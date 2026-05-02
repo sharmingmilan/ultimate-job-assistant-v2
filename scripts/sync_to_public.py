@@ -76,6 +76,10 @@ ALLOWLIST = [
     # Website source.
     ("website", "website"),
 
+    # Netlify deploy config — pins publish dir + headers so the UI's Build &
+    # deploy panel doesn't need to be touched.
+    ("netlify.toml", "netlify.toml"),
+
     # GitHub Pages deploy workflow for the public repo. Stored as a regular file
     # in website/ inside the private repo (so it doesn't trigger spuriously
     # there), then placed at the standard workflow path in the public repo.
