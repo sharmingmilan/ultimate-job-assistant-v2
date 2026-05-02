@@ -1,0 +1,41 @@
+# tracker.md -- Application Tracker
+# Last updated: [YYYY-MM-DD]
+
+---
+
+## How to Use This File
+
+This is the central source of truth for all job applications. Read this when:
+
+- Starting work on any application ("where did I leave off?")
+- Deciding what to work on next
+- Checking status across all active applications
+
+Claude will propose updates here at the end of each session. You approve or reject — never auto-applied.
+
+---
+
+## Applications
+
+| Company | Role | Date | Status | Decoded JD | Score Before | Resume | Score After | Speaking Pts | Cover Letter | Portfolio | Networking | Interview Prep PWA | Notes |
+|---------|------|------|--------|------------|-------------|--------|-------------|-------------|-------------|-----------|------------|--------------------|-------|
+| | | | | | | | | | | | | | |
+
+---
+
+## Key
+
+- **Done** = Skill ran and output exists
+- **--** = Skipped or not yet started
+- **Partial** = Application started but not all required steps complete
+- **Active** = In progress, not yet submitted or interviewing
+- **Complete** = Full lifecycle finished
+- Score percentages shown where available (before → after with delta)
+
+---
+
+## Decisions Log
+
+Decisions that affect multiple applications or set precedents. Append as you make them.
+
+- [Date] — [Decision and the reason]

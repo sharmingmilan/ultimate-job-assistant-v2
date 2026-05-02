@@ -1,0 +1,112 @@
+# memory.md -- [YOUR FULL NAME]
+# Last updated: [YYYY-MM-DD]
+
+> **This is your most important file.** Claude reads it every session to understand who you are, how you work, and which stories to draw on when targeting your resume. Spend ten thoughtful minutes here. It saves hours of bad output later.
+>
+> Replace every `[BRACKETED]` value below with your real content. Delete this blockquote when you're done.
+
+---
+
+## About You
+
+- **Name**: [Your full name]
+- **Location**: [City, State / Country]
+- **Email**: [your.email@example.com]
+- **LinkedIn**: [linkedin.com/in/yourhandle]
+- **GitHub** (optional): [github.com/yourhandle]
+- **Education**: [Degree, School, Year]
+- **Current role**: [Title at Company, dates]
+- **Experience**: [Total years, brief sweep — e.g., "8+ years across X, Y, Z industries"]
+- **Core stack**: [Your top 5–7 tools / languages / frameworks, in rough order of strength]
+
+---
+
+## Work Style & Preferences
+
+- **Resume philosophy**: [How do you think resumes should read? E.g., "concise bullets with metrics; leave the stories for the interview" or "narrative-style summaries with quant proof points underneath"]
+- **Formatting rules** (these get enforced on user-facing application outputs — resumes, cover letters, speaking points, thank-you letters, anything sent to a hiring contact):
+  1. [Your rule about dashes/punctuation — e.g., "no em dashes; use commas"]
+  2. [Your rule about contact line — e.g., "contact line on one line; use github.com/ not https://github.com/"]
+  3. [Your rule about spacing between bullets]
+  4. [Your rule about company section breaks]
+  5. [Your rule about SKILLS section formatting]
+  6. [Any other formatting rule you stand by]
+  7. **No fabrication.** All bullet content must come from your base resume or verified stories in this file.
+- **Cover letter signature**: "[Sincerely / Best regards / etc.],\n[Your first name]"
+- **Tone**: [How should outputs read? E.g., "neutral and professional," "warm but precise," "direct, technical, confident"]
+- **Job search pattern**: [E.g., "batch apply but customize per role" or "very selective, one or two at a time"]
+- **Networking comfort**: [Low / Medium / High — and any caveats. E.g., "low — rarely cold-message, but open to coaching"]
+- **AI adoption**: [How comfortable are you using AI tools? Comfortable with Cowork? Code? Skills?]
+
+---
+
+## Communication Preferences
+
+- **Mode selection**: [How should Claude propose options? E.g., "infer from context, confirm with a quick check"]
+- **Updates/changes**: [How should Claude propose changes? E.g., "always propose, never auto-apply; dual-layer summary + details"]
+- **Questions**: [E.g., "one focused question at a time" or "batch related questions"]
+- **Feedback style**: [How do you give feedback? E.g., "direct and concise; will say 'looks good' when satisfied"]
+- **Progress tracking**: [E.g., "do not auto-update tracker.md status; ask before marking steps complete"]
+
+---
+
+## Key Stories & Experience (for resume targeting)
+
+These are 4–8 anchor stories that surface naturally in behavioral interviews. Each one has a name, a one-paragraph description, and a tag list of **what kinds of roles or competencies it's good for**. Claude reuses these across applications when relevant.
+
+Format example (delete this and add your own):
+
+### [Company] — [Short story title]
+[2–4 sentences of what happened, what you did, what the outcome was. Include numbers if you have them.]
+**Good for**: [tags — e.g., "data quality, systemic thinking, courage/candor, measurement rigor"]
+
+---
+
+### [Story 1 title]
+[Description.]
+**Good for**: [tags]
+
+### [Story 2 title]
+[Description.]
+**Good for**: [tags]
+
+### [Story 3 title]
+[Description.]
+**Good for**: [tags]
+
+### [Story 4 title]
+[Description.]
+**Good for**: [tags]
+
+---
+
+## What You Want Next
+
+- **Target role types**: [E.g., "Data Analyst, Senior Data Analyst, BI Analyst, Analytics Manager"]
+- **Industries**: [E.g., "media/entertainment, fintech, healthcare; not advertising or gambling"]
+- **Company size**: [Startup / mid-stage / enterprise / mix?]
+- **Geography**: [Remote / hybrid / specific cities?]
+- **Compensation floor**: [Optional — what's the minimum you'll seriously consider?]
+- **Other criteria**: [Mission-aligned? Specific tech stacks? Specific team structures? Anything else?]
+
+---
+
+## Off-Limits
+
+Companies, industries, or work types you've decided against. Claude won't propose these.
+
+- [Company / industry / type — and a one-line "why"]
+- [Company / industry / type — and a one-line "why"]
+
+---
+
+## Design Principles (for this project)
+
+These shape how Claude works on this toolkit. You can edit but the defaults are good for most users.
+
+- **No fabrication** — all company claims sourced and cited with credible sources
+- **Human-in-the-loop** — nothing auto-generated without approval
+- **Specific over vague** — metrics, tools, outcomes in every bullet
+- **Plug-and-play** — skill logic separated from user data so the project is forkable
+- **Doc freshness** — propose updates at end of every session
+- **Modular skills** — each skill standalone, orchestrator chains them

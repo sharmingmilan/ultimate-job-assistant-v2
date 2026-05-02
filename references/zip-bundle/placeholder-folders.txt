@@ -1,0 +1,18 @@
+# One folder per line. The zip-build step creates each folder in the zip
+# with an empty .gitkeep inside, so users get the right project structure
+# the moment they extract the archive.
+#
+# Lines starting with # and blank lines are ignored.
+
+base-resumes
+research
+decoded-jds
+resumes
+scores
+speaking-points
+cover-letters
+interview-prep
+portfolio
+networking
+applications
+archive

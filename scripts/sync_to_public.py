@@ -66,6 +66,11 @@ ALLOWLIST = [
     ("references/scripts", "references/scripts"),
     ("references/templates", "references/templates"),
 
+    # Zip-bundle source: user-facing templates injected into the starter zip
+    # by build_zip(). The zip-bundle folder itself is dropped from the zip
+    # after injection so users don't see the templating internals.
+    ("references/zip-bundle", "references/zip-bundle"),
+
     # Build/CI scripts
     ("scripts/scan_pii.py", "scripts/scan_pii.py"),
     ("scripts/sync_to_public.py", "scripts/sync_to_public.py"),
@@ -106,53 +111,145 @@ def run(cmd, cwd=None, check=True):
     return subprocess.run(cmd, cwd=cwd, check=check, capture_output=True, text=True)
 
 
-# Paths inside the deploy-source repo that the zip MUST NOT contain.
-# These are checked against the path RELATIVE to the deploy-source root.
-ZIP_EXCLUDE_DIRS = {".git", "node_modules", ".github/cache", "__pycache__", ".cache"}
-# The zip must not include itself or its parent download directory (would
-# either be empty or stale on every regeneration).
-ZIP_EXCLUDE_PATH_PREFIXES = ("website/downloads/",)
-ZIP_EXCLUDE_FILES = {".DS_Store"}
+# ─── Zip build configuration ──────────────────────────────────────────────
+#
+# The zip is curated, not a snapshot. The deploy-source repo carries everything
+# Netlify needs (website/, netlify.toml, sync scripts, CI workflows) plus
+# everything a fresh user needs (skills, references). The zip is just the
+# user-facing slice. Keep the two views explicit so the public companion repo
+# can grow without bloating the user starter kit.
 
 # Output location of the zip, relative to the deploy-source repo root.
 ZIP_RELPATH = "website/downloads/ultimate-job-assistant.zip"
-# Files we expect to find in every published zip. Verified after build.
+
+# 1) WALK SOURCE FROM THE DEPLOY-SOURCE REPO. Skip these dirs entirely (no
+#    point traversing into them).
+ZIP_WALK_SKIP_DIRS = {".git", "node_modules", ".github/cache", "__pycache__", ".cache"}
+
+# 2) DROP THESE PATHS from the zip even though they exist in the deploy-source
+#    tree. These are maintainer-only files — sync scripts, CI workflows,
+#    Netlify deploy config, the website source, the downloads dir itself.
+#    A user who downloads the zip never needs any of these.
+#    Leading slash means "absolute repo path"; trailing slash means "directory
+#    and everything inside it"; otherwise it's an exact match.
+ZIP_DROP_PATHS = (
+    # The downloads directory itself — would create a self-referential zip.
+    "website/downloads/",
+    # Maintainer-only sync + scan tooling. The skills directory has its own
+    # build/eval scripts which DO go in the zip.
+    "scripts/",
+    # Maintainer-only CI workflows for the source repos. Users who init their
+    # own private repo can write their own CI as needed.
+    ".github/",
+    # Netlify deploy config — only the deploy-source repo needs this.
+    "netlify.toml",
+    # The promotional website source — users came from the live site to
+    # download this zip; they don't need a local copy of the marketing pages.
+    "website/",
+    # Internal roadmap. The decisions log talks about repo strategy and
+    # SaaS pivot speculation that's confusing for end users.
+    "ROADMAP.md",
+    # macOS metadata, lock files, editor temp files.
+    ".DS_Store",
+    "Thumbs.db",
+    # The deploy-source repo's own .gitignore is for the maintainer's tree.
+    # Drop it so the user-facing .gitignore injected from references/zip-bundle
+    # is the only one in the archive.
+    ".gitignore",
+)
+
+# 3) INJECT THESE FILES from references/zip-bundle/ INTO the zip at top-level
+#    paths. Each tuple is (source_in_deploy_source, archive_path_in_zip).
+#    The zip-bundle folder itself is dropped from the zip after injection
+#    (see ZIP_DROP_PATHS_AFTER_INJECT below).
+ZIP_INJECT_FILES = (
+    ("references/zip-bundle/CLAUDE.md", "CLAUDE.md"),
+    ("references/zip-bundle/QUICKSTART.md", "QUICKSTART.md"),
+    ("references/zip-bundle/memory.md.template", "memory.md.template"),
+    ("references/zip-bundle/tracker.md.template", "tracker.md.template"),
+    # gitignore (no leading dot in source so it's not hidden in the source
+    # checkout) lands at .gitignore in the zip so it activates on extract.
+    ("references/zip-bundle/gitignore", ".gitignore"),
+)
+
+# 4) After injection, also drop the zip-bundle source folder from the zip —
+#    users don't need to see the templating internals.
+ZIP_DROP_AFTER_INJECT = ("references/zip-bundle/",)
+
+# 5) Placeholder folders that must exist as empty .gitkeep entries in the zip.
+#    Sourced from references/zip-bundle/placeholder-folders.txt.
+ZIP_PLACEHOLDER_MANIFEST = "references/zip-bundle/placeholder-folders.txt"
+
+# 6) Members the zip MUST contain after curation. Aborts the sync if any are
+#    missing — a guardrail against accidental over-curation.
 ZIP_REQUIRED_MEMBERS = (
-    "references/templates/base-resume-template.docx",
+    # Project orientation (injected)
+    "CLAUDE.md",
+    "QUICKSTART.md",
+    "memory.md.template",
+    "tracker.md.template",
+    ".gitignore",
     "ONBOARDING.md",
+    "README.md",
+    # Resume template
+    "references/templates/base-resume-template.docx",
+    # Skills (orchestrator + spec for the new skill)
+    "skills/orchestrator/SKILL.md",
     "skills/interview-prep/SKILL.md",
-    "website/index.html",
+    "skills/resume-targeter/SKILL.md",
+    # Sample placeholder folders prove the manifest applied
+    "base-resumes/.gitkeep",
+    "research/.gitkeep",
 )
 
 
-def _should_exclude_from_zip(rel_posix: str) -> bool:
-    """Return True if a path inside the deploy-source repo should NOT go in the zip."""
-    parts = rel_posix.split("/")
-    # Exclude any file inside an excluded directory at any depth.
-    for skip in ZIP_EXCLUDE_DIRS:
-        skip_parts = skip.split("/")
-        # match skip_parts as a prefix-window anywhere in parts
-        for i in range(len(parts) - len(skip_parts) + 1):
-            if parts[i:i + len(skip_parts)] == skip_parts:
+def _path_matches_drop_pattern(rel_posix: str, patterns) -> bool:
+    """True if rel_posix should be dropped under one of the drop patterns."""
+    for pat in patterns:
+        if pat.endswith("/"):
+            # Directory pattern — drop the dir and everything below.
+            if rel_posix == pat.rstrip("/") or rel_posix.startswith(pat):
                 return True
-    if any(rel_posix.startswith(p) for p in ZIP_EXCLUDE_PATH_PREFIXES):
-        return True
-    if parts and parts[-1] in ZIP_EXCLUDE_FILES:
-        return True
+        else:
+            # Exact-file or filename pattern.
+            if rel_posix == pat:
+                return True
+            # Bare filename like ".DS_Store" matches at any depth.
+            if "/" not in pat and rel_posix.split("/")[-1] == pat:
+                return True
     return False
+
+
+def _read_placeholder_folders(public_root: Path) -> list[str]:
+    """Read the placeholder-folders manifest and return a list of folder paths."""
+    manifest = public_root / ZIP_PLACEHOLDER_MANIFEST
+    if not manifest.exists():
+        return []
+    out = []
+    for raw in manifest.read_text().splitlines():
+        line = raw.strip()
+        if not line or line.startswith("#"):
+            continue
+        out.append(line.rstrip("/"))
+    return out
 
 
 def build_zip(public_root: Path) -> Path:
     """
-    Bundle the deploy-source repo's working tree into website/downloads/ultimate-job-assistant.zip.
+    Build the user-facing starter zip at website/downloads/ultimate-job-assistant.zip.
 
-    Excludes .git, node_modules, build caches, the downloads dir itself, and
-    macOS metadata. Sets the zip mtime to "now" so the live site can show an
-    accurate "updated <date>" via a HEAD request. Adds website/downloads/.gitkeep
-    so the directory survives in git even when the zip is gitignored.
-
-    After write, verifies the required members are present (e.g. the public
-    base-resume template). Aborts the sync if a required member is missing.
+    The zip is CURATED (not a snapshot of the deploy-source repo):
+      - Walks the deploy-source tree.
+      - Skips directories in ZIP_WALK_SKIP_DIRS for traversal speed.
+      - Drops paths in ZIP_DROP_PATHS so maintainer-only files don't ship.
+      - Drops paths in ZIP_DROP_AFTER_INJECT to hide the templating internals.
+      - Injects user-facing templates from references/zip-bundle/ at top-level
+        archive paths (CLAUDE.md, memory.md.template, .gitignore, etc.).
+      - Creates empty .gitkeep entries for each folder in
+        references/zip-bundle/placeholder-folders.txt so the project structure
+        is right immediately on extract.
+      - Verifies ZIP_REQUIRED_MEMBERS exist before promoting the temp file.
+      - Atomic-renames into place; stamps mtime to now.
     """
     zip_path = public_root / ZIP_RELPATH
     zip_path.parent.mkdir(parents=True, exist_ok=True)
@@ -161,30 +258,42 @@ def build_zip(public_root: Path) -> Path:
     if not gitkeep.exists():
         gitkeep.write_text("# Keep website/downloads/ in git so the path is stable for the landing page.\n")
 
-    # Write to a temp file in the same directory then atomically rename, so a
-    # partially-written zip is never observable to the live site.
     tmp_path = zip_path.with_suffix(".zip.tmp")
     if tmp_path.exists():
         tmp_path.unlink()
 
+    placeholder_folders = _read_placeholder_folders(public_root)
+    injected_archive_paths = set()  # to avoid double-writing if a path is also walked
+    dropped_count = 0
+    walked_count = 0
     file_count = 0
     total_bytes = 0
+
     with zipfile.ZipFile(tmp_path, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=6) as zf:
-        # Walk every file, sorted for reproducible output.
+        # ── Pass A: walk the deploy-source tree, applying drop filters ──
         all_files = []
         for dirpath, dirnames, filenames in os.walk(public_root):
-            # Prune excluded directories so we don't recurse into them.
             rel_dir = Path(dirpath).relative_to(public_root).as_posix()
             keep_dirs = []
             for d in dirnames:
+                if d in ZIP_WALK_SKIP_DIRS:
+                    continue
                 child_rel = (rel_dir + "/" + d).lstrip("/") if rel_dir != "." else d
-                if not _should_exclude_from_zip(child_rel + "/"):
-                    keep_dirs.append(d)
+                if _path_matches_drop_pattern(child_rel + "/", ZIP_DROP_PATHS):
+                    continue
+                if _path_matches_drop_pattern(child_rel + "/", ZIP_DROP_AFTER_INJECT):
+                    continue
+                keep_dirs.append(d)
             dirnames[:] = sorted(keep_dirs)
             for fn in sorted(filenames):
                 full = Path(dirpath) / fn
                 rel = full.relative_to(public_root).as_posix()
-                if _should_exclude_from_zip(rel):
+                walked_count += 1
+                if _path_matches_drop_pattern(rel, ZIP_DROP_PATHS):
+                    dropped_count += 1
+                    continue
+                if _path_matches_drop_pattern(rel, ZIP_DROP_AFTER_INJECT):
+                    dropped_count += 1
                     continue
                 all_files.append((full, rel))
 
@@ -197,7 +306,27 @@ def build_zip(public_root: Path) -> Path:
             file_count += 1
             total_bytes += size
 
-    # Verify required members are present.
+        # ── Pass B: inject user-facing templates from references/zip-bundle/ ──
+        for src_rel, archive_rel in ZIP_INJECT_FILES:
+            src = public_root / src_rel
+            if not src.exists():
+                raise RuntimeError(
+                    f"Zip build aborted — inject source missing: {src_rel}"
+                )
+            zf.write(src, arcname=archive_rel)
+            injected_archive_paths.add(archive_rel)
+            file_count += 1
+            total_bytes += src.stat().st_size
+
+        # ── Pass C: empty .gitkeep entries for placeholder folders ──
+        for folder in placeholder_folders:
+            arc = f"{folder}/.gitkeep"
+            if arc in injected_archive_paths:
+                continue
+            zf.writestr(arc, "")
+            file_count += 1
+
+    # Verify required members present.
     missing = []
     with zipfile.ZipFile(tmp_path, "r") as zf:
         names = set(zf.namelist())
@@ -211,16 +340,18 @@ def build_zip(public_root: Path) -> Path:
             + "\n  - ".join(missing)
         )
 
-    # Atomic replace.
     if zip_path.exists():
         zip_path.unlink()
     tmp_path.rename(zip_path)
 
-    # Stamp mtime to now so the live site's HEAD-fetch shows today's date.
     now = time.time()
     os.utime(zip_path, (now, now))
 
     print(f"  ZIP BUILT: {ZIP_RELPATH}")
+    print(f"    walked:    {walked_count} files in deploy-source tree")
+    print(f"    dropped:   {dropped_count} maintainer-only files")
+    print(f"    placeholders: {len(placeholder_folders)} folders with .gitkeep")
+    print(f"    injected:  {len(ZIP_INJECT_FILES)} user-facing templates")
     print(f"    files:   {file_count}")
     print(f"    raw:     {total_bytes / 1024:.1f} KB uncompressed")
     print(f"    on-disk: {zip_path.stat().st_size / 1024:.1f} KB compressed")
