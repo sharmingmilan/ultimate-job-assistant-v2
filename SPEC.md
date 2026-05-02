@@ -420,15 +420,15 @@ A separate GitHub repo, `ultimate-job-assistant-public`, holds:
 
 **Timing:** part of **v0.1.0** as **Phase 7**, after the regression test (Phase 5) and ROADMAP/audit (Phase 6) but before the v0.1.0 tag.
 
-**Stack:** to be picked in Phase 7 between three options:
+**Stack:** during Phase 7 design (2026-05-02), flipped from Astro to **plain static HTML + Tailwind CDN** for these reasons:
 
-| Option | Pros | Cons |
-|---|---|---|
-| **Astro** | Fast, modern, ships near-zero JS, nice DX | Newer, slightly steeper setup |
-| **MkDocs Material** | Mature, battle-tested for docs, beautiful default theme | Python-based; slightly less landing-page-friendly |
-| **Plain static HTML + Tailwind CDN** | Mirrors the interview-prep PWA stack; zero build step | Hand-rolled docs nav |
+| Option | Decision rationale |
+|---|---|
+| **Plain static HTML + Tailwind CDN** ✅ chosen | Mirrors the interview-prep PWA stack. Zero build step. Same "no npm install" philosophy. GitHub Pages serves directly with `actions/upload-pages-artifact` and `actions/deploy-pages`, no Node setup needed. ~1 hour to build vs 3+ for Astro. |
+| Astro | Was the original default. Has nicer DX once set up but introduces a Node build pipeline that conflicts with the project's stated no-build philosophy. |
+| MkDocs Material | Strong docs theme, but Python build, less landing-page-friendly. |
 
-**Default for Phase 7:** Astro (best fit for "landing page + docs" combo). Decision can flip during Phase 7 design if the user prefers MkDocs's docs polish.
+The decision was explicitly anticipated in the original spec ("decision can flip during Phase 7 design") and is recorded here.
 
 **Live demo PWA on the website:** explicitly **deferred to v0.1.1**. The v0.1.0 website links to the GitHub repo and explains how to run the toolkit; it does not yet host an interactive demo. Adding the demo PWA was option D in the scope question and was deferred to keep v0.1.0 finishable.
 

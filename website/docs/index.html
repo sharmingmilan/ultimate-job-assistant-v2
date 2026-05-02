@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Docs — Ultimate Job Assistant</title>
+  <link rel="icon" href="../assets/favicon.svg" />
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<body class="bg-slate-950 text-slate-200 antialiased font-sans">
+
+<header class="border-b border-slate-800 sticky top-0 z-10 bg-slate-950/80 backdrop-blur">
+  <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+    <a href="../" class="flex items-center gap-2">
+      <span class="inline-block w-7 h-7 rounded bg-gradient-to-br from-sky-400 to-pink-400"></span>
+      <span class="font-bold tracking-tight">Ultimate Job Assistant</span>
+    </a>
+    <nav class="flex items-center gap-5 text-sm">
+      <a href="./" class="text-sky-300">Docs</a>
+      <a href="./onboarding.html" class="hover:text-sky-300">Onboarding</a>
+      <a href="./skills.html" class="hover:text-sky-300">Skills</a>
+      <a href="https://github.com/" target="_blank" rel="noreferrer" class="rounded border border-slate-700 px-3 py-1 hover:bg-slate-800">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main class="max-w-4xl mx-auto px-6 py-16">
+
+<h1 class="text-4xl font-bold text-slate-100 mb-4">Documentation</h1>
+<p class="text-slate-400 text-lg mb-12">Everything you need to clone the toolkit, personalize it, and run your first application.</p>
+
+<div class="grid md:grid-cols-2 gap-5">
+
+  <a href="./onboarding.html" class="block rounded-lg border border-slate-800 hover:border-sky-700/60 bg-slate-900/40 p-6 transition">
+    <p class="text-xs uppercase tracking-wider text-sky-400 mb-2">Start here</p>
+    <h2 class="text-xl font-semibold text-slate-100 mb-2">Onboarding</h2>
+    <p class="text-sm text-slate-400">Step-by-step setup. Personalizing memory.md, dropping in your base resume, starting a Cowork session, optional GitHub backup, optional Netlify deploy.</p>
+  </a>
+
+  <a href="./skills.html" class="block rounded-lg border border-slate-800 hover:border-sky-700/60 bg-slate-900/40 p-6 transition">
+    <p class="text-xs uppercase tracking-wider text-pink-400 mb-2">Reference</p>
+    <h2 class="text-xl font-semibold text-slate-100 mb-2">Skills</h2>
+    <p class="text-sm text-slate-400">All eight skills explained. What each one does, what it reads, what it produces, and where it sits in the orchestrator workflow.</p>
+  </a>
+
+  <a href="./pwa.html" class="block rounded-lg border border-slate-800 hover:border-sky-700/60 bg-slate-900/40 p-6 transition">
+    <p class="text-xs uppercase tracking-wider text-emerald-400 mb-2">New in v0.1.0</p>
+    <h2 class="text-xl font-semibold text-slate-100 mb-2">Interview-prep PWA</h2>
+    <p class="text-sm text-slate-400">How the new study-site generator works. The three-phase pedagogical loop, the "Real Qs" tab with sourced attribution, and how to deploy your PWA in 30 seconds.</p>
+  </a>
+
+  <a href="./roadmap.html" class="block rounded-lg border border-slate-800 hover:border-sky-700/60 bg-slate-900/40 p-6 transition">
+    <p class="text-xs uppercase tracking-wider text-amber-400 mb-2">What's next</p>
+    <h2 class="text-xl font-semibold text-slate-100 mb-2">Roadmap</h2>
+    <p class="text-sm text-slate-400">Tracks under consideration: SaaS pivot, browser-driven skills, in-browser code execution, real spaced repetition. None committed yet.</p>
+  </a>
+
+</div>
+
+<section class="mt-16">
+  <h2 class="text-2xl font-bold text-slate-100 mb-4">Project structure at a glance</h2>
+  <p class="text-slate-400 mb-6">Once you clone, you get this layout. Personal-data folders are git-ignored by default.</p>
+  <pre class="bg-slate-900 border border-slate-800 rounded-lg p-5 text-xs text-slate-300 overflow-x-auto leading-relaxed">
+ultimate-job-assistant-public/
+├── README.md                 ← what this is
+├── ONBOARDING.md             ← start here
+├── ROADMAP.md                ← what's planned beyond v0.1.0
+├── skills/                   ← 8 skills, all generic
+│   ├── orchestrator/
+│   ├── decoded-jd/
+│   ├── resume-targeter/
+│   ├── resume-scorer/
+│   ├── why-this-company/
+│   ├── portfolio-coach/
+│   ├── networking-intros/
+│   └── interview-prep/       ← new in v0.1.0
+├── references/
+│   ├── templates/, scripts/, patterns/   ← generic
+│   └── (examples/ excluded — Job-Assist-specific)
+├── scripts/
+│   ├── scan_pii.py           ← PII gate for any future fork-back
+│   └── sync_to_public.py
+├── website/                  ← this site's source
+└── memory.md.template        ← starts blank; you fill it in
+  </pre>
+</section>
+
+<section class="mt-16">
+  <h2 class="text-2xl font-bold text-slate-100 mb-4">Conventions you should know</h2>
+  <div class="space-y-5 text-slate-300 leading-relaxed">
+    <div>
+      <h3 class="font-semibold text-slate-100 mb-1">Naming convention</h3>
+      <p class="text-sm text-slate-400">All per-application outputs follow <code class="bg-slate-900 rounded px-1.5 py-0.5 text-sky-300">[company]-[role-slug]-[YYYY-MM].[ext]</code>. The orchestrator sets these variables once at the start of each application.</p>
+    </div>
+    <div>
+      <h3 class="font-semibold text-slate-100 mb-1">Output folders</h3>
+      <p class="text-sm text-slate-400">Each output type lives in its own folder: <code class="bg-slate-900 rounded px-1 text-sky-300">resumes/</code>, <code class="bg-slate-900 rounded px-1 text-sky-300">scores/</code>, <code class="bg-slate-900 rounded px-1 text-sky-300">cover-letters/</code>, etc. Sort by name in your file manager to group by company.</p>
+    </div>
+    <div>
+      <h3 class="font-semibold text-slate-100 mb-1">Research per company, not per role</h3>
+      <p class="text-sm text-slate-400">Every company gets one <code class="bg-slate-900 rounded px-1 text-sky-300">research/[company].md</code>. Section 1 is reusable across roles; Section 2 has dated subsections per role.</p>
+    </div>
+    <div>
+      <h3 class="font-semibold text-slate-100 mb-1">No fabrication</h3>
+      <p class="text-sm text-slate-400">All claims about companies cite a source. All reported interview questions cite a Glassdoor / Blind / Levels.fyi link. If a fact can't be verified, the toolkit refuses to invent one.</p>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="border-t border-slate-800 mt-16">
+  <div class="max-w-6xl mx-auto px-6 py-10 text-sm text-slate-500">
+    <p>Ultimate Job Assistant · <a href="../" class="hover:text-slate-300">Home</a> · <a href="https://github.com/" class="hover:text-slate-300">GitHub</a></p>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Onboarding — Ultimate Job Assistant</title>
+  <link rel="icon" href="../assets/favicon.svg" />
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <style>code{font-size:0.9em;}</style>
+</head>
+<body class="bg-slate-950 text-slate-200 antialiased font-sans">
+
+<header class="border-b border-slate-800 sticky top-0 z-10 bg-slate-950/80 backdrop-blur">
+  <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+    <a href="../" class="flex items-center gap-2">
+      <span class="inline-block w-7 h-7 rounded bg-gradient-to-br from-sky-400 to-pink-400"></span>
+      <span class="font-bold tracking-tight">Ultimate Job Assistant</span>
+    </a>
+    <nav class="flex items-center gap-5 text-sm">
+      <a href="./" class="hover:text-sky-300">Docs</a>
+      <a href="./onboarding.html" class="text-sky-300">Onboarding</a>
+      <a href="./skills.html" class="hover:text-sky-300">Skills</a>
+      <a href="https://github.com/" class="rounded border border-slate-700 px-3 py-1 hover:bg-slate-800">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main class="max-w-3xl mx-auto px-6 py-16 prose prose-invert prose-slate">
+
+<p class="text-sm uppercase tracking-widest text-sky-400 mb-3">Setup walkthrough</p>
+<h1 class="text-4xl font-bold text-slate-100 mb-4">Onboarding</h1>
+<p class="text-slate-400 text-lg mb-8 leading-relaxed">Set up your own personalized version of Ultimate Job Assistant. About 30 to 45 minutes, mostly because <code class="bg-slate-900 rounded px-1 text-sky-300">memory.md</code> is worth thinking through carefully.</p>
+
+<h2 class="text-2xl font-bold text-slate-100 mt-12 mb-3">Prerequisites</h2>
+<ul class="space-y-1 text-slate-300 list-disc pl-6">
+  <li><strong>Claude Desktop</strong> with Cowork mode (or a compatible Claude environment with file tool access).</li>
+  <li>A <strong>folder you control</strong> on your Mac or PC where the project will live.</li>
+  <li>Your <strong>base resume</strong>, ideally as a DOCX.</li>
+  <li>Optional: a GitHub account if you want a private backup.</li>
+  <li>Optional: a free Netlify account if you want to host the interview-prep PWAs.</li>
+</ul>
+
+<h2 class="text-2xl font-bold text-slate-100 mt-12 mb-3">Step 1: Get the project</h2>
+<pre class="bg-slate-900 border border-slate-800 rounded-lg p-4 text-xs text-slate-300 overflow-x-auto"><code>git clone https://github.com/&lt;owner&gt;/ultimate-job-assistant-public.git "Ultimate Job Assistant"
+cd "Ultimate Job Assistant"</code></pre>
+<p class="text-slate-400 text-sm mt-2">Or download a release zip if you prefer.</p>
+
+<h2 class="text-2xl font-bold text-slate-100 mt-12 mb-3">Step 2: Personalize <code class="bg-slate-900 rounded px-1 text-sky-300">memory.md</code></h2>
+<p class="text-slate-300 leading-relaxed">This is the most important file in the project. It is Claude's primary source for understanding your work style, anchor stories, and resume preferences. Open it and replace each section with your own:</p>
+<ul class="space-y-1 text-slate-300 mt-3 list-disc pl-6">
+  <li><strong>Identity and background</strong> — name, current city, contact preferences.</li>
+  <li><strong>Career history at a glance</strong> — companies, roles, dates, scope.</li>
+  <li><strong>Key stories</strong> — three to six anchor stories you'd tell in a behavioral interview, in STAR format.</li>
+  <li><strong>Resume preferences</strong> — formatting rules you stand by (e.g., no em-dashes, two-page max, contact line on a single line).</li>
+  <li><strong>What you want next</strong> — target role types, industries, company-size preferences.</li>
+  <li><strong>What's off-limits</strong> — companies, industries, or work types you've decided against.</li>
+</ul>
+<p class="text-slate-400 text-sm mt-3">Take your time on this file. Ten thoughtful minutes here saves hours of bad output later.</p>
+
+<h2 class="text-2xl font-bold text-slate-100 mt-12 mb-3">Step 3: Drop in your base resume</h2>
+<pre class="bg-slate-900 border border-slate-800 rounded-lg p-4 text-xs text-slate-300 overflow-x-auto"><code>base-resumes/[your-role-type].docx</code></pre>
+<p class="text-slate-400 text-sm mt-2">For example: <code class="bg-slate-900 rounded px-1 text-sky-300">base-resumes/data-analyst.docx</code>. You can have multiple base resumes for different role types.</p>
+
+<h2 class="text-2xl font-bold text-slate-100 mt-12 mb-3">Step 4: Start a session in Claude</h2>
+<p class="text-slate-300 leading-relaxed">Open Claude Desktop, switch to Cowork mode, select the project folder. Then say:</p>
+<blockquote class="border-l-4 border-sky-500/50 pl-4 my-4 italic text-slate-300">"I want to apply to [Company] for the [Role] position. Here's the JD: [paste or link]"</blockquote>
+<p class="text-slate-400 text-sm">Claude reads <code class="bg-slate-900 rounded px-1 text-sky-300">CLAUDE.md</code> to orient itself, then routes through the orchestrator, which walks you through each step.</p>
+
+<h2 class="text-2xl font-bold text-slate-100 mt-12 mb-3">Step 5 (optional): Initialize your own private git repo</h2>
+<pre class="bg-slate-900 border border-slate-800 rounded-lg p-4 text-xs text-slate-300 overflow-x-auto"><code>cd "Ultimate Job Assistant"
+git init -b main
+git config user.email "you@example.com"
+git config user.name "Your Name"
+git add -A
+git commit -m "Initial: my Ultimate Job Assistant"
+git remote add origin git@github.com:youruser/ultimate-job-assistant.git
+git push -u origin main</code></pre>
+
+<div class="rounded-lg border border-amber-700/40 bg-amber-950/30 p-5 mt-6">
+  <p class="font-semibold text-amber-200 mb-2">Keep your fork private.</p>
+  <p class="text-sm text-slate-300 leading-relaxed">Even with the provided <code class="bg-slate-900 rounded px-1 text-sky-300">.gitignore</code> excluding personal-data folders, your <code class="bg-slate-900 rounded px-1 text-sky-300">memory.md</code> and any committed evaluation fixtures may carry information about you that you don't want public. The original author's project follows a two-tier model: private repo holds the personal copy permanently; only this onboarding doc and the public companion repo are ever public.</p>
+</div>
+
+<h2 class="text-2xl font-bold text-slate-100 mt-12 mb-3">Step 6 (optional): Hook up Netlify for the interview-prep PWAs</h2>
+<p class="text-slate-300 leading-relaxed">When the <code class="bg-slate-900 rounded px-1 text-sky-300">interview-prep</code> skill outputs a folder like <code class="bg-slate-900 rounded px-1 text-sky-300">interview-prep/[company]-[role-slug]-[YYYY-MM]-pwa/</code>, you can deploy it for free in 30 seconds:</p>
+<ol class="space-y-1 text-slate-300 mt-3 list-decimal pl-6">
+  <li>Sign up at <a href="https://www.netlify.com" class="text-sky-400 hover:underline" target="_blank" rel="noreferrer">netlify.com</a>.</li>
+  <li>Open <a href="https://app.netlify.com/drop" class="text-sky-400 hover:underline" target="_blank" rel="noreferrer">Netlify Drop</a>.</li>
+  <li>Drag the folder onto the page.</li>
+  <li>Get an HTTPS URL.</li>
+  <li>Add to your iPhone home screen via Safari → Share → Add to Home Screen.</li>
+</ol>
+<p class="text-slate-400 text-sm mt-3">No backend, no database, no monthly cost.</p>
+
+<h2 class="text-2xl font-bold text-slate-100 mt-12 mb-3">What's safe to share publicly</h2>
+<div class="grid md:grid-cols-2 gap-4 text-sm">
+  <div class="rounded-lg border border-emerald-700/40 bg-emerald-950/20 p-5">
+    <p class="font-semibold text-emerald-200 mb-2">✓ Yes</p>
+    <ul class="space-y-1 text-slate-300 list-disc pl-5">
+      <li>This onboarding doc</li>
+      <li>SPEC.md, ROADMAP.md, README.md, DESIGN_DOC.md (after sanitization)</li>
+      <li>Skill code under <code class="bg-slate-900 rounded px-1 text-sky-300">skills/*/</code> (except eval fixtures with real data)</li>
+      <li>Generic templates and patterns under <code class="bg-slate-900 rounded px-1 text-sky-300">references/</code></li>
+      <li>The interview-prep PWA template</li>
+    </ul>
+  </div>
+  <div class="rounded-lg border border-pink-700/40 bg-pink-950/20 p-5">
+    <p class="font-semibold text-pink-200 mb-2">✗ No</p>
+    <ul class="space-y-1 text-slate-300 list-disc pl-5">
+      <li><code class="bg-slate-900 rounded px-1 text-sky-300">memory.md</code></li>
+      <li><code class="bg-slate-900 rounded px-1 text-sky-300">base-resumes/</code></li>
+      <li><code class="bg-slate-900 rounded px-1 text-sky-300">research/[company].md</code></li>
+      <li><code class="bg-slate-900 rounded px-1 text-sky-300">resumes/</code>, <code class="bg-slate-900 rounded px-1 text-sky-300">scores/</code>, <code class="bg-slate-900 rounded px-1 text-sky-300">speaking-points/</code>, <code class="bg-slate-900 rounded px-1 text-sky-300">cover-letters/</code></li>
+      <li>Per-application <code class="bg-slate-900 rounded px-1 text-sky-300">interview-prep/[convention]-pwa/</code> folders</li>
+      <li>Anything in <code class="bg-slate-900 rounded px-1 text-sky-300">portfolio/</code>, <code class="bg-slate-900 rounded px-1 text-sky-300">networking/</code>, <code class="bg-slate-900 rounded px-1 text-sky-300">applications/</code>, <code class="bg-slate-900 rounded px-1 text-sky-300">archive/</code></li>
+    </ul>
+  </div>
+</div>
+
+<h2 class="text-2xl font-bold text-slate-100 mt-12 mb-3">Troubleshooting</h2>
+<dl class="space-y-4">
+  <div>
+    <dt class="font-semibold text-slate-100">Claude can't find a file</dt>
+    <dd class="text-sm text-slate-400">Check that the Cowork folder pick is the project root, not a parent directory. Paths in skill specs are relative to the project root.</dd>
+  </div>
+  <div>
+    <dt class="font-semibold text-slate-100">The PWA template won't render</dt>
+    <dd class="text-sm text-slate-400">Ensure CDN access is allowed (jsDelivr is the default). The build script will tell you if a CDN script failed to load. The PWA also runs offline once the service worker is registered.</dd>
+  </div>
+  <div>
+    <dt class="font-semibold text-slate-100">A skill produced a bad output</dt>
+    <dd class="text-sm text-slate-400">Reject the output, tell Claude what was wrong, and re-run. The orchestrator preserves your prior approvals — only the rejected step re-runs.</dd>
+  </div>
+  <div>
+    <dt class="font-semibold text-slate-100">The interview-prep skill found "no sourced questions" for my company</dt>
+    <dd class="text-sm text-slate-400">That's intentional — the skill refuses to fabricate. Either accept the empty Real Qs tab, or feed the skill a list of questions you found yourself.</dd>
+  </div>
+</dl>
+
+<div class="mt-16 flex gap-4">
+  <a href="./" class="rounded border border-slate-700 px-4 py-2 hover:bg-slate-800 text-sm">← Docs home</a>
+  <a href="./skills.html" class="rounded bg-sky-500 hover:bg-sky-400 text-slate-950 font-semibold px-4 py-2 text-sm">Skills reference →</a>
+</div>
+
+</main>
+
+<footer class="border-t border-slate-800 mt-16">
+  <div class="max-w-6xl mx-auto px-6 py-10 text-sm text-slate-500">
+    <p>Ultimate Job Assistant · <a href="../" class="hover:text-slate-300">Home</a></p>
+  </div>
+</footer>
+
+</body>
+</html>

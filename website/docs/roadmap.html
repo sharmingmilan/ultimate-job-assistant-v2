@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Roadmap — Ultimate Job Assistant</title>
+  <link rel="icon" href="../assets/favicon.svg" />
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<body class="bg-slate-950 text-slate-200 antialiased font-sans">
+
+<header class="border-b border-slate-800 sticky top-0 z-10 bg-slate-950/80 backdrop-blur">
+  <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+    <a href="../" class="flex items-center gap-2">
+      <span class="inline-block w-7 h-7 rounded bg-gradient-to-br from-sky-400 to-pink-400"></span>
+      <span class="font-bold tracking-tight">Ultimate Job Assistant</span>
+    </a>
+    <nav class="flex items-center gap-5 text-sm">
+      <a href="./" class="hover:text-sky-300">Docs</a>
+      <a href="./onboarding.html" class="hover:text-sky-300">Onboarding</a>
+      <a href="./skills.html" class="hover:text-sky-300">Skills</a>
+      <a href="https://github.com/" class="rounded border border-slate-700 px-3 py-1 hover:bg-slate-800">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main class="max-w-3xl mx-auto px-6 py-16">
+
+<p class="text-sm uppercase tracking-widest text-amber-400 mb-3">What's next</p>
+<h1 class="text-4xl font-bold text-slate-100 mb-4">Roadmap</h1>
+<p class="text-slate-400 text-lg leading-relaxed mb-12">Tracks under consideration. <strong>Nothing here is committed work.</strong> An item moves to "in progress" only when the owner approves a follow-up SPEC document for it. The full ROADMAP.md lives in the repo.</p>
+
+<div class="space-y-8">
+
+<div>
+  <p class="text-xs uppercase tracking-wider text-sky-400 mb-2">Track 1</p>
+  <h2 class="text-2xl font-bold text-slate-100 mb-2">SaaS pivot</h2>
+  <p class="text-slate-300 leading-relaxed mb-4">Convert the personal toolkit into a multi-user product where strangers sign up, run the workflow on their own JDs, and download their own deliverables.</p>
+  <p class="text-sm text-slate-400"><strong>Cost ladder:</strong> $0 hobby (Vercel free + Supabase free + Clerk free) · ~$20/mo light · ~$70/mo growth · $200+/mo at scale. Anthropic API costs are usage-based on top.</p>
+  <p class="text-sm text-slate-400 mt-2"><strong>Architecture seams already in place:</strong> content separated from rendering at content.json; skill specs are YAML frontmatter + markdown; no hardcoded user-specific paths in skill code.</p>
+</div>
+
+<div>
+  <p class="text-xs uppercase tracking-wider text-pink-400 mb-2">Track 2</p>
+  <h2 class="text-2xl font-bold text-slate-100 mb-2">Browser-driven skills</h2>
+  <p class="text-slate-300 leading-relaxed mb-4">Lighter version of the SaaS pivot: package each skill as a static page that runs Claude via the user's own API key, kept entirely in the browser. No server, no auth, no payments.</p>
+  <p class="text-sm text-slate-400">Lower bar than full SaaS. Friction: user must sign up for Anthropic API.</p>
+</div>
+
+<div>
+  <p class="text-xs uppercase tracking-wider text-emerald-400 mb-2">Track 3</p>
+  <h2 class="text-2xl font-bold text-slate-100 mb-2">In-browser code execution</h2>
+  <p class="text-slate-300 leading-relaxed mb-4">Add a real SQL playground inside the PWA so retrieval problems can be self-checked. Likely path: DuckDB-Wasm runs SQL fully in the browser, no backend needed. Bundle gains ~3 MB.</p>
+  <p class="text-sm text-slate-400">Trade-off: DuckDB lacks some Trino/Postgres dialect features. Document divergences.</p>
+</div>
+
+<div>
+  <p class="text-xs uppercase tracking-wider text-orange-400 mb-2">Track 4</p>
+  <h2 class="text-2xl font-bold text-slate-100 mb-2">Real spaced repetition</h2>
+  <p class="text-slate-300 leading-relaxed mb-4">Replace the v0.1.0 flag-and-cooldown with SM-2 / Anki-style spaced repetition. Two new fields per problem (next_review_at, ease_factor). Anki-style 4-button rating after each retrieval attempt.</p>
+  <p class="text-sm text-slate-400">Worth it once content volume justifies it. The current flag-and-cooldown is sufficient for a 7-day prep horizon.</p>
+</div>
+
+<div>
+  <p class="text-xs uppercase tracking-wider text-amber-400 mb-2">Track 5</p>
+  <h2 class="text-2xl font-bold text-slate-100 mb-2">Cross-application analytics</h2>
+  <p class="text-slate-300 leading-relaxed mb-4">Each application's PWA is isolated today. A small analytics.json at project root could surface patterns across applications (e.g., topics you've struggled with in three of the last five prep sites become a flagged growth area on your resume).</p>
+</div>
+
+<div>
+  <p class="text-xs uppercase tracking-wider text-rose-400 mb-2">Track 6</p>
+  <h2 class="text-2xl font-bold text-slate-100 mb-2">Auto-deploy on tagged release</h2>
+  <p class="text-slate-300 leading-relaxed mb-4">CI today runs lint and smoke tests. CD is manual (Netlify Drop). On a tagged release, deploy a sample PWA to a preview URL — useful as a live demo for strangers.</p>
+</div>
+
+</div>
+
+<h2 class="text-2xl font-bold text-slate-100 mt-16 mb-4">Anti-roadmap</h2>
+<p class="text-slate-400 text-sm mb-4">Things explicitly NOT planned, even with infinite time.</p>
+<ul class="space-y-2 text-slate-300 list-disc pl-6">
+  <li>A native mobile app — PWA install is good enough.</li>
+  <li>A built-in chat with Claude inside the PWA — the toolkit's value is the structured workflow, not yet another chat box.</li>
+  <li>OCR for paper resumes — out of scope.</li>
+  <li>LinkedIn API integration — terms-of-service hostile.</li>
+  <li>"Auto-apply" features that submit applications — bad outcomes for users; we coach the application, the user submits.</li>
+</ul>
+
+<div class="mt-16 flex gap-4">
+  <a href="./pwa.html" class="rounded border border-slate-700 px-4 py-2 hover:bg-slate-800 text-sm">← Interview-prep PWA</a>
+  <a href="./" class="rounded bg-sky-500 hover:bg-sky-400 text-slate-950 font-semibold px-4 py-2 text-sm">Docs home</a>
+</div>
+
+</main>
+
+<footer class="border-t border-slate-800 mt-16">
+  <div class="max-w-6xl mx-auto px-6 py-10 text-sm text-slate-500">
+    <p>Ultimate Job Assistant · <a href="../" class="hover:text-slate-300">Home</a></p>
+  </div>
+</footer>
+
+</body>
+</html>

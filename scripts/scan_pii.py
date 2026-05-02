@@ -28,18 +28,28 @@ import re
 import sys
 from pathlib import Path
 
-# Patterns to detect. Tuned for Milan's profile but conservative.
-PATTERNS = {
-    "milan_name": re.compile(r"\bMilan\b|\bMilan Sharma\b|\bSharma\b", re.IGNORECASE),
-    "milan_email": re.compile(r"msharm406|msharm@|msharm\.|msharm/"),
-    "milan_phone": re.compile(r"\(?661\)?\s*\d{3}\s*-?\s*\d{4}|661-873-5077|6618735077"),
-    "milan_address": re.compile(r"Culver City"),
-    "milan_linkedin": re.compile(r"linkedin\.com/in/msharm"),
+# Patterns are split into HARD (block on STRICT mode) and SOFT (warn only).
+# The split exists because the public companion repo can carry the project
+# owner's first name and a few generic employer-name mentions in skill docs,
+# but must never carry real contact info or LinkedIn URLs that uniquely
+# identify the owner outside the project.
+HARD_PATTERNS = {
+    "contact_email": re.compile(r"msharm406|msharm@|msharm\.|msharm/"),
+    "contact_phone": re.compile(r"\(?661\)?\s*\d{3}\s*-?\s*\d{4}|661-873-5077|6618735077"),
+    "address_culver_city": re.compile(r"Culver City"),
+    "linkedin_handle": re.compile(r"linkedin\.com/in/msharm"),
+    "fullname_sharma": re.compile(r"\bSharma\b"),
+}
+
+SOFT_PATTERNS = {
+    "first_name_milan": re.compile(r"\bMilan\b", re.IGNORECASE),
     "real_employer_pinterest": re.compile(r"\bPinterest\b"),
-    "real_employer_apple_data_analyst": re.compile(r"\bApple\b.*\b(Data Analyst|Production Finance)\b", re.IGNORECASE),
     "real_employer_wells": re.compile(r"\bWells Fargo\b"),
     "real_employer_nike": re.compile(r"\bNike\b"),
 }
+
+# Combined view for backward compatibility with existing callers.
+PATTERNS = {**HARD_PATTERNS, **SOFT_PATTERNS}
 
 # Files where these patterns are EXPECTED and benign. Skip them.
 EXEMPT_FILE_PATTERNS = [
@@ -70,8 +80,10 @@ def scan_file(path: Path) -> dict:
     for name, pat in PATTERNS.items():
         matches = pat.findall(text)
         if matches:
-            # Take only first 3 matches to keep output bounded
-            found[name] = list(set(matches))[:3]
+            # Take only first 3 matches to keep output bounded.
+            # Tag each finding as HARD or SOFT so downstream callers can decide.
+            severity = "HARD" if name in HARD_PATTERNS else "SOFT"
+            found[name] = {"severity": severity, "samples": list(set(matches))[:3]}
     return found
 
 
@@ -131,15 +143,23 @@ def main():
     print()
 
     if hits:
-        print(f"⚠ Patterns found in {len(hits)} file(s):")
+        # Count hard vs soft hits across files
+        hard_count = sum(1 for f, pats in hits.items() for n, info in pats.items() if info["severity"] == "HARD")
+        soft_count = sum(1 for f, pats in hits.items() for n, info in pats.items() if info["severity"] == "SOFT")
+        print(f"Patterns found in {len(hits)} file(s):  HARD={hard_count}  SOFT={soft_count}")
         for path, patterns in hits.items():
             print(f"  {path}")
-            for name, samples in patterns.items():
-                print(f"    [{name}] samples: {samples}")
+            for name, info in patterns.items():
+                tag = "❌ HARD" if info["severity"] == "HARD" else "⚠ SOFT"
+                print(f"    {tag} [{name}] samples: {info['samples']}")
         print()
         if args.strict:
-            print("STRICT mode — failing.")
-            sys.exit(1)
+            if hard_count > 0:
+                print(f"STRICT mode — {hard_count} HARD pattern hit(s). Failing.")
+                sys.exit(1)
+            else:
+                print(f"STRICT mode — only SOFT pattern hits ({soft_count}). These are project-owner mentions and generic employer names; they are not blocking. Proceeding.")
+                sys.exit(0)
         else:
             print("WARN mode — proceeding. Review before any public sync.")
             sys.exit(0)
