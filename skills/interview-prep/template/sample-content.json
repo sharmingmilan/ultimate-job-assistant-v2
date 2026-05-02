@@ -1,0 +1,272 @@
+{
+  "metadata": {
+    "company": "Sample Company",
+    "role": "Data Analyst",
+    "convention": "sample-data-analyst-2026-05",
+    "generated_at": "2026-05-02T19:00:00Z",
+    "primary_language": "sql",
+    "dialect_note": "Examples target Postgres-compatible SQL. Notes flag Presto/Trino divergences where relevant.",
+    "empty_state_explanation": "This is the template smoke-test fixture. The real_questions tab includes one example sourced entry."
+  },
+  "topics": [
+    {
+      "id": "joins",
+      "title": "Multi-Table Joins",
+      "tier": "T1",
+      "frequency_signal": "Every Glassdoor SQL screen for the role mentions at least one multi-table join problem. (Sample fixture; real run cites real URLs.)",
+      "sources": ["https://example.com/sample-source"],
+      "language_mode": "sql",
+      "worked": [
+        {
+          "difficulty": "easy",
+          "prompt": "Return each production with the total spend across all its payments. Sort by total spend descending. Business motivation: leadership needs a one-page overview of which productions are burning the most cash this fiscal month so we can prioritize close reviews.",
+          "schemas": [
+            {
+              "table": "productions",
+              "columns": ["production_id", "title", "tier"],
+              "rows": [
+                ["P101", "Tentpole A", "tentpole"],
+                ["P102", "Mid-Budget B", "mid"],
+                ["P103", "Micro C", "micro"]
+              ]
+            },
+            {
+              "table": "payments",
+              "columns": ["payment_id", "production_id", "vendor_id", "amount_usd", "paid_on"],
+              "rows": [
+                ["PMT-001", "P101", "V001", 12500, "2026-04-12"],
+                ["PMT-002", "P101", "V002", 8000, "2026-04-15"],
+                ["PMT-003", "P102", "V001", 4500, "2026-04-22"]
+              ]
+            }
+          ],
+          "solution": "SELECT\n  p.production_id,\n  p.title,\n  SUM(pmt.amount_usd) AS total_spend\nFROM productions p\nJOIN payments pmt USING (production_id)\nGROUP BY p.production_id, p.title\nORDER BY total_spend DESC;",
+          "walk": [
+            "Joining productions to payments on production_id is the right move because every payment must be tied to a production for spend to count.",
+            "Used INNER JOIN (just JOIN) here, not LEFT JOIN, because productions with zero payments would show as NULL totals and clutter a leadership view.",
+            "USING (production_id) is shorthand for ON p.production_id = pmt.production_id when the column has the same name in both tables.",
+            "SUM aggregates payment amounts per production after grouping; without GROUP BY this would error.",
+            "GROUP BY needs every non-aggregated SELECT column. We include p.production_id and p.title to satisfy that.",
+            "ORDER BY total_spend DESC puts the highest-burn productions on top, matching what leadership scans first.",
+            "If we wanted to include zero-payment productions, the query becomes a LEFT JOIN with COALESCE(SUM(amount_usd), 0)."
+          ],
+          "self_explain_prompt": "Before moving on, explain in your own words why an INNER JOIN was the right default here and when you would switch to LEFT JOIN."
+        },
+        {
+          "difficulty": "medium",
+          "prompt": "For each production, return the top 3 vendors by total spend, with their rank. Tiebreak on vendor_id. Business motivation: vendor concentration risk reviews require a per-production view of who is taking the most money.",
+          "schemas": [
+            {
+              "table": "productions",
+              "columns": ["production_id", "title"],
+              "rows": [["P101", "Tentpole A"], ["P102", "Mid-Budget B"]]
+            },
+            {
+              "table": "payments",
+              "columns": ["payment_id", "production_id", "vendor_id", "amount_usd"],
+              "rows": [
+                ["PMT-001", "P101", "V001", 12500],
+                ["PMT-002", "P101", "V002", 8000],
+                ["PMT-003", "P101", "V003", 7500],
+                ["PMT-004", "P101", "V004", 5500]
+              ]
+            }
+          ],
+          "solution": "WITH per_vendor AS (\n  SELECT\n    production_id,\n    vendor_id,\n    SUM(amount_usd) AS total_spend\n  FROM payments\n  GROUP BY production_id, vendor_id\n),\nranked AS (\n  SELECT\n    production_id,\n    vendor_id,\n    total_spend,\n    ROW_NUMBER() OVER (\n      PARTITION BY production_id\n      ORDER BY total_spend DESC, vendor_id ASC\n    ) AS rk\n  FROM per_vendor\n)\nSELECT * FROM ranked WHERE rk <= 3;",
+          "walk": [
+            "Two-step CTE: first sum per vendor per production, then rank. Doing both in one query is possible but harder to read.",
+            "ROW_NUMBER picked over RANK because we want exactly 3 rows per production even when totals tie. RANK would give 1, 1, 3 on a tie at the top.",
+            "PARTITION BY production_id resets the ranking inside each production.",
+            "ORDER BY total_spend DESC, vendor_id ASC: the second key is the tiebreak the prompt asked for.",
+            "Filtering with rk <= 3 in the outer SELECT, not in the window function itself, because window functions can't be in WHERE.",
+            "If the requirement was 'top 3 including ties' the answer would use DENSE_RANK and the row count per production could exceed 3."
+          ]
+        },
+        {
+          "difficulty": "hard",
+          "prompt": "Return productions where, in any single fiscal month, a single vendor accounted for over 60% of that month's total spend on the production. Output the production, fiscal month, offending vendor, and their share. Business motivation: surface single-vendor concentration risk that current reports miss.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": ["payment_id", "production_id", "vendor_id", "amount_usd", "paid_on"],
+              "rows": [
+                ["PMT-001", "P101", "V001", 12000, "2026-04-12"],
+                ["PMT-002", "P101", "V002", 1000, "2026-04-15"],
+                ["PMT-003", "P101", "V003", 7000, "2026-04-20"]
+              ]
+            }
+          ],
+          "solution": "WITH monthly_vendor AS (\n  SELECT\n    production_id,\n    DATE_TRUNC('month', paid_on) AS fiscal_month,\n    vendor_id,\n    SUM(amount_usd) AS vendor_spend\n  FROM payments\n  GROUP BY production_id, DATE_TRUNC('month', paid_on), vendor_id\n),\nmonthly_total AS (\n  SELECT\n    production_id,\n    fiscal_month,\n    SUM(vendor_spend) AS month_spend\n  FROM monthly_vendor\n  GROUP BY production_id, fiscal_month\n)\nSELECT\n  mv.production_id,\n  mv.fiscal_month,\n  mv.vendor_id,\n  ROUND(100.0 * mv.vendor_spend / mt.month_spend, 1) AS pct_share\nFROM monthly_vendor mv\nJOIN monthly_total mt USING (production_id, fiscal_month)\nWHERE mv.vendor_spend > 0.60 * mt.month_spend;",
+          "walk": [
+            "Two CTEs: spend per vendor per month, then total per month. Joining them gives the share.",
+            "DATE_TRUNC('month', paid_on) buckets payments by fiscal month. Postgres syntax. In Presto/Trino it would be date_trunc('month', paid_on).",
+            "Joining monthly_vendor to monthly_total on (production_id, fiscal_month) gives each vendor row the denominator it needs.",
+            "Filter with mv.vendor_spend > 0.60 * mt.month_spend. Stating it as a multiplication avoids a divide-and-compare which can lose precision on integer types.",
+            "ROUND to one decimal place for human-readable output; the comparison itself uses the unrounded values to avoid false negatives at the boundary.",
+            "If thresholds vary by production tier, you'd join in productions with a CASE on tier; documented as the obvious next iteration."
+          ]
+        }
+      ],
+      "faded": [
+        {
+          "difficulty": "easy",
+          "prompt": "Return each production with the total spend across all its payments. Sort by total spend descending.",
+          "schemas": [
+            {
+              "table": "productions",
+              "columns": ["production_id", "title"],
+              "rows": [["P101", "Tentpole A"], ["P102", "Mid-Budget B"]]
+            },
+            {
+              "table": "payments",
+              "columns": ["payment_id", "production_id", "amount_usd"],
+              "rows": [["PMT-001", "P101", 12500], ["PMT-002", "P101", 8000]]
+            }
+          ],
+          "scaffold": "SELECT\n  p.production_id,\n  p.title,\n  _____(pmt.amount_usd) AS total_spend\nFROM productions p\n_____ JOIN payments pmt USING (_____)\nGROUP BY p.production_id, p.title\nORDER BY total_spend _____;",
+          "solution": "SELECT\n  p.production_id,\n  p.title,\n  SUM(pmt.amount_usd) AS total_spend\nFROM productions p\nINNER JOIN payments pmt USING (production_id)\nGROUP BY p.production_id, p.title\nORDER BY total_spend DESC;",
+          "walk": [
+            "First blank is the aggregator. SUM, not COUNT, because we want dollars not row counts.",
+            "Second blank is the join type. INNER (or just JOIN) drops productions with no payments.",
+            "Third blank is the join column.",
+            "Fourth blank is the sort direction. DESC because leadership scans top-down."
+          ]
+        },
+        {
+          "difficulty": "medium",
+          "prompt": "For each production, return the top 3 vendors by total spend, with their rank. Tiebreak on vendor_id.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": ["production_id", "vendor_id", "amount_usd"],
+              "rows": [["P101", "V001", 12500], ["P101", "V002", 8000]]
+            }
+          ],
+          "scaffold": "WITH per_vendor AS (\n  SELECT production_id, vendor_id, SUM(amount_usd) AS total_spend\n  FROM payments\n  GROUP BY production_id, vendor_id\n),\nranked AS (\n  SELECT\n    production_id,\n    vendor_id,\n    total_spend,\n    _____() OVER (\n      PARTITION BY _____\n      ORDER BY total_spend DESC, _____ ASC\n    ) AS rk\n  FROM per_vendor\n)\nSELECT * FROM ranked WHERE rk _____ 3;",
+          "solution": "WITH per_vendor AS (\n  SELECT production_id, vendor_id, SUM(amount_usd) AS total_spend\n  FROM payments\n  GROUP BY production_id, vendor_id\n),\nranked AS (\n  SELECT\n    production_id,\n    vendor_id,\n    total_spend,\n    ROW_NUMBER() OVER (\n      PARTITION BY production_id\n      ORDER BY total_spend DESC, vendor_id ASC\n    ) AS rk\n  FROM per_vendor\n)\nSELECT * FROM ranked WHERE rk <= 3;",
+          "walk": [
+            "Window function blank: ROW_NUMBER for exactly-three semantics; RANK would tie.",
+            "Partition blank: production_id, the grouping the prompt wants.",
+            "Tiebreak blank: vendor_id ascending, as the prompt requested.",
+            "Filter blank: <= 3 to take top three."
+          ]
+        },
+        {
+          "difficulty": "hard",
+          "prompt": "Productions with single-vendor concentration risk in any month (>60% share). Output production, month, vendor, share.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": ["production_id", "vendor_id", "amount_usd", "paid_on"],
+              "rows": [["P101", "V001", 12000, "2026-04-12"]]
+            }
+          ],
+          "scaffold": "WITH monthly_vendor AS (\n  SELECT production_id,\n         _____('month', paid_on) AS fiscal_month,\n         vendor_id,\n         SUM(amount_usd) AS vendor_spend\n  FROM payments\n  GROUP BY production_id, _____('month', paid_on), vendor_id\n),\nmonthly_total AS (\n  SELECT production_id, fiscal_month, SUM(vendor_spend) AS month_spend\n  FROM monthly_vendor\n  GROUP BY production_id, fiscal_month\n)\nSELECT mv.production_id, mv.fiscal_month, mv.vendor_id,\n       ROUND(100.0 * mv.vendor_spend / mt.month_spend, 1) AS pct_share\nFROM monthly_vendor mv\nJOIN monthly_total mt USING (_____, _____)\nWHERE mv.vendor_spend _____ 0.60 * mt.month_spend;",
+          "solution": "WITH monthly_vendor AS (\n  SELECT production_id,\n         DATE_TRUNC('month', paid_on) AS fiscal_month,\n         vendor_id,\n         SUM(amount_usd) AS vendor_spend\n  FROM payments\n  GROUP BY production_id, DATE_TRUNC('month', paid_on), vendor_id\n),\nmonthly_total AS (\n  SELECT production_id, fiscal_month, SUM(vendor_spend) AS month_spend\n  FROM monthly_vendor\n  GROUP BY production_id, fiscal_month\n)\nSELECT mv.production_id, mv.fiscal_month, mv.vendor_id,\n       ROUND(100.0 * mv.vendor_spend / mt.month_spend, 1) AS pct_share\nFROM monthly_vendor mv\nJOIN monthly_total mt USING (production_id, fiscal_month)\nWHERE mv.vendor_spend > 0.60 * mt.month_spend;",
+          "walk": [
+            "Date function blank: DATE_TRUNC, used twice consistently inside the same CTE.",
+            "Join columns blank: (production_id, fiscal_month) is the composite key tying vendor spend to its month total.",
+            "Comparator blank: > stages the threshold check as a multiplication so we avoid integer-divide precision loss."
+          ]
+        }
+      ],
+      "retrieval": [
+        {
+          "difficulty": "easy",
+          "prompt": "Return the count of distinct vendors who received at least one payment in 2026.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": ["payment_id", "vendor_id", "amount_usd", "paid_on"],
+              "rows": [
+                ["PMT-001", "V001", 12500, "2026-04-12"],
+                ["PMT-002", "V001", 4500, "2025-12-22"],
+                ["PMT-003", "V002", 8000, "2026-01-15"]
+              ]
+            }
+          ],
+          "solution": "SELECT COUNT(DISTINCT vendor_id) AS active_vendors_2026\nFROM payments\nWHERE paid_on >= '2026-01-01' AND paid_on < '2027-01-01';",
+          "selfExplain": "Why use a half-open interval [2026-01-01, 2027-01-01) instead of BETWEEN '2026-01-01' AND '2026-12-31'?",
+          "explanation": "Half-open intervals are correct for date-and-timestamp comparisons regardless of whether the column is a DATE or a TIMESTAMP. BETWEEN with the year-end date silently misses any timestamps between 2026-12-31 00:00:01 and 23:59:59. The COUNT DISTINCT collapses rows so a vendor paid twice in 2026 still counts once."
+        },
+        {
+          "difficulty": "medium",
+          "prompt": "Return productions whose total spend in April 2026 increased by more than 50% over their March 2026 total. Output production, March total, April total, growth rate.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": ["production_id", "amount_usd", "paid_on"],
+              "rows": [
+                ["P101", 1000, "2026-03-10"],
+                ["P101", 2000, "2026-04-10"],
+                ["P102", 5000, "2026-03-15"],
+                ["P102", 5500, "2026-04-15"]
+              ]
+            }
+          ],
+          "solution": "WITH monthly AS (\n  SELECT production_id,\n         DATE_TRUNC('month', paid_on) AS month,\n         SUM(amount_usd) AS month_spend\n  FROM payments\n  WHERE paid_on >= '2026-03-01' AND paid_on < '2026-05-01'\n  GROUP BY production_id, DATE_TRUNC('month', paid_on)\n),\npivoted AS (\n  SELECT production_id,\n         SUM(CASE WHEN month = '2026-03-01' THEN month_spend END) AS march_total,\n         SUM(CASE WHEN month = '2026-04-01' THEN month_spend END) AS april_total\n  FROM monthly\n  GROUP BY production_id\n)\nSELECT production_id, march_total, april_total,\n       ROUND(100.0 * (april_total - march_total) / march_total, 1) AS growth_pct\nFROM pivoted\nWHERE march_total IS NOT NULL\n  AND april_total > 1.5 * march_total;",
+          "selfExplain": "Why pivot with conditional aggregation instead of using LAG over months?",
+          "explanation": "Either approach works. Conditional aggregation reads more naturally when the comparison is between two specific months and you want both totals as columns. LAG is preferred when the comparison generalizes to N months or you need a rolling pattern. The march_total IS NOT NULL guard prevents division-by-zero false positives for productions that started in April."
+        },
+        {
+          "difficulty": "hard",
+          "prompt": "Identify pairs of productions whose payment date ranges overlap and that share at least one vendor. For each overlapping pair, return the productions, the shared vendors, and the overlap window.",
+          "schemas": [
+            {
+              "table": "productions",
+              "columns": ["production_id", "title", "start_date", "end_date"],
+              "rows": [
+                ["P101", "Tentpole A", "2026-01-15", "2026-06-30"],
+                ["P102", "Mid-Budget B", "2026-03-01", "2026-09-15"]
+              ]
+            },
+            {
+              "table": "payments",
+              "columns": ["production_id", "vendor_id"],
+              "rows": [["P101", "V001"], ["P102", "V001"]]
+            }
+          ],
+          "solution": "WITH shared_vendors AS (\n  SELECT a.production_id AS prod_a,\n         b.production_id AS prod_b,\n         a.vendor_id\n  FROM (SELECT DISTINCT production_id, vendor_id FROM payments) a\n  JOIN (SELECT DISTINCT production_id, vendor_id FROM payments) b\n    ON a.vendor_id = b.vendor_id\n   AND a.production_id < b.production_id\n)\nSELECT sv.prod_a,\n       sv.prod_b,\n       string_agg(DISTINCT sv.vendor_id, ',') AS shared_vendors,\n       GREATEST(pa.start_date, pb.start_date) AS overlap_start,\n       LEAST(pa.end_date, pb.end_date) AS overlap_end\nFROM shared_vendors sv\nJOIN productions pa ON pa.production_id = sv.prod_a\nJOIN productions pb ON pb.production_id = sv.prod_b\nWHERE GREATEST(pa.start_date, pb.start_date) < LEAST(pa.end_date, pb.end_date)\nGROUP BY sv.prod_a, sv.prod_b, pa.start_date, pa.end_date, pb.start_date, pb.end_date;",
+          "selfExplain": "Why the a.production_id < b.production_id constraint in shared_vendors?",
+          "explanation": "Self-joining a table on a shared attribute (vendor) without an ordering constraint produces every pair twice (P101,P102) and (P102,P101) plus self-pairs (P101,P101). The strict-less-than constraint gives unordered pairs and excludes self. The Allen's-intervals overlap test is GREATEST(starts) < LEAST(ends); if true, the windows overlap. string_agg coalesces multiple shared vendors into one cell."
+        }
+      ]
+    }
+  ],
+  "real_questions": [
+    {
+      "id": "rq_001",
+      "category": "SQL",
+      "title": "Top N per group with tiebreak",
+      "prompt": "Given orders and customers, return the top 3 orders by amount per customer, breaking ties by order_date.",
+      "concepts": ["window functions", "ROW_NUMBER", "tiebreak"],
+      "difficulty": "medium",
+      "source": "Glassdoor (sample fixture, 2025-08, anonymous DA report)",
+      "source_url": "https://example.com/sample-glassdoor-thread",
+      "solution": "WITH ranked AS (\n  SELECT customer_id, order_id, amount_usd, order_date,\n    ROW_NUMBER() OVER (\n      PARTITION BY customer_id\n      ORDER BY amount_usd DESC, order_date ASC\n    ) AS rk\n  FROM orders\n)\nSELECT * FROM ranked WHERE rk <= 3;",
+      "solution_authored_by": "claude",
+      "hint": "Two-key ORDER BY inside the window function handles the tiebreak.",
+      "note": "Sample fixture for the smoke test. Real runs cite real URLs only."
+    }
+  ],
+  "exam_meta": {
+    "format": "Sample fixture: a 45-60 minute coding screen on CoderPad-style platform.",
+    "alternateFormat": "Some candidates report a take-home variant.",
+    "keyInsight": "The screen is more about verbalized reasoning than syntax perfection.",
+    "highROI": "Practice writing the whole query before running anything; mirrors the actual interview constraint."
+  },
+  "patterns": {
+    "sql": [
+      {
+        "title": "Top N per group",
+        "summary": "ROW_NUMBER() OVER (PARTITION BY group_key ORDER BY rank_key DESC) then filter rk <= N.",
+        "snippet": "ROW_NUMBER() OVER (PARTITION BY g ORDER BY x DESC)"
+      },
+      {
+        "title": "Half-open date interval",
+        "summary": "WHERE col >= start AND col < end. Avoids BETWEEN gotchas with timestamps.",
+        "snippet": "WHERE paid_on >= '2026-01-01' AND paid_on < '2027-01-01'"
+      }
+    ]
+  }
+}

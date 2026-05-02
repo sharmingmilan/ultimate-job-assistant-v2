@@ -1,0 +1,183 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "title": "InterviewPrepContent",
+  "description": "Schema for content.json files consumed by the interview-prep PWA template. One file per application.",
+  "type": "object",
+  "required": ["metadata", "topics"],
+  "additionalProperties": false,
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "required": ["company", "role", "convention", "generated_at", "primary_language"],
+      "additionalProperties": false,
+      "properties": {
+        "company": { "type": "string", "minLength": 1 },
+        "role": { "type": "string", "minLength": 1 },
+        "convention": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]+-[0-9]{4}-[0-9]{2}$",
+          "description": "company-role-slug-YYYY-MM, lowercase hyphenated"
+        },
+        "generated_at": { "type": "string", "format": "date-time" },
+        "primary_language": {
+          "type": "string",
+          "enum": ["sql", "python", "plaintext"],
+          "description": "Default editor mode for retrieval problems whose topic does not specify its own"
+        },
+        "dialect_note": {
+          "type": "string",
+          "description": "Optional human-readable note about SQL dialect (Presto, Postgres, Snowflake, etc.)"
+        },
+        "empty_state_explanation": {
+          "type": "string",
+          "description": "Required when real_questions is empty or under 3 items. Explains why and what the user should do."
+        }
+      }
+    },
+    "topics": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/definitions/topic" }
+    },
+    "real_questions": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/realQuestion" }
+    },
+    "exam_meta": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "format": { "type": "string" },
+        "alternateFormat": { "type": "string" },
+        "keyInsight": { "type": "string" },
+        "highROI": { "type": "string" }
+      }
+    },
+    "patterns": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "sql": { "type": "array", "items": { "$ref": "#/definitions/pattern" } },
+        "python": { "type": "array", "items": { "$ref": "#/definitions/pattern" } }
+      }
+    }
+  },
+  "definitions": {
+    "topic": {
+      "type": "object",
+      "required": ["id", "title", "tier", "worked", "faded", "retrieval"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+        "title": { "type": "string" },
+        "tier": { "type": "string", "enum": ["T1", "T2", "T3", "PY", "SD", "BH", "CASE"] },
+        "frequency_signal": { "type": "string" },
+        "sources": { "type": "array", "items": { "type": "string", "format": "uri" } },
+        "language_mode": { "type": "string", "enum": ["sql", "python", "plaintext"] },
+        "worked": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 3,
+          "items": { "$ref": "#/definitions/workedExample" }
+        },
+        "faded": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 3,
+          "items": { "$ref": "#/definitions/fadedScaffold" }
+        },
+        "retrieval": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 3,
+          "items": { "$ref": "#/definitions/retrievalProblem" }
+        }
+      }
+    },
+    "schemaPanel": {
+      "type": "object",
+      "required": ["table", "columns", "rows"],
+      "additionalProperties": false,
+      "properties": {
+        "table": { "type": "string" },
+        "columns": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "rows": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "array", "items": { "type": ["string", "number", "null"] } }
+        }
+      }
+    },
+    "workedExample": {
+      "type": "object",
+      "required": ["difficulty", "prompt", "schemas", "solution", "walk"],
+      "additionalProperties": false,
+      "properties": {
+        "difficulty": { "type": "string", "enum": ["easy", "medium", "hard"] },
+        "prompt": { "type": "string", "minLength": 20 },
+        "schemas": { "type": "array", "items": { "$ref": "#/definitions/schemaPanel" } },
+        "solution": { "type": "string", "minLength": 1 },
+        "walk": { "type": "array", "items": { "type": "string" }, "minItems": 4, "maxItems": 12 },
+        "self_explain_prompt": { "type": "string" }
+      }
+    },
+    "fadedScaffold": {
+      "type": "object",
+      "required": ["difficulty", "prompt", "schemas", "scaffold", "solution"],
+      "additionalProperties": false,
+      "properties": {
+        "difficulty": { "type": "string", "enum": ["easy", "medium", "hard"] },
+        "prompt": { "type": "string", "minLength": 20 },
+        "schemas": { "type": "array", "items": { "$ref": "#/definitions/schemaPanel" } },
+        "scaffold": {
+          "type": "string",
+          "description": "Solution with strategic _____ blanks at error-prone tokens"
+        },
+        "solution": { "type": "string" },
+        "walk": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "retrievalProblem": {
+      "type": "object",
+      "required": ["difficulty", "prompt", "schemas", "solution", "selfExplain", "explanation"],
+      "additionalProperties": false,
+      "properties": {
+        "difficulty": { "type": "string", "enum": ["easy", "medium", "hard"] },
+        "prompt": { "type": "string", "minLength": 20 },
+        "schemas": { "type": "array", "items": { "$ref": "#/definitions/schemaPanel" } },
+        "solution": { "type": "string" },
+        "selfExplain": { "type": "string" },
+        "explanation": { "type": "string" }
+      }
+    },
+    "realQuestion": {
+      "type": "object",
+      "required": ["id", "category", "title", "prompt", "concepts", "difficulty", "source", "source_url"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^rq_[0-9]+$" },
+        "category": { "type": "string", "enum": ["SQL", "Python", "System Design", "Behavioral", "Case", "Stats"] },
+        "title": { "type": "string" },
+        "prompt": { "type": "string" },
+        "concepts": { "type": "array", "items": { "type": "string" } },
+        "difficulty": { "type": "string", "enum": ["easy", "medium", "hard"] },
+        "source": { "type": "string", "minLength": 5 },
+        "source_url": { "type": "string", "format": "uri" },
+        "solution": { "type": "string" },
+        "solution_authored_by": { "type": "string", "enum": ["source", "claude"] },
+        "hint": { "type": "string" },
+        "note": { "type": "string" }
+      }
+    },
+    "pattern": {
+      "type": "object",
+      "required": ["title", "summary"],
+      "additionalProperties": false,
+      "properties": {
+        "title": { "type": "string" },
+        "summary": { "type": "string" },
+        "snippet": { "type": "string" }
+      }
+    }
+  }
+}

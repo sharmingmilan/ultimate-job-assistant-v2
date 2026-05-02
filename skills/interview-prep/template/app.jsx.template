@@ -1,0 +1,600 @@
+// ---------------------------------------------------------------------------
+//  Ultimate Job Assistant — interview-prep PWA
+//  This file is a TEMPLATE. The build script reads template/app.jsx.template
+//  and inlines it into index.html.template. window.__CONTENT__ is provided
+//  by the host page and conforms to skills/interview-prep/content-schema.json.
+// ---------------------------------------------------------------------------
+
+const CONTENT = window.__CONTENT__;
+const { useState, useEffect, useMemo, useRef } = React;
+
+// ----- Storage keys ---------------------------------------------------------
+const SK = {
+  attempt: (appId, topicId, phase, idx) =>
+    `ujassist_q_${appId}_${topicId}_${phase}_${idx}`,
+  topicDone: (appId, topicId) => `ujassist_done_${appId}_${topicId}`,
+  flag: (appId, topicId, phase, idx) =>
+    `ujassist_flag_${appId}_${topicId}_${phase}_${idx}`,
+};
+const APP_ID = CONTENT.metadata.convention || "default";
+
+const lsGet = (k, fallback) => {
+  try {
+    const v = localStorage.getItem(k);
+    return v === null ? fallback : v;
+  } catch (_) {
+    return fallback;
+  }
+};
+const lsSet = (k, v) => {
+  try { localStorage.setItem(k, v); } catch (_) {}
+};
+
+// ----- Tokenizer (mode-aware) -----------------------------------------------
+const SQL_KW = new Set([
+  "select","from","where","group","by","order","having","with","as","on","using",
+  "join","inner","left","right","full","outer","cross","union","intersect","except",
+  "and","or","not","null","is","in","between","like","case","when","then","else",
+  "end","over","partition","range","rows","preceding","following","unbounded","current",
+  "row","limit","offset","distinct","all","exists","any","some","asc","desc","cast",
+  "create","insert","update","delete","values","set","into","table","view","filter",
+]);
+const SQL_FN = new Set([
+  "count","sum","avg","min","max","coalesce","nullif","row_number","rank","dense_rank",
+  "lag","lead","first_value","last_value","ntile","date_trunc","date_part","extract",
+  "to_char","to_date","to_timestamp","interval","greatest","least","round","abs",
+  "string_agg","array_agg","listagg","substring","concat","upper","lower","length",
+]);
+const PY_KW = new Set([
+  "def","return","if","elif","else","for","while","import","from","as","with","yield",
+  "lambda","try","except","finally","raise","class","pass","break","continue","in",
+  "not","and","or","is","None","True","False","global","nonlocal","async","await",
+]);
+const PY_FN = new Set([
+  "print","len","range","sum","min","max","sorted","map","filter","zip","enumerate",
+  "list","dict","set","tuple","str","int","float","bool","groupby","merge","read_csv",
+  "DataFrame","Series","apply","agg","rolling","resample","pivot","melt",
+]);
+
+function tokenize(text, mode) {
+  if (mode === "plaintext" || !text) return [{ t: text || "", c: "" }];
+  const KW = mode === "python" ? PY_KW : SQL_KW;
+  const FN = mode === "python" ? PY_FN : SQL_FN;
+  // Comment regex per mode
+  const commentRE = mode === "python" ? /^#.*/ : /^--.*/;
+  const out = [];
+  let i = 0;
+  while (i < text.length) {
+    const ch = text[i];
+    // Comment to end of line
+    const restLine = text.slice(i, text.indexOf("\n", i) === -1 ? text.length : text.indexOf("\n", i));
+    const cm = restLine.match(commentRE);
+    if (cm) {
+      out.push({ t: cm[0], c: "tok-com" });
+      i += cm[0].length;
+      continue;
+    }
+    // String
+    if (ch === "'" || ch === '"') {
+      let j = i + 1;
+      while (j < text.length && text[j] !== ch) {
+        if (text[j] === "\\") j += 2;
+        else j++;
+      }
+      out.push({ t: text.slice(i, Math.min(j + 1, text.length)), c: "tok-str" });
+      i = j + 1;
+      continue;
+    }
+    // Number
+    if (/[0-9]/.test(ch)) {
+      let j = i;
+      while (j < text.length && /[0-9.]/.test(text[j])) j++;
+      out.push({ t: text.slice(i, j), c: "tok-num" });
+      i = j;
+      continue;
+    }
+    // Word
+    if (/[A-Za-z_]/.test(ch)) {
+      let j = i;
+      while (j < text.length && /[A-Za-z0-9_]/.test(text[j])) j++;
+      const w = text.slice(i, j);
+      const wl = w.toLowerCase();
+      if (KW.has(wl)) out.push({ t: w, c: "tok-kw" });
+      else if (FN.has(wl) && text[j] === "(") out.push({ t: w, c: "tok-fn" });
+      else out.push({ t: w, c: "" });
+      i = j;
+      continue;
+    }
+    // Else: single char (operator, punctuation, whitespace)
+    out.push({ t: ch, c: "" });
+    i++;
+  }
+  return out;
+}
+
+// ----- Code Editor ----------------------------------------------------------
+function CodeEditor({ value, onChange, mode, ariaLabel }) {
+  const taRef = useRef(null);
+  const tokens = useMemo(() => tokenize(value, mode), [value, mode]);
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Tab") {
+      e.preventDefault();
+      const ta = e.target;
+      const start = ta.selectionStart;
+      const end = ta.selectionEnd;
+      if (e.shiftKey) {
+        const before = value.slice(0, start);
+        const lineStart = before.lastIndexOf("\n") + 1;
+        if (value.slice(lineStart, lineStart + 2) === "  ") {
+          const next = value.slice(0, lineStart) + value.slice(lineStart + 2);
+          onChange(next);
+          requestAnimationFrame(() => {
+            ta.selectionStart = ta.selectionEnd = Math.max(start - 2, 0);
+          });
+        }
+      } else {
+        const next = value.slice(0, start) + "  " + value.slice(end);
+        onChange(next);
+        requestAnimationFrame(() => {
+          ta.selectionStart = ta.selectionEnd = start + 2;
+        });
+      }
+    } else if (e.key === "Enter") {
+      const ta = e.target;
+      const start = ta.selectionStart;
+      const before = value.slice(0, start);
+      const lineStart = before.lastIndexOf("\n") + 1;
+      const indent = (before.slice(lineStart).match(/^\s*/) || [""])[0];
+      if (indent.length > 0) {
+        e.preventDefault();
+        const next = value.slice(0, start) + "\n" + indent + value.slice(start);
+        onChange(next);
+        requestAnimationFrame(() => {
+          ta.selectionStart = ta.selectionEnd = start + 1 + indent.length;
+        });
+      }
+    }
+  };
+
+  return (
+    <div className="editor-wrap">
+      <pre aria-hidden="true">
+        {tokens.map((tok, i) => (
+          <span key={i} className={tok.c}>{tok.t}</span>
+        ))}
+        {/* Trailing newline for cursor visual */}
+        {value.endsWith("\n") ? "\n" : ""}
+      </pre>
+      <textarea
+        ref={taRef}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        onKeyDown={handleKeyDown}
+        spellCheck={false}
+        autoCapitalize="off"
+        autoCorrect="off"
+        autoComplete="off"
+        aria-label={ariaLabel || "Code editor"}
+      />
+    </div>
+  );
+}
+
+// ----- Schema Panel ---------------------------------------------------------
+function SchemaPanel({ schemas }) {
+  if (!schemas || !schemas.length) return null;
+  return (
+    <div className="grid gap-3 my-3" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))" }}>
+      {schemas.map((s, i) => (
+        <div key={i} className="rounded border border-slate-700 bg-slate-900 overflow-hidden text-xs">
+          <div className="bg-slate-800 px-3 py-1.5 font-semibold text-slate-200 uppercase tracking-wider">{s.table}</div>
+          <table className="w-full">
+            <thead className="bg-slate-800/50">
+              <tr>
+                {s.columns.map((c, j) => (
+                  <th key={j} className="px-2 py-1 text-left font-medium text-slate-400">{c}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {s.rows.map((row, r) => (
+                <tr key={r} className="border-t border-slate-800">
+                  {row.map((cell, c) => (
+                    <td key={c} className="px-2 py-1 text-slate-300 font-mono">
+                      {cell === null || cell === undefined ? <span className="text-slate-500">NULL</span> : String(cell)}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ----- Phase: Came (worked example) ----------------------------------------
+function CameCard({ topic, idx, item, mode, isFirst }) {
+  const [showWalk, setShowWalk] = useState(true);
+  return (
+    <article className="rounded-lg border border-slate-700 bg-slate-900/50 p-4 mb-4">
+      <header className="flex items-baseline justify-between mb-2">
+        <h3 className="font-semibold text-slate-100">
+          {idx + 1}. <span className="uppercase text-xs text-pink-400">{item.difficulty}</span> &mdash; Worked Example
+        </h3>
+      </header>
+      <p className="text-slate-300 mb-3 leading-relaxed">{item.prompt}</p>
+      <SchemaPanel schemas={item.schemas} />
+      <div className="my-3">
+        <CodeEditor value={item.solution} onChange={() => {}} mode={mode} ariaLabel="worked solution" />
+      </div>
+      <div>
+        <button
+          className="text-xs text-sky-400 hover:underline"
+          onClick={() => setShowWalk(s => !s)}
+          aria-expanded={showWalk}
+        >
+          {showWalk ? "Hide walkthrough" : "Show walkthrough"}
+        </button>
+        {showWalk && (
+          <ol className="list-decimal list-inside mt-2 space-y-1.5 text-sm text-slate-300">
+            {item.walk.map((b, i) => <li key={i}>{b}</li>)}
+          </ol>
+        )}
+      </div>
+      {isFirst && item.self_explain_prompt && (
+        <p className="mt-3 text-sm italic text-amber-300">{item.self_explain_prompt}</p>
+      )}
+    </article>
+  );
+}
+
+// ----- Phase: Saw (faded scaffold) -----------------------------------------
+function SawCard({ topic, idx, item, mode }) {
+  const key = SK.attempt(APP_ID, topic.id, "saw", idx);
+  const [val, setVal] = useState(() => lsGet(key, ""));
+  const [showSolution, setShowSolution] = useState(false);
+  useEffect(() => { lsSet(key, val); }, [val]);
+  return (
+    <article className="rounded-lg border border-slate-700 bg-slate-900/50 p-4 mb-4">
+      <header className="flex items-baseline justify-between mb-2">
+        <h3 className="font-semibold text-slate-100">
+          {idx + 1}. <span className="uppercase text-xs text-orange-400">{item.difficulty}</span> &mdash; Fill the Blanks
+        </h3>
+      </header>
+      <p className="text-slate-300 mb-3 leading-relaxed">{item.prompt}</p>
+      <SchemaPanel schemas={item.schemas} />
+      <div className="my-3">
+        <p className="text-xs text-slate-400 mb-1">Scaffold (with blanks):</p>
+        <pre className="bg-slate-950 border border-slate-800 rounded p-3 text-xs text-slate-300 overflow-x-auto">
+          {item.scaffold.split(/(_____)/g).map((part, i) =>
+            part === "_____" ? <span key={i} className="scaffold-blank">_____</span> : <span key={i}>{part}</span>
+          )}
+        </pre>
+      </div>
+      <div className="my-3">
+        <p className="text-xs text-slate-400 mb-1">Your attempt:</p>
+        <CodeEditor value={val} onChange={setVal} mode={mode} ariaLabel={`saw attempt ${idx}`} />
+      </div>
+      <button
+        className="text-xs text-sky-400 hover:underline"
+        onClick={() => setShowSolution(s => !s)}
+      >
+        {showSolution ? "Hide solution" : "Show solution"}
+      </button>
+      {showSolution && (
+        <div className="mt-2">
+          <CodeEditor value={item.solution} onChange={() => {}} mode={mode} ariaLabel="saw solution" />
+        </div>
+      )}
+    </article>
+  );
+}
+
+// ----- Phase: Conquered (free recall) --------------------------------------
+function ConqueredCard({ topic, idx, item, mode }) {
+  const key = SK.attempt(APP_ID, topic.id, "conquered", idx);
+  const [val, setVal] = useState(() => lsGet(key, ""));
+  const [showSolution, setShowSolution] = useState(false);
+  useEffect(() => { lsSet(key, val); }, [val]);
+  return (
+    <article className="rounded-lg border border-slate-700 bg-slate-900/50 p-4 mb-4">
+      <header className="flex items-baseline justify-between mb-2">
+        <h3 className="font-semibold text-slate-100">
+          {idx + 1}. <span className="uppercase text-xs text-emerald-400">{item.difficulty}</span> &mdash; Write It From Scratch
+        </h3>
+      </header>
+      <p className="text-slate-300 mb-3 leading-relaxed">{item.prompt}</p>
+      <SchemaPanel schemas={item.schemas} />
+      <div className="my-3">
+        <p className="text-xs text-slate-400 mb-1">Your answer (saves automatically):</p>
+        <CodeEditor value={val} onChange={setVal} mode={mode} ariaLabel={`conquered attempt ${idx}`} />
+      </div>
+      <p className="text-xs italic text-amber-300 mt-2">{item.selfExplain}</p>
+      <button
+        className="text-xs text-sky-400 hover:underline mt-3"
+        onClick={() => setShowSolution(s => !s)}
+      >
+        {showSolution ? "Hide reference solution + explanation" : "Show reference solution + explanation"}
+      </button>
+      {showSolution && (
+        <div className="mt-2">
+          <CodeEditor value={item.solution} onChange={() => {}} mode={mode} ariaLabel="conquered solution" />
+          <p className="mt-2 text-sm text-slate-300 leading-relaxed">{item.explanation}</p>
+        </div>
+      )}
+    </article>
+  );
+}
+
+// ----- Topic page (Came / Saw / Conquered) ---------------------------------
+function TopicPage({ topic }) {
+  const mode = topic.language_mode || CONTENT.metadata.primary_language || "sql";
+  const phaseLabel = (key, txt, color) => (
+    <h2 className={`text-lg font-semibold mt-6 mb-2 ${color}`} id={`${topic.id}_${key}`}>{txt}</h2>
+  );
+  return (
+    <section>
+      <header className="mb-4">
+        <p className="text-xs uppercase tracking-wider text-slate-400">{topic.tier} &middot; {topic.title}</p>
+        <h1 className="text-2xl font-bold text-slate-100">{topic.title}</h1>
+        {topic.frequency_signal && (
+          <p className="text-sm text-slate-400 mt-1">{topic.frequency_signal}</p>
+        )}
+      </header>
+
+      {phaseLabel("came", "Came — read the worked example", "text-pink-400")}
+      {topic.worked.map((w, i) => (
+        <CameCard key={i} topic={topic} idx={i} item={w} mode={mode} isFirst={i === 0} />
+      ))}
+
+      {phaseLabel("saw", "Saw — fill in the blanks", "text-orange-400")}
+      {topic.faded.map((f, i) => (
+        <SawCard key={i} topic={topic} idx={i} item={f} mode={mode} />
+      ))}
+
+      {phaseLabel("conquered", "Conquered — write it from scratch", "text-emerald-400")}
+      {topic.retrieval.map((r, i) => (
+        <ConqueredCard key={i} topic={topic} idx={i} item={r} mode={mode} />
+      ))}
+    </section>
+  );
+}
+
+// ----- Real Questions Tab --------------------------------------------------
+function RealQuestionsPage() {
+  const items = CONTENT.real_questions || [];
+  const empty = CONTENT.metadata.empty_state_explanation;
+
+  if (items.length === 0) {
+    return (
+      <section>
+        <h1 className="text-2xl font-bold text-slate-100 mb-3">Real Questions</h1>
+        <div className="rounded-lg border border-slate-700 bg-slate-900/50 p-4">
+          <p className="text-slate-300">No sourced questions found for this role.</p>
+          {empty && <p className="text-slate-400 text-sm mt-2">{empty}</p>}
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section>
+      <h1 className="text-2xl font-bold text-slate-100 mb-1">Real Questions</h1>
+      <p className="text-sm text-slate-400 mb-4">Reported in real interviews. Every question is sourced; check the link.</p>
+      {items.map((q, i) => (
+        <RealQuestionCard key={q.id} q={q} mode={(q.category || "").toLowerCase() === "python" ? "python" : (q.category || "").toLowerCase() === "sql" ? "sql" : "plaintext"} />
+      ))}
+    </section>
+  );
+}
+
+function RealQuestionCard({ q, mode }) {
+  const [show, setShow] = useState(false);
+  const key = `ujassist_rq_${q.id}`;
+  const [val, setVal] = useState(() => lsGet(key, ""));
+  useEffect(() => { lsSet(key, val); }, [val]);
+  return (
+    <article className="rounded-lg border border-slate-700 bg-slate-900/50 p-4 mb-4">
+      <header className="flex items-baseline justify-between mb-2 flex-wrap gap-2">
+        <h3 className="font-semibold text-slate-100">{q.title}</h3>
+        <div className="flex gap-2 text-xs">
+          <span className="rounded bg-slate-800 px-2 py-0.5 text-slate-300">{q.category}</span>
+          <span className="rounded bg-pink-900/40 px-2 py-0.5 text-pink-300">{q.difficulty}</span>
+        </div>
+      </header>
+      <p className="text-slate-300 mb-2 leading-relaxed">{q.prompt}</p>
+      <p className="text-xs text-slate-400 mb-3">
+        Source: <a href={q.source_url} target="_blank" rel="noreferrer" className="underline hover:text-sky-300">{q.source}</a>
+        {q.solution_authored_by === "claude" && <span className="ml-2 italic">(solution authored by AI)</span>}
+      </p>
+      {q.concepts && q.concepts.length > 0 && (
+        <div className="flex flex-wrap gap-1 mb-3">
+          {q.concepts.map((c, i) => (
+            <span key={i} className="rounded bg-slate-800 px-2 py-0.5 text-xs text-slate-400">{c}</span>
+          ))}
+        </div>
+      )}
+      <CodeEditor value={val} onChange={setVal} mode={mode} ariaLabel={`real-question attempt ${q.id}`} />
+      {q.hint && (
+        <p className="text-xs italic text-amber-300 mt-2">Hint: {q.hint}</p>
+      )}
+      {q.solution && (
+        <>
+          <button className="text-xs text-sky-400 hover:underline mt-3" onClick={() => setShow(s => !s)}>
+            {show ? "Hide reference solution" : "Show reference solution"}
+          </button>
+          {show && (
+            <div className="mt-2">
+              <CodeEditor value={q.solution} onChange={() => {}} mode={mode} ariaLabel={`real-question solution ${q.id}`} />
+              {q.note && <p className="mt-2 text-xs text-slate-400 italic">{q.note}</p>}
+            </div>
+          )}
+        </>
+      )}
+    </article>
+  );
+}
+
+// ----- Patterns Tab --------------------------------------------------------
+function PatternsPage() {
+  const sql = (CONTENT.patterns && CONTENT.patterns.sql) || [];
+  const py = (CONTENT.patterns && CONTENT.patterns.python) || [];
+  if (sql.length === 0 && py.length === 0) {
+    return (
+      <section>
+        <h1 className="text-2xl font-bold text-slate-100 mb-3">Patterns</h1>
+        <p className="text-slate-400">No patterns recorded for this build.</p>
+      </section>
+    );
+  }
+  return (
+    <section>
+      <h1 className="text-2xl font-bold text-slate-100 mb-3">Patterns to Drill</h1>
+      {sql.length > 0 && (
+        <div className="mb-6">
+          <h2 className="text-lg font-semibold text-pink-400 mb-2">SQL ({sql.length})</h2>
+          {sql.map((p, i) => (
+            <div key={i} className="rounded border border-slate-700 bg-slate-900/50 p-3 mb-2">
+              <h3 className="font-semibold text-slate-100">{p.title}</h3>
+              <p className="text-sm text-slate-300 mt-1">{p.summary}</p>
+              {p.snippet && <pre className="text-xs bg-slate-950 border border-slate-800 rounded p-2 mt-2 text-slate-300 overflow-x-auto">{p.snippet}</pre>}
+            </div>
+          ))}
+        </div>
+      )}
+      {py.length > 0 && (
+        <div>
+          <h2 className="text-lg font-semibold text-sky-400 mb-2">Python ({py.length})</h2>
+          {py.map((p, i) => (
+            <div key={i} className="rounded border border-slate-700 bg-slate-900/50 p-3 mb-2">
+              <h3 className="font-semibold text-slate-100">{p.title}</h3>
+              <p className="text-sm text-slate-300 mt-1">{p.summary}</p>
+              {p.snippet && <pre className="text-xs bg-slate-950 border border-slate-800 rounded p-2 mt-2 text-slate-300 overflow-x-auto">{p.snippet}</pre>}
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
+// ----- Citations footer ----------------------------------------------------
+const CITATIONS = [
+  "Atkinson, R. K., Renkl, A., & Merrill, M. M. (2003). Transitioning from studying examples to solving problems. Journal of Educational Psychology, 95.",
+  "Cepeda, N. J., Pashler, H., Vul, E., Wixted, J. T., & Rohrer, D. (2006). Distributed practice in verbal recall tasks. Psychological Bulletin, 132.",
+  "Chi, M. T. H., et al. (1994). Eliciting self-explanations improves understanding. Cognitive Science, 18.",
+  "Dunlosky, J., et al. (2013). Improving students' learning with effective learning techniques. Psychological Science in the Public Interest, 14.",
+  "Mayer, R. E. (2009). Multimedia Learning (2nd ed.). Cambridge University Press.",
+  "Paivio, A. (1971). Imagery and Verbal Processes. Holt, Rinehart and Winston.",
+  "Renkl, A. (2014). Toward an instructionally oriented theory of example-based learning. Cognitive Science, 38.",
+  "Roediger, H. L., & Karpicke, J. D. (2006). Test-enhanced learning. Psychological Science, 17.",
+  "Rohrer, D. (2012). Interleaving helps students distinguish among similar concepts. Educational Psychology Review, 24.",
+  "Sweller, J. (1988). Cognitive load during problem solving. Cognitive Science, 12.",
+  "Sweller, J., & Cooper, G. A. (1985). The use of worked examples as a substitute for problem solving. Cognition and Instruction, 2.",
+  "Taylor, K., & Rohrer, D. (2010). The effects of interleaved practice. Applied Cognitive Psychology, 24.",
+];
+
+function Footer() {
+  return (
+    <footer className="mt-12 pt-6 border-t border-slate-800 text-xs text-slate-500">
+      <p className="mb-2 font-semibold uppercase tracking-wider">Built on these citations:</p>
+      <ul className="space-y-1 list-disc list-inside">
+        {CITATIONS.map((c, i) => <li key={i}>{c}</li>)}
+      </ul>
+      <p className="mt-3 italic">Generated by Ultimate Job Assistant.</p>
+    </footer>
+  );
+}
+
+// ----- App shell ------------------------------------------------------------
+function App() {
+  const topics = CONTENT.topics || [];
+  const realCount = (CONTENT.real_questions || []).length;
+  const hasPatterns = !!(CONTENT.patterns && (CONTENT.patterns.sql || CONTENT.patterns.python));
+
+  const [view, setView] = useState({ kind: "topic", topicId: topics[0] ? topics[0].id : null });
+  const [navOpen, setNavOpen] = useState(false);
+
+  const currentTopic = view.kind === "topic" ? topics.find(t => t.id === view.topicId) : null;
+
+  return (
+    <div className="min-h-full">
+      <header className="sticky top-0 z-10 bg-slate-950/95 backdrop-blur border-b border-slate-800 px-4 py-3 flex items-center gap-3">
+        <button
+          className="md:hidden rounded border border-slate-700 px-2 py-1 text-sm"
+          onClick={() => setNavOpen(o => !o)}
+          aria-label="toggle navigation"
+        >
+          {navOpen ? "Close" : "Menu"}
+        </button>
+        <div className="flex-1">
+          <p className="text-xs text-slate-400 uppercase tracking-wider">Interview Prep</p>
+          <h1 className="text-base font-bold text-slate-100 leading-tight">
+            {CONTENT.metadata.company} &middot; {CONTENT.metadata.role}
+          </h1>
+        </div>
+      </header>
+
+      <div className="flex" style={{ minHeight: "calc(100vh - 60px)" }}>
+        <nav
+          className={`${navOpen ? "block" : "hidden"} md:block w-64 shrink-0 border-r border-slate-800 bg-slate-950/50 p-3 overflow-y-auto`}
+          style={{ maxHeight: "calc(100vh - 60px)", position: "sticky", top: 60 }}
+        >
+          <p className="text-xs text-slate-500 uppercase tracking-wider mb-2">Topics</p>
+          <ul className="space-y-1">
+            {topics.map((t) => (
+              <li key={t.id}>
+                <button
+                  className={`w-full text-left px-2 py-1.5 rounded text-sm ${
+                    view.kind === "topic" && view.topicId === t.id
+                      ? "bg-sky-900/40 text-sky-200"
+                      : "text-slate-300 hover:bg-slate-800"
+                  }`}
+                  onClick={() => { setView({ kind: "topic", topicId: t.id }); setNavOpen(false); }}
+                >
+                  <span className="text-xs text-slate-500 mr-1">{t.tier}</span>
+                  {t.title}
+                </button>
+              </li>
+            ))}
+          </ul>
+          <p className="text-xs text-slate-500 uppercase tracking-wider mt-4 mb-2">Other</p>
+          <ul className="space-y-1">
+            <li>
+              <button
+                className={`w-full text-left px-2 py-1.5 rounded text-sm ${
+                  view.kind === "real" ? "bg-sky-900/40 text-sky-200" : "text-slate-300 hover:bg-slate-800"
+                }`}
+                onClick={() => { setView({ kind: "real" }); setNavOpen(false); }}
+              >
+                Real Questions {realCount > 0 && <span className="text-slate-500">({realCount})</span>}
+              </button>
+            </li>
+            {hasPatterns && (
+              <li>
+                <button
+                  className={`w-full text-left px-2 py-1.5 rounded text-sm ${
+                    view.kind === "patterns" ? "bg-sky-900/40 text-sky-200" : "text-slate-300 hover:bg-slate-800"
+                  }`}
+                  onClick={() => { setView({ kind: "patterns" }); setNavOpen(false); }}
+                >
+                  Patterns
+                </button>
+              </li>
+            )}
+          </ul>
+        </nav>
+
+        <main className="flex-1 p-4 max-w-4xl">
+          {view.kind === "topic" && currentTopic && <TopicPage topic={currentTopic} />}
+          {view.kind === "real" && <RealQuestionsPage />}
+          {view.kind === "patterns" && <PatternsPage />}
+          <Footer />
+        </main>
+      </div>
+    </div>
+  );
+}

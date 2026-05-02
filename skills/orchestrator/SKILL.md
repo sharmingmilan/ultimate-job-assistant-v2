@@ -35,6 +35,7 @@ Step 6: Why This Company (speaking pts)   [Required]
 Step 7: Cover Letter                      [Optional — ask]
 Step 8: Portfolio Project                 [Optional — ask]
 Step 9: Networking & Warm Intros          [Optional — ask]
+Step 9.5: Interview Prep PWA              [Optional — ask]
 Step 10: Wrap-up & Doc Freshness          [Required]
 ```
 
@@ -61,6 +62,7 @@ Step 10: Wrap-up & Doc Freshness          [Required]
 > 5. Build speaking points (and optionally a cover letter)
 > 6. Optionally build a portfolio piece
 > 7. Optionally find contacts for outreach
+> 8. Optionally generate an interview-prep study site (PWA)
 >
 > Let's start with decoding the JD."
 
@@ -164,6 +166,27 @@ If no scorer ran, frame it generally:
 - **Yes:** Run networking-intros. Save contacts to `networking/contacts.md` and outreach drafts to `networking/outreach/`.
 - **No:** Skip.
 
+### Step 9.5: Interview Prep PWA — Optional
+
+**Skill:** interview-prep
+
+**Decision point:**
+> "Want me to build a study site for the [Company] [role] interview? It pulls from the decoded JD and the company research, plus searches the web for real reported questions. It outputs a single-file PWA you can drag onto Netlify and install on your phone. Takes about 5-10 minutes to generate. Most useful when you have a real interview scheduled within the next 1-2 weeks."
+
+- **Yes:** Run interview-prep. The skill walks through six phases (A through F) with a checkpoint per phase. Final output:
+  - `interview-prep/[company]-[role-slug]-[YYYY-MM]-format.md` -- inferred interview format and topic list
+  - `interview-prep/[company]-[role-slug]-[YYYY-MM]-content.json` -- topic content + sourced real-question entries
+  - `interview-prep/[company]-[role-slug]-[YYYY-MM]-pwa/` -- deployable folder (drag onto Netlify Drop)
+- **No:** Skip.
+
+**On completion, announce:**
+> "Interview prep PWA built at `interview-prep/[convention]-pwa/`. Drag the folder onto https://app.netlify.com/drop to deploy. Then add to your iPhone home screen via Safari Share -> Add to Home Screen."
+
+**Notes:**
+- This step requires `decoded-jds/[convention].md` and `research/[company].md`. If either is missing, the skill stops and tells the user which earlier step to run first.
+- The skill never fabricates interview questions. If web research returns fewer than three credible sourced questions, the Real Questions tab renders an honest empty state. See `skills/interview-prep/references/source-attribution-rules.md`.
+- The output `[convention]-pwa/` folder is git-ignored by default (per `.gitignore`).
+
 ### Step 10: Wrap-up & Doc Freshness
 
 **Actions:**
@@ -184,7 +207,8 @@ If no scorer ran, frame it generally:
 > - Speaking points: `speaking-points/[convention].md + .pdf` ✓
 > - Cover letter: `cover-letters/[convention].md + .pdf` ✓ / skipped
 > - Portfolio: `portfolio/[convention]/` ✓ / skipped
-> - Networking: `networking/` ✓ / skipped"
+> - Networking: `networking/` ✓ / skipped
+> - Interview prep PWA: `interview-prep/[convention]-pwa/` ✓ / skipped"
 
 ## Resuming In-Progress Applications
 

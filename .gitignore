@@ -56,3 +56,9 @@ decoded-jds/*
 node_modules/
 *.log
 /tmp/
+
+# Local backup files (e.g., .docx.bak created during sanitization passes).
+# These often contain pre-redaction PII. Never commit them.
+*.bak
+*~bak
+*.orig

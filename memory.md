@@ -20,7 +20,7 @@
 ## Work Style & Preferences
 
 - **Resume philosophy**: Concise bullets with metrics. Leave the stories for the interview. "I glance at notes and talk candidly."
-- **Formatting rules** (enforced on all resume outputs):
+- **Formatting rules** (enforced on user-facing application outputs: resumes, cover letters, speaking points, thank-you letters, recruiter prep, anything sent to a hiring contact). Internal Claude-facing docs such as SKILL.md, SPEC.md, CLAUDE.md, ROADMAP.md, DESIGN_DOC.md, ONBOARDING.md, and SESSION_LOG.md are out of scope for these formatting rules and prioritize readability. See `references/patterns/formatting-rules.md` for the canonical scope statement.
   1. No hyphens, en dashes, or em dashes as sentence punctuation. Restructure or use commas.
   2. Contact line must fit on one line. Use `github.com/` not `https://github.com/`.
   3. No empty spacer paragraphs between bullets within a company section. Bullets evenly spaced.

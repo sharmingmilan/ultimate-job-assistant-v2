@@ -142,8 +142,25 @@ Blank template: `references/templates/research-brief.md`
   4. "Why This Company" Narrative (speaking points, optional cover letter, optional resume revision loop)
   5. Portfolio Project Coach (optional, for high-priority applications)
   6. Networking & Warm Intros (optional, loosely coupled)
+  7. Interview Prep PWA (optional Step 9.5; new in UJA v0.1.0)
 - Error handling: if a skill fails, announce the issue and offer retry, skip, or stop-and-resume-later.
 - The orchestrator is a guide, not a gatekeeper. If the user wants to skip, reorder, or stop, respect that immediately.
+
+### Skill 8: Interview Prep PWA (UJA v0.1.0)
+
+**Purpose**: Convert the decoded JD plus company research into a deployable single-file Progressive Web App for one specific interview, using the worked-example → faded-scaffold → free-recall pedagogical loop modeled on the Netflix Interview Prep build.
+
+**Key Design Decisions**:
+- Six explicit phases (A through F) with checkpoint per phase (see `skills/interview-prep/SKILL.md`).
+- Content separated from rendering at the `content.json` layer. The PWA template is generic and reusable; per-application runs only generate new content. This keeps the SaaS pivot path open (a future server can swap content from a database without rewriting the React).
+- Hard rule: no fabricated interview questions. Every entry in the "Real Qs" tab cites a credible source (Glassdoor, Blind, Levels.fyi, official tech blog). Synthetic worked examples are allowed but must use vocabulary and patterns sourced from the company's real materials. Full source-attribution rules in `skills/interview-prep/references/source-attribution-rules.md`.
+- Generic across formats. The editor component is parameterized by language: SQL, Python, plaintext (for system-design / behavioral / case-study rounds).
+- Output is drag-and-drop deployable. Each run produces `interview-prep/[convention]-pwa/` containing a single `index.html` (~250-400 KB), a manifest, a service worker, the PWA shell icons, and a user-facing README. The user drags the folder onto Netlify Drop for a free public URL.
+- Zero monthly cost. No backend, no auth, no database. Progress persists to `localStorage` per browser. iOS Safari clears localStorage after about 7 days inactive — documented as a known limitation rather than fixed.
+- Pedagogical citations render in the PWA footer for transparency: Renkl, Sweller, Roediger & Karpicke, Rohrer, Cepeda, Paivio, Mayer, Chi. Full reference list in `skills/interview-prep/references/pedagogy.md`.
+- Reference build: the original Netflix Interview Prep project lives at `skills/interview-prep/references/netflix-example/` for design provenance.
+- Wired into the orchestrator as optional Step 9.5 (between Networking and Wrap-up); also runnable standalone.
+- See `SPEC.md` §5–§6 for the higher-level rationale and acceptance criteria.
 
 ---
 
@@ -156,6 +173,7 @@ Blank template: `references/templates/research-brief.md`
 5. Portfolio Project Coach — `skills/portfolio-coach/SKILL.md` — Tested 1x (Waymo lifecycle)
 6. Orchestrator — `skills/orchestrator/SKILL.md` — Tested 1x (Waymo Steps 1-10 complete)
 7. Networking & Warm Intros — `skills/networking-intros/SKILL.md` — Tested 1x (Waymo lifecycle)
+8. Interview Prep PWA — `skills/interview-prep/SKILL.md` — NEW in UJA v0.1.0 (Phase 5 regression test pending)
 
 ---
 

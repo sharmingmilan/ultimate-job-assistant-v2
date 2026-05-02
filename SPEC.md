@@ -350,10 +350,12 @@ The project is "v0.1.0 ready" when:
 2. All existing Job Assist skills work unchanged
 3. The new `interview-prep` skill produces a valid PWA against the Netflix decoded JD as a regression test
 4. Regression PWA matches Netflix structural fidelity (11 topics × 3 phases × 3 difficulties + Real Qs tab)
-5. Git repo initialized, CI green, baseline tag `v0.1.0` placed
-6. README.md explains the project to a stranger; CLAUDE.md explains it to future Claude
+5. Private git repo initialized; CI green; baseline tag `v0.1.0` placed at the end of Phase 7
+6. README.md explains the project to a stranger; CLAUDE.md explains it to future Claude; ONBOARDING.md walks a new public user through setup
 7. ROADMAP.md captures the SaaS pivot path
 8. `tracker.md` schema extended with an `interview_prep_pwa` column
+9. **Public companion repo** (`ultimate-job-assistant-public`) exists, contains only sanitized files (PII scanner clean), and includes the website source
+10. **Public website** is live on GitHub Pages: landing page + multi-page ONBOARDING docs, builds on every push, no broken links
 
 ---
 
@@ -382,11 +384,53 @@ The project is "v0.1.0 ready" when:
 
 ## 13. Decisions (confirmed by Milan, 2026-05-02)
 
-1. **Repo visibility:** start **private**. Confirm before flipping public after first successful real run.
+1. **Repo strategy — two-tier, REVISED 2026-05-02:**
+   - **Private repo** holds the canonical project including any artifacts that contain personal data (e.g., `skills/resume-targeter/evals/files/data_analyst_base.docx` in the v0.1.0 baseline commit `49bc5be` retains real PII). This repo is **never made public.**
+   - **Public artifact** is `ONBOARDING.md` (and any future companion public repo derived from it). It contains a sanitized walk-through that lets a new user clone the public companion (or a sanitized export of this project) and personalize it to their own profile, base resume, memory.md content, etc.
+   - The earlier "flip private → public after first successful run" plan is **superseded** by this two-tier model. Milan's exact words: *"that can go private repo but never public. also want to maintain an onboarding doc in public for full onboarding of repo to personalize it to user preference."*
 2. **Custom domain:** skip. Use Netlify-generated URLs.
 3. **Iconography:** one **generic neutral icon for the Ultimate Job Assistant app**. Reused for every PWA generated; not regenerated per application.
 4. **Existing `interview-prep/` PDFs:** keep in place; no migration. New `[convention]-pwa/` subfolders coexist.
 5. **Approval cadence:** proceed automatically when self-audit is fully green. Stop and surface on any ⚠️ or ❌.
+
+### 13.1 Public artifact strategy (decided 2026-05-02)
+
+**Decision:** Option **(b) Public companion repo** — chosen over single-doc and branch-based options.
+
+A separate GitHub repo, `ultimate-job-assistant-public`, holds:
+
+- All skill code from `skills/*/` (generic, no PII)
+- Generic templates from `references/templates/`, `references/scripts/`, `references/patterns/`
+- `ONBOARDING.md` (sanitized version, copied or symlinked from private repo)
+- A `.github/workflows/pages.yml` that builds the website on push
+- The website source (landing page + docs)
+- A `memory.md.template` (blanks where personal info goes)
+- A blank skeleton of every personal-data folder (`.gitkeep` only) so cloners get the right structure
+
+**Sync model:** the private repo is the working copy. A small script (`scripts/sync-to-public.sh`) copies an allowlist of files into a sibling clone of the public repo, runs a PII scanner over the diff, and stops if any sensitive string is found. The user reviews the diff and pushes manually. No automatic sync, ever — that's how PII leaks happen.
+
+**Why not (a) single doc:** strangers can't actually use the toolkit from a single doc. They need the skill code.
+**Why not (c) branch-based:** one wrong `git push` from the wrong branch leaks everything. Two separate repos make that mistake structurally impossible.
+
+### 13.2 Public website (decided 2026-05-02)
+
+**Shape:** **C — landing page + docs site.** Polished product-style landing page (hero, features, screenshots, "Get started" CTA) plus the ONBOARDING walkthrough rendered as a multi-page docs site.
+
+**Hosting:** GitHub Pages, built and deployed on push to the companion repo via GitHub Actions. Default URL: `https://<username>.github.io/ultimate-job-assistant-public/`. No custom domain in v0.1.0.
+
+**Timing:** part of **v0.1.0** as **Phase 7**, after the regression test (Phase 5) and ROADMAP/audit (Phase 6) but before the v0.1.0 tag.
+
+**Stack:** to be picked in Phase 7 between three options:
+
+| Option | Pros | Cons |
+|---|---|---|
+| **Astro** | Fast, modern, ships near-zero JS, nice DX | Newer, slightly steeper setup |
+| **MkDocs Material** | Mature, battle-tested for docs, beautiful default theme | Python-based; slightly less landing-page-friendly |
+| **Plain static HTML + Tailwind CDN** | Mirrors the interview-prep PWA stack; zero build step | Hand-rolled docs nav |
+
+**Default for Phase 7:** Astro (best fit for "landing page + docs" combo). Decision can flip during Phase 7 design if the user prefers MkDocs's docs polish.
+
+**Live demo PWA on the website:** explicitly **deferred to v0.1.1**. The v0.1.0 website links to the GitHub repo and explains how to run the toolkit; it does not yet host an interactive demo. Adding the demo PWA was option D in the scope question and was deferred to keep v0.1.0 finishable.
 
 ---
 
@@ -400,7 +444,9 @@ The project is "v0.1.0 ready" when:
 | 3 | Wire orchestrator | Updated `orchestrator/SKILL.md`, `CLAUDE.md`, `tracker.md` | Cross-doc consistency audit passes |
 | 4 | Git + CI/CD | `.github/workflows/ci.yml`, baseline commit, README.md | CI green on a clean clone |
 | 5 | Regression test | Run skill against Netflix JD; structural diff | Structural parity confirmed |
-| 6 | ROADMAP + final audit | `ROADMAP.md`, mandatory consistency audit, `v0.1.0` tag | All Job Assist conventions honored |
+| 6 | ROADMAP + audit | `ROADMAP.md`, consistency audit | All Job Assist conventions honored |
+| 7 | Companion repo + website | `ultimate-job-assistant-public` repo, sync script, Astro site (landing + docs), GitHub Pages deploy | PII scanner clean before first push; site renders on Pages |
+| (tag) | Tag `v0.1.0` | Final tag after Phase 7 ships | All acceptance criteria in §10 met |
 
 ---
 

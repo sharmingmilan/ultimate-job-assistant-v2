@@ -1,5 +1,5 @@
 # tracker.md -- Application Tracker
-# Last updated: 2026-04-10
+# Last updated: 2026-05-02 (UJA Session 1: added Interview Prep PWA column for Step 9.5)
 
 ---
 
@@ -14,13 +14,13 @@ This is the central source of truth for all job applications. Read this when:
 
 ## Applications
 
-| Company | Role | Date | Status | Decoded JD | Score Before | Resume | Score After | Speaking Pts | Cover Letter | Portfolio | Networking | Notes |
-|---------|------|------|--------|------------|-------------|--------|-------------|-------------|-------------|-----------|------------|-------|
-| Netflix | Data Analyst, Production Finance O&I | 2026-04 | Active | Done | 56% | Done | 82% (+26) | Done | Done | Done | Done (draft) | Recruiter screen with Anna Guan completed. Thank you letter sent. Hiring manager is Bruno. Portfolio: production spend analysis (TMDB). Networking: Miranda Lau (O&I team). |
-| Lumin Digital | Product Data Analyst | 2026-04 | Active | -- | -- | Done | -- | -- | -- | -- | -- | Series B fintech, 100% remote. Research brief complete. |
-| Disney | Lead Data Analyst | 2026-04 | Active | -- | -- | Done | -- | -- | -- | -- | -- | Disney Entertainment & ESPN Product & Technology, NYC. |
-| MrBeast | YouTube Intelligence Analyst | 2026-04 | Partial | Done | -- | -- | -- | -- | -- | -- | -- | Decoded JD only. No resume targeting yet. |
-| Waymo | BI Analyst, Product Data Science | 2026-04 | Complete | Done | 74% | Done | 88% (+14) | Done | Done | Done | Done (draft) | Full lifecycle test (Steps 1-10). Gold-standard reference. |
+| Company | Role | Date | Status | Decoded JD | Score Before | Resume | Score After | Speaking Pts | Cover Letter | Portfolio | Networking | Interview Prep PWA | Notes |
+|---------|------|------|--------|------------|-------------|--------|-------------|-------------|-------------|-----------|------------|--------------------|-------|
+| Netflix | Data Analyst, Production Finance O&I | 2026-04 | Active | Done | 56% | Done | 82% (+26) | Done | Done | Done | Done (draft) | Reference build (predates UJA) | Recruiter screen with Anna Guan completed. Thank you letter sent. Hiring manager is Bruno. Portfolio: production spend analysis (TMDB). Networking: Miranda Lau (O&I team). |
+| Lumin Digital | Product Data Analyst | 2026-04 | Active | -- | -- | Done | -- | -- | -- | -- | -- | -- | Series B fintech, 100% remote. Research brief complete. |
+| Disney | Lead Data Analyst | 2026-04 | Active | -- | -- | Done | -- | -- | -- | -- | -- | -- | Disney Entertainment & ESPN Product & Technology, NYC. |
+| MrBeast | YouTube Intelligence Analyst | 2026-04 | Partial | Done | -- | -- | -- | -- | -- | -- | -- | -- | Decoded JD only. No resume targeting yet. |
+| Waymo | BI Analyst, Product Data Science | 2026-04 | Complete | Done | 74% | Done | 88% (+14) | Done | Done | Done | Done (draft) | -- | Full lifecycle test (Steps 1-10). Gold-standard reference. |
 
 ---
 

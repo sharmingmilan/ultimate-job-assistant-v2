@@ -1,0 +1,123 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch: {}
+
+jobs:
+  validate:
+    name: Validate skills, schema, and PWA template
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Python deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install jsonschema pyyaml pillow
+
+      - name: Validate every SKILL.md frontmatter
+        shell: bash
+        run: |
+          set -e
+          fail=0
+          for f in skills/*/SKILL.md; do
+            python3 - <<PY
+          import sys, re, yaml
+          path = "$f"
+          with open(path) as fh:
+              text = fh.read()
+          m = re.match(r'^---\s*\n(.*?)\n---', text, re.DOTALL)
+          if not m:
+              print(f"::error file=$f::missing YAML frontmatter")
+              sys.exit(1)
+          try:
+              fm = yaml.safe_load(m.group(1))
+          except Exception as e:
+              print(f"::error file=$f::invalid YAML: {e}")
+              sys.exit(1)
+          if not isinstance(fm, dict) or not fm.get("name") or not fm.get("description"):
+              print(f"::error file=$f::frontmatter missing 'name' or 'description'")
+              sys.exit(1)
+          print(f"  OK: $f (name={fm['name']!r})")
+          PY
+          done
+
+      - name: JSON-lint content-schema.json
+        run: |
+          python3 -c "
+          import json
+          from jsonschema import Draft7Validator
+          schema = json.load(open('skills/interview-prep/content-schema.json'))
+          Draft7Validator.check_schema(schema)
+          print('content-schema.json is valid Draft 7 JSON Schema')
+          "
+
+      - name: Validate sample-content against schema
+        run: |
+          python3 -c "
+          import json
+          from jsonschema import validate
+          schema = json.load(open('skills/interview-prep/content-schema.json'))
+          content = json.load(open('skills/interview-prep/template/sample-content.json'))
+          validate(instance=content, schema=schema)
+          print('sample-content.json validates')
+          "
+
+      - name: Build sample PWA
+        run: |
+          mkdir -p /tmp/uja-ci-build
+          python3 skills/interview-prep/template/build_pwa.py \
+            skills/interview-prep/template/sample-content.json \
+            /tmp/uja-ci-build
+
+      - name: Brace-balance check on rendered HTML
+        run: |
+          python3 -c "
+          html = open('/tmp/uja-ci-build/index.html').read()
+          o = html.count('{')
+          c = html.count('}')
+          assert o == c, f'brace imbalance: {{={o}, }}={c}'
+          print(f'brace balance OK ({o} pairs)')
+          "
+
+      - name: Bundle size check
+        run: |
+          size=$(stat -c '%s' /tmp/uja-ci-build/index.html)
+          echo "index.html: $size bytes"
+          if [ $size -gt 400000 ]; then
+            echo "::error::index.html exceeds 400KB budget ($size bytes)"
+            exit 1
+          fi
+
+      - name: Install Playwright
+        run: |
+          npm install --silent --no-audit --no-fund playwright@latest
+          npx playwright install chromium
+
+      - name: Run PWA smoke test
+        run: |
+          cp skills/interview-prep/template/smoke_test.cjs /tmp/uja-ci-build/
+          cd /tmp/uja-ci-build
+          ln -sf $GITHUB_WORKSPACE/node_modules .
+          node smoke_test.cjs .
+
+      - name: PII scanner (warn-only on private branch)
+        run: |
+          python3 scripts/scan_pii.py --paths skills/ references/ template/ 2>&1 || \
+            echo "::warning::PII scanner found patterns; review before any public sync"
