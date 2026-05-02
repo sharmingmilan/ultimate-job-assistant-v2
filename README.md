@@ -90,3 +90,7 @@ See [SPEC.md](SPEC.md) for the build plan and acceptance criteria, and [ROADMAP.
 ## License
 
 Personal project. Currently private. See SPEC.md §13 for the public-release decision path.
+
+---
+
+> **Note**: This is a personal toolkit, hosted publicly so the link can be shared but **not promoted**. Search engines are blocked via `robots.txt` and `noindex`. If you found this and want to fork or adapt it for your own job search, please open an issue first so we can chat about your use case.
