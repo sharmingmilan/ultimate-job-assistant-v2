@@ -1,0 +1,55 @@
+{
+  "skill_name": "resume-targeter",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Here is a job description I want to apply to: https://explore.jobs.netflix.net/careers/job/790313736490?microsite=netflix.com — it's the Data Analyst, Production Finance Operations & Innovation role at Netflix in LA. I've uploaded my resume. Help me tailor it for this role.",
+      "expected_output": "The skill should: (1) research Netflix culture/values/interview process with credible sources, (2) produce a research brief with confidence-tagged findings, (3) conduct adaptive Q&A rounds drawing out relevant experience from the user, (4) generate specific tailored bullet points using language that mirrors Netflix values and the JD, (5) propose clear REPLACE/ADD/KEEP changes to the existing resume, (6) generate final DOCX and PDF after approval",
+      "files": ["evals/files/data_analyst_base.docx"],
+      "expectations": [
+        "Research brief includes Netflix culture values with source citations",
+        "Research brief mentions Freedom and Responsibility or keeper test",
+        "Q&A questions reference specific job requirements from the JD (SQL, stakeholder management, ad hoc analysis)",
+        "Q&A questions are informed by Netflix values, not generic",
+        "Bullet points include specific metrics or quantified impact from user's answers",
+        "Bullet points use language that mirrors the JD terminology (e.g., production finance, vendor spend, global markets)",
+        "Proposed changes use REPLACE/ADD/KEEP format showing old vs new",
+        "Skill does not fabricate experience the user did not provide",
+        "Skill waits for user approval before generating final documents",
+        "Final output includes both DOCX and PDF"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "I want to apply to this role: Lumin Digital is hiring a Product Data Analyst (remote, $125K-$145K). It's a Series B fintech startup. The role focuses on product analytics, dashboard development, KPI reporting, and requires 3-5 years with SQL, Tableau, and Python. Preferred: experience with Pendo, Google Analytics, or similar product analytics tools. Fintech/SaaS experience preferred but not required. Here's my resume.",
+      "expected_output": "The skill should: (1) attempt research on Lumin Digital and be transparent about limited public info, (2) confidence-tag findings appropriately (lower confidence for a startup with less public data), (3) ask the user to fill gaps in company knowledge, (4) still produce useful bullet points despite thin research, (5) recognize the user's strong BI/dashboard background as a close match",
+      "files": ["evals/files/data_analyst_base.docx"],
+      "expectations": [
+        "Skill is transparent about limited public information on Lumin Digital's culture",
+        "Research findings include confidence tags distinguishing strong evidence from inference",
+        "Skill asks the user to fill gaps when research is thin",
+        "Q&A questions still reference specific JD requirements (product analytics, KPI reporting, fintech)",
+        "Bullet points highlight the user's dashboard and BI experience as directly relevant",
+        "Skill does not fabricate company culture details it couldn't verify",
+        "Proposed changes recognize existing resume strengths rather than rewriting everything",
+        "Skill waits for user approval before generating final documents"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "I found this Disney Lead Data Analyst role in New York — it's on the Disney Entertainment & ESPN Product & Technology team, $148K-$199K. Requires a quant degree or equivalent, experience with Python/R, data visualization (Tableau), experimentation, and advanced analytics. I actually worked at Disney before (see my resume). Help me target my resume for this.",
+      "expected_output": "The skill should: (1) research Disney's current culture and this specific team, (2) recognize the user's prior Disney experience as a major asset, (3) focus Q&A on what's changed since the user worked there and how to position for a senior/lead role, (4) propose refinements rather than a full rewrite, (5) help frame the career arc from Disney contract analyst to returning as a lead",
+      "files": ["evals/files/data_analyst_base.docx"],
+      "expectations": [
+        "Skill recognizes the user previously worked at Disney from the resume",
+        "Research covers Disney's current culture and the specific ESPN/Product & Technology team",
+        "Q&A questions focus on growth since the Disney stint, not basic experience mapping",
+        "Q&A explores how to frame the return-to-Disney narrative as a strength",
+        "Bullet points for the Disney section are refined/elevated, not completely rewritten",
+        "Skill positions the user's career progression (Disney → Nike → Wells Fargo → Pinterest → Apple) as a narrative arc",
+        "Proposed changes are targeted refinements, not a wholesale rewrite",
+        "Skill waits for user approval before generating final documents"
+      ]
+    }
+  ]
+}

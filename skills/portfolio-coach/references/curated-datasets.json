@@ -1,0 +1,129 @@
+{
+  "_meta": {
+    "description": "Curated dataset sources for portfolio projects. Grows over time with user-verified additions.",
+    "last_updated": "2026-04-08",
+    "how_to_add": "After a live search finds a reliable dataset source, confirm with the user and add an entry here."
+  },
+  "sources": [
+    {
+      "name": "Kaggle Datasets",
+      "url": "https://kaggle.com/datasets",
+      "domains": ["general", "ml", "finance", "healthcare", "sports", "entertainment"],
+      "format": "CSV, JSON, various",
+      "access": "free with account",
+      "notes": "Largest repository. Quality varies widely. Check dataset size and recency before committing."
+    },
+    {
+      "name": "data.gov",
+      "url": "https://data.gov",
+      "domains": ["government", "finance", "healthcare", "education", "environment"],
+      "format": "CSV, JSON, XML",
+      "access": "free",
+      "notes": "US government open data. Reliable but can be messy. Good for policy and public sector projects."
+    },
+    {
+      "name": "UCI Machine Learning Repository",
+      "url": "https://archive.ics.uci.edu/",
+      "domains": ["ml", "statistics", "general"],
+      "format": "CSV",
+      "access": "free",
+      "notes": "Classic datasets for ML projects. Well-documented. Many are small but clean."
+    },
+    {
+      "name": "FiveThirtyEight Data",
+      "url": "https://data.fivethirtyeight.com",
+      "domains": ["politics", "sports", "culture", "economics"],
+      "format": "CSV",
+      "access": "free",
+      "notes": "Clean, well-documented datasets behind FiveThirtyEight articles. Good for storytelling projects."
+    },
+    {
+      "name": "MovieLens",
+      "url": "https://grouplens.org/datasets/movielens/",
+      "domains": ["entertainment", "streaming", "recommendations"],
+      "format": "CSV",
+      "access": "free",
+      "notes": "Movie ratings dataset. Multiple sizes (100K to 25M ratings). Great for recommendation and streaming projects."
+    },
+    {
+      "name": "TMDB API",
+      "url": "https://www.themoviedb.org/documentation/api",
+      "domains": ["entertainment", "media", "streaming"],
+      "format": "JSON API",
+      "access": "free with API key",
+      "notes": "Movie and TV metadata. Good for content analysis and media industry projects."
+    },
+    {
+      "name": "Spotify Web API",
+      "url": "https://developer.spotify.com/documentation/web-api",
+      "domains": ["entertainment", "music", "streaming"],
+      "format": "JSON API",
+      "access": "free with developer account",
+      "notes": "Audio features, tracks, artists. Good for music analytics and recommendation projects."
+    },
+    {
+      "name": "FRED (Federal Reserve Economic Data)",
+      "url": "https://fred.stlouisfed.org",
+      "domains": ["finance", "economics", "macro"],
+      "format": "CSV, JSON API",
+      "access": "free",
+      "notes": "800K+ economic time series. Gold standard for financial and economic analysis projects."
+    },
+    {
+      "name": "Yahoo Finance",
+      "url": "https://finance.yahoo.com",
+      "domains": ["finance", "investing", "markets"],
+      "format": "CSV via yfinance Python library",
+      "access": "free",
+      "notes": "Stock prices, fundamentals, market data. Use yfinance library for easy access."
+    },
+    {
+      "name": "World Bank Open Data",
+      "url": "https://data.worldbank.org",
+      "domains": ["economics", "development", "global"],
+      "format": "CSV, JSON API",
+      "access": "free",
+      "notes": "Global development indicators. Good for international comparison and macro-level analysis."
+    },
+    {
+      "name": "Google BigQuery Public Datasets",
+      "url": "https://cloud.google.com/bigquery/public-data",
+      "domains": ["general", "product", "analytics", "government"],
+      "format": "BigQuery tables",
+      "access": "free tier (1TB/month query)",
+      "notes": "Includes Google Analytics sample, GitHub activity, Stack Overflow, and more. Good for SQL-heavy projects."
+    },
+    {
+      "name": "Instacart Market Basket Analysis",
+      "url": "https://www.kaggle.com/c/instacart-market-basket-analysis",
+      "domains": ["product", "ecommerce", "user_behavior"],
+      "format": "CSV",
+      "access": "free",
+      "notes": "3M+ orders from 200K+ users. Great for product analytics, basket analysis, and user behavior projects."
+    },
+    {
+      "name": "Yelp Open Dataset",
+      "url": "https://www.yelp.com/dataset",
+      "domains": ["product", "reviews", "nlp", "local_business"],
+      "format": "JSON",
+      "access": "free with agreement",
+      "notes": "Reviews, businesses, check-ins, tips. Good for NLP, sentiment analysis, and business analytics."
+    },
+    {
+      "name": "Bureau of Labor Statistics",
+      "url": "https://www.bls.gov/data/",
+      "domains": ["workforce", "operations", "economics"],
+      "format": "CSV, API",
+      "access": "free",
+      "notes": "Employment, wages, productivity, prices. Good for workforce planning and operational analytics projects."
+    },
+    {
+      "name": "StatsBomb Open Data",
+      "url": "https://github.com/statsbomb/open-data",
+      "domains": ["sports", "analytics"],
+      "format": "JSON",
+      "access": "free",
+      "notes": "Detailed soccer match event data. Great for sports analytics projects."
+    }
+  ]
+}

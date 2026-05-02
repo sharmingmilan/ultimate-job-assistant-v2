@@ -1,0 +1,58 @@
+# OS files
+.DS_Store
+Thumbs.db
+
+# Lock files (LibreOffice/Word temp files)
+.~lock.*
+
+# Editor/IDE
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+.cursor/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.ipynb_checkpoints/
+
+# Environment
+.env
+.env.local
+.env.*
+
+# ─── Personal data (do not push) ──────────────────────────────
+# These hold real applicant data and per-application outputs.
+# Skill code and templates remain tracked.
+
+base-resumes/
+research/
+resumes/
+scores/
+speaking-points/
+cover-letters/
+applications/
+archive/
+portfolio/
+networking/
+
+# Personal interview-prep artifacts (PDFs, MDs, HTML, per-application PWA outputs).
+# The folder is tracked via .gitkeep but its contents are user-data only.
+interview-prep/*
+!interview-prep/.gitkeep
+
+# Root-level reference PDFs that came from prior sessions
+netflix-codesignal-prep.pdf
+
+# Decoded JDs may contain proprietary content from postings.
+# Tracked via .gitkeep; .md/.pdf contents excluded.
+decoded-jds/*
+!decoded-jds/.gitkeep
+
+# Build outputs / temp
+node_modules/
+*.log
+/tmp/
