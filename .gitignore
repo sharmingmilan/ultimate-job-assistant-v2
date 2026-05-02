@@ -67,3 +67,6 @@ website/downloads/ultimate-job-assistant.zip
 *.bak
 *~bak
 *.orig
+
+# FUSE workaround: shed-renamed files when OS unlink is blocked.
+*.shed-*

@@ -1,0 +1,90 @@
+name: Auto-sync to public companion
+
+# Mirrors the canonical (private) repo to the deploy-source repo
+# (ultimate-job-assistant-public) on every push to main. The destination is
+# what Netlify reads via OAuth, so a successful push here lights up the live
+# site within ~30 seconds of build/cache TTL.
+#
+# Pipeline:
+#   1. Checkout canonical (this repo).
+#   2. Clone the deploy-source repo into ./public-clone using PUBLIC_REPO_TOKEN.
+#   3. Run scripts/sync_to_public.py --to ./public-clone with STRICT PII gate.
+#   4. If anything changed in ./public-clone, commit + push it.
+#
+# Requirements:
+#   - Repo secret PUBLIC_REPO_TOKEN: a classic PAT scoped to `repo` on
+#     sharmingmilan/ultimate-job-assistant-public. 1-year expiry recommended.
+#
+# Failure modes:
+#   - PII scanner blocks (exit 1): workflow fails. Inspect the run, fix the
+#     offending source file in canonical, push again. The destination clone is
+#     ephemeral so there is nothing to roll back.
+#   - Zip required-members guard fails (exit 3): same recovery — fix in
+#     canonical and re-push.
+#   - Push rejected (race with a manual sync): re-run the workflow; the
+#     fresh clone in step 2 will be up to date.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+# Prevent two simultaneous syncs from racing each other on the same target repo.
+concurrency:
+  group: auto-sync-to-public
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    name: Sync canonical -> public companion
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout canonical
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Clone deploy-source repo
+        env:
+          PUBLIC_REPO_TOKEN: ${{ secrets.PUBLIC_REPO_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "${PUBLIC_REPO_TOKEN:-}" ]; then
+            echo "::error::PUBLIC_REPO_TOKEN secret is not set."
+            echo "Create a classic PAT with 'repo' scope on"
+            echo "sharmingmilan/ultimate-job-assistant-public and add it as"
+            echo "a repository secret named PUBLIC_REPO_TOKEN."
+            exit 2
+          fi
+          git clone \
+            "https://x-access-token:${PUBLIC_REPO_TOKEN}@github.com/sharmingmilan/ultimate-job-assistant-public.git" \
+            ./public-clone
+
+      - name: Run sync (allowlist + STRICT PII + curated zip build)
+        run: |
+          set -euo pipefail
+          python3 scripts/sync_to_public.py --to ./public-clone
+
+      - name: Commit + push if anything changed
+        working-directory: ./public-clone
+        run: |
+          set -euo pipefail
+          git config user.name  "uja-auto-sync"
+          git config user.email "uja-auto-sync@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes to push — destination already in sync."
+            exit 0
+          fi
+          CANONICAL_SHA="${GITHUB_SHA}"
+          CANONICAL_SUBJECT=$(git -C "$GITHUB_WORKSPACE" log -1 --pretty=%s)
+          git commit -m "Auto-sync from canonical ${CANONICAL_SHA:0:7}: ${CANONICAL_SUBJECT}"
+          git push origin main
+          echo "Pushed sync commit. Netlify will redeploy within ~30s."
