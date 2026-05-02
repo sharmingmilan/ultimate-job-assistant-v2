@@ -26,6 +26,68 @@ Read on demand:
 
 ---
 
+## First Session Behavior — Detect Fresh Install And Onboard
+
+**Before doing anything else in a session, run this detection step:**
+
+1. List the project root and check whether the user has completed setup. The signal is:
+   - **Fresh install** — `memory.md.template` exists AND `memory.md` does NOT exist (and/or `tracker.md.template` exists AND `tracker.md` does NOT exist).
+   - **Already set up** — `memory.md` exists at the project root.
+
+2. **If fresh install, do not proceed to whatever the user just typed.** Instead, kick off the interactive onboarding flow described below. Open with a warm greeting, explain you noticed they just unzipped the toolkit, and offer to walk them through setup. Only fall back to "OK, I'll skip onboarding for now" if they explicitly decline.
+
+3. **If already set up**, proceed normally with whatever they asked for.
+
+### Interactive onboarding flow (run when fresh install is detected)
+
+Read `QUICKSTART.md` and `ONBOARDING.md` first so you can speak from them, then walk the user through these phases. Keep your messages short — one question or one chunk of explanation per turn.
+
+**Phase 1 — Welcome & overview (1 message).**
+Greet the user. Acknowledge they just unzipped Ultimate Job Assistant. In two or three sentences explain what the toolkit does (research-driven job-application pipeline running inside Claude with human-in-the-loop approval at every step). Offer them a choice:
+- **(a) Quick guided setup** — about 15 minutes; you'll interview them to fill in `memory.md`, walk them through dropping a resume, and confirm everything's working before they apply to anything.
+- **(b) Self-paced** — they read QUICKSTART.md themselves and come back when ready. You'll just confirm you're standing by.
+- **(c) Skip and just apply now** — they may have set up before and clicked into a fresh folder; you'll move on without onboarding.
+
+**Phase 2 — Interview to populate `memory.md`** (only if they picked guided setup).
+Open `memory.md.template` to see the structure. Then interview the user one section at a time:
+
+1. **Identity & contact**: name, location, email, LinkedIn, current role, education, total experience, top 5–7 tools/languages. Ask, get answers, fill that section.
+2. **Work-style & resume preferences**: how do they think about resumes (concise-with-metrics vs narrative-with-quant)? Any formatting rules they stand by? Cover-letter sign-off they prefer? Tone? Don't read the rules at them — ask open-ended and translate their answers into the rule set. The default eight rules in the template are good; surface them as defaults and ask "any of these you want to change?"
+3. **Communication preferences**: how should you propose changes (always-propose-never-auto-apply is the default)? One question at a time vs batch? Should you auto-update `tracker.md` or always ask?
+4. **Key stories — 4 to 6 anchor stories.** This is the most valuable part. For each story, ask:
+    - Which company / role / time period?
+    - What was the situation?
+    - What did they do?
+    - What was the outcome (numbers if available)?
+    - What kinds of roles or competencies is this story good for?
+    Convert each into the STAR-shaped block the template shows. Encourage them to surface stories that show: (a) ownership / pushback, (b) measurable impact, (c) cross-functional work, (d) self-direction. Stop at 4 if they're slowing down; push for 6 if they're warming up.
+5. **What they want next**: target role types, industries, company size, geography, comp floor. Off-limits list.
+
+After each section, write the populated content into `memory.md` (a NEW file at the project root, not the template). Confirm with the user before moving to the next section. At the end, delete `memory.md.template` and tell them they can edit `memory.md` anytime.
+
+**Phase 3 — Resume drop-in.**
+Ask: "Do you have a resume in `.docx` form ready to use?" Three branches:
+- **Yes, I'll drop it in.** Give them the exact target path (`base-resumes/[role-type].docx`, e.g., `base-resumes/data-analyst.docx`). Confirm once they've dropped it.
+- **Yes but it's a PDF.** Walk them through opening it in Word/Pages/Google Docs and exporting as .docx. Then same as above.
+- **No, I need a starter.** Open `references/templates/base-resume-template.docx`, walk them through filling in the bracketed placeholders. Save under `base-resumes/`.
+
+**Phase 4 — Initialize `tracker.md`.**
+Copy `tracker.md.template` to `tracker.md`. Customize the "Last updated" line. Ask the user if they want to delete `tracker.md.template` (yes by default).
+
+**Phase 5 — Optional first application.**
+Ask: "Want to try your first real application now? Paste a job description and I'll walk you through the whole pipeline." If yes, hand off to the orchestrator (`skills/orchestrator/SKILL.md`). If no, summarize what they can come back and say later (e.g., "I want to apply to [Company] for [Role], here's the JD: ...") and wrap.
+
+**Phase 6 — Doc freshness sweep.**
+Confirm `memory.md` and `tracker.md` exist. Confirm `*.template` files have been deleted (or note that they're still around if the user prefers to keep them). Tell the user where the live website lives (the URL they downloaded from) so they can grab fresh versions later.
+
+### Onboarding etiquette
+
+- Don't dump the entire QUICKSTART.md at the user. Speak from it; quote sparingly.
+- Never write `memory.md` content the user hasn't explicitly approved. If you're inferring (e.g., guessing tone preferences from how they talk), say so and confirm.
+- The user may interrupt onboarding with "actually let me just apply to X first." Honor it — you can always come back to setup later. The detection step at the top of every session will resurface the fresh-install signal until `memory.md` exists.
+
+---
+
 ## Workspace Structure
 
 ```
