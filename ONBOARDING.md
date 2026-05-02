@@ -2,6 +2,8 @@
 
 **Status:** Public-facing. This is the doc someone clones (or copies into a sanitized public companion repo) to set up their own personalized version of Ultimate Job Assistant.
 
+**Last updated:** 2026-05-02
+
 **Audience:** A new user who wants to use this toolkit for their own job search. You will replace every reference to the original author with your own profile, plug in your own base resume, and customize the workflow to your career situation.
 
 **Time to set up:** ~30–45 minutes (excluding the time it takes you to write your own `memory.md`, which is the most valuable input).

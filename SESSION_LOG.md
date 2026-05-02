@@ -297,3 +297,38 @@ At the start of a new session, read this file first. It tells you where we left 
 ## What's Next
 
 Moved to CLAUDE.md "Current Status & What's Next" section. SESSION_LOG.md is now append-only history.
+
+---
+
+## Session: 2026-05-02 (UJA Session 1) — Fork to Ultimate Job Assistant + interview-prep skill
+
+### What Got Done
+
+- **Project fork.** Created `Ultimate Job Assistant/` as a clean copy of `Job Assist/` (Session 9 state), preserving all 7 existing skills.
+- **SPEC.md authored** as the canonical build plan: scope, architecture, decisions log, acceptance criteria, execution plan. Approved before any execution.
+- **Phase 0 — Bootstrap.** Project layout cloned, git initialized, root docs written (SPEC, README, ROADMAP, ONBOARDING), .gitignore expanded for personal data exclusions. Commit `49bc5be`.
+  - **PII finding mid-phase.** Discovered the inherited `skills/resume-targeter/evals/files/data_analyst_base.docx` contained a real resume with full PII. Surfaced for user decision. Decision: keep the original in commit `49bc5be` permanently; redact the working-tree version going forward; private repo never goes public; add a public `ONBOARDING.md` instead.
+- **Phase 1 — Skill spec.** Authored `skills/interview-prep/SKILL.md` (425 lines) covering six-phase workflow A–F, content authoring rules, pedagogy table, generic-format support (sql/python/plaintext editors). Authored supporting `references/pedagogy.md` and `references/source-attribution-rules.md`. Preserved the original Netflix project's SPECS.md and CLAUDE.md as `skills/interview-prep/references/netflix-example/` for design provenance.
+- **Phase 2 — PWA template.** Authored `content-schema.json` (JSON Schema Draft 7 contract), `index.html.template`, `app.jsx.template` (~600 lines React with parameterized SQL/Python/plaintext editor, three-phase per-topic loop, Real Qs tab with sourced attribution, citation footer), `manifest.json.template`, `sw.js`, generated neutral PWA icons, wrote `build_pwa.py` and `smoke_test.cjs` (Playwright headless). Sample content built and smoke-tested green: 45 KB bundle, brace-balanced, React mounted, citations rendered, editable textarea works.
+- **Phase 3 — Orchestrator.** Inserted Step 9.5 (Interview Prep PWA) between Networking and Wrap-up in `skills/orchestrator/SKILL.md`. Updated Step 1 announce script and Step 10 wrap-up summary. Added Interview Prep PWA column to `tracker.md`. Added Skill 8 section to `DESIGN_DOC.md`.
+- **Phase 4 — CI/CD.** Authored `.github/workflows/ci.yml` (13-step validation: SKILL.md frontmatter, schema validity, sample build, brace balance, bundle size, Playwright smoke, PII scan). Authored `scripts/scan_pii.py` (warn-mode in CI; strict-mode reserved for Phase 7's public-repo sync). Committed Phase 1–4 as `eb0d7ac`. Local CI simulation: 17 ✅, 1 ⚠ (expected PII in private repo), 0 ❌.
+- **Phase 5 — Regression test.** Authored `skills/interview-prep/evals/build_netflix_regression.py`, generated `netflix-regression-content.json` at full Netflix shape (11 topics × 3 phases × 3 difficulties = 99 problem cards), built the PWA, ran smoke test green. Bundle: 119 KB. Documented in `skills/interview-prep/evals/netflix-regression.md`. 9 ✅ across structural-parity checks.
+- **Phase 6 — Final audit.** Mandatory consistency audit per CLAUDE.md doc-freshness protocol. Surfaced 6 warnings; fixed the 3 I owned (added Last-updated to ONBOARDING.md, bumped DESIGN_DOC.md and memory.md). Other 3 warnings are pre-existing em-dashes in inherited user-facing artifacts (cover-letters, speaking-points, scores) that predate UJA and are out of scope.
+
+### Key Decisions
+
+- **Two-tier repo strategy.** Private repo holds the canonical project (including PII baseline commit) permanently; never goes public. Public artifact is a separate companion repo `ultimate-job-assistant-public` containing only sanitized files. Sync happens via allowlisted script with PII scanner as gate. Branch-based publish was considered and rejected as too risky.
+- **Public companion + website.** Confirmed Phase 7 scope: companion repo + landing page + multi-page docs site. Hosted on GitHub Pages. Astro is the default stack for the website. Live demo PWA was option D and is deferred to v0.1.1.
+- **Formatting rule scope clarified.** "No dashes as punctuation" applies to user-facing application outputs only (resumes, cover letters, speaking points, anything sent to a recruiter). Internal docs (SKILL.md, SPEC.md, etc.) prioritize readability and are out of scope. Updated `references/patterns/formatting-rules.md` and `memory.md` to match how the project actually behaves.
+- **Approval cadence.** Proceed automatically when self-audit is fully green; stop and surface on any ⚠ or ❌. Repeated-but-already-approved warnings (the private-repo PII scanner output) count as informational, not blocking.
+
+### What Got Pushed Where
+
+- Two commits on `main` of the new private repo:
+  - `49bc5be` — Phase 0 bootstrap
+  - `eb0d7ac` — Phase 1–4 (skill + PWA template + CI/CD)
+- Phase 5 (regression test) and Phase 6 (audit fixes) still uncommitted in working tree at the time of this log entry.
+
+### What's Next
+
+Phase 7: companion repo + landing page + GitHub Pages docs site. Then the v0.1.0 tag. See SPEC.md §14 and ROADMAP.md.

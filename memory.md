@@ -1,6 +1,6 @@
 # memory.md -- Milan Sharma
-# Location: /Users/Milan/Documents/Claude/Job Assist/memory.md
-# Last updated: 2026-04-08
+# Location: /Users/Milan/Documents/Claude/Ultimate Job Assistant/memory.md
+# Last updated: 2026-05-02 (UJA Session 1: clarified formatting-rule scope to user-facing outputs only)
 
 ---
 

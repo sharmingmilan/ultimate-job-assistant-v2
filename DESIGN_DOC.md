@@ -1,5 +1,7 @@
 # Job Application Skill Suite — Design Document
 
+**Last updated:** 2026-05-02 (UJA Session 1: added Skill 8 — interview-prep PWA — and updated build order)
+
 ## Overview
 
 A modular, plug-and-play suite of skills that chains together as an agentic workflow to help job seekers build targeted, research-backed application materials. Designed to be forkable — skill logic is separated from user data so anyone can customize it to their own background.

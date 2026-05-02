@@ -1,0 +1,4701 @@
+{
+  "metadata": {
+    "company": "Netflix",
+    "role": "Data Analyst, Production Finance Operations and Innovation",
+    "convention": "netflix-data-analyst-2026-04",
+    "generated_at": "2026-05-02T20:31:32.718822+00:00",
+    "primary_language": "sql",
+    "dialect_note": "Regression target: Presto/Trino on Iceberg. Examples shown as Postgres-compatible SQL.",
+    "empty_state_explanation": "Regression test fixture; real_questions tab populated with two synthetic-source examples for structural testing."
+  },
+  "topics": [
+    {
+      "id": "joins",
+      "title": "Multi-Table Joins",
+      "tier": "T1",
+      "frequency_signal": "Appears in every SQL interview",
+      "sources": [
+        "https://example.com/regression-source"
+      ],
+      "language_mode": "sql",
+      "worked": [
+        {
+          "difficulty": "easy",
+          "prompt": "Regression placeholder for topic Multi-Table Joins at easy difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Worked example for joins at easy\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "Walk bullet 1 for joins easy.",
+            "Walk bullet 2 for joins easy.",
+            "Walk bullet 3 for joins easy.",
+            "Walk bullet 4 for joins easy."
+          ]
+        },
+        {
+          "difficulty": "medium",
+          "prompt": "Regression placeholder for topic Multi-Table Joins at medium difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Worked example for joins at medium\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "Walk bullet 1 for joins medium.",
+            "Walk bullet 2 for joins medium.",
+            "Walk bullet 3 for joins medium.",
+            "Walk bullet 4 for joins medium."
+          ]
+        },
+        {
+          "difficulty": "hard",
+          "prompt": "Regression placeholder for topic Multi-Table Joins at hard difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Worked example for joins at hard\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "Walk bullet 1 for joins hard.",
+            "Walk bullet 2 for joins hard.",
+            "Walk bullet 3 for joins hard.",
+            "Walk bullet 4 for joins hard."
+          ]
+        }
+      ],
+      "faded": [
+        {
+          "difficulty": "easy",
+          "prompt": "Regression placeholder (faded) for Multi-Table Joins at easy.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "scaffold": "-- Faded for joins easy\nSELECT production_id, _____(amount_usd) AS total\nFROM payments\nGROUP BY _____\nORDER BY total _____;",
+          "solution": "-- Faded for joins easy\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "First blank: aggregator (SUM)",
+            "Second blank: GROUP BY column (production_id)",
+            "Third blank: sort direction (DESC)",
+            "Fourth bullet for the joins faded case."
+          ]
+        },
+        {
+          "difficulty": "medium",
+          "prompt": "Regression placeholder (faded) for Multi-Table Joins at medium.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "scaffold": "-- Faded for joins medium\nSELECT production_id, _____(amount_usd) AS total\nFROM payments\nGROUP BY _____\nORDER BY total _____;",
+          "solution": "-- Faded for joins medium\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "First blank: aggregator (SUM)",
+            "Second blank: GROUP BY column (production_id)",
+            "Third blank: sort direction (DESC)",
+            "Fourth bullet for the joins faded case."
+          ]
+        },
+        {
+          "difficulty": "hard",
+          "prompt": "Regression placeholder (faded) for Multi-Table Joins at hard.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "scaffold": "-- Faded for joins hard\nSELECT production_id, _____(amount_usd) AS total\nFROM payments\nGROUP BY _____\nORDER BY total _____;",
+          "solution": "-- Faded for joins hard\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "First blank: aggregator (SUM)",
+            "Second blank: GROUP BY column (production_id)",
+            "Third blank: sort direction (DESC)",
+            "Fourth bullet for the joins faded case."
+          ]
+        }
+      ],
+      "retrieval": [
+        {
+          "difficulty": "easy",
+          "prompt": "Regression retrieval placeholder for Multi-Table Joins at easy.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Retrieval reference for joins easy\nSELECT vendor_id, COUNT(*) AS payments\nFROM payments\nWHERE paid_on >= '2026-01-01'\nGROUP BY vendor_id;",
+          "selfExplain": "Why joins matters here at easy: explain in your own words.",
+          "explanation": "This retrieval problem tests the joins concept at easy level. The reference solution is one of several valid approaches; the value comes from generating it without scaffolding."
+        },
+        {
+          "difficulty": "medium",
+          "prompt": "Regression retrieval placeholder for Multi-Table Joins at medium.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Retrieval reference for joins medium\nSELECT vendor_id, COUNT(*) AS payments\nFROM payments\nWHERE paid_on >= '2026-01-01'\nGROUP BY vendor_id;",
+          "selfExplain": "Why joins matters here at medium: explain in your own words.",
+          "explanation": "This retrieval problem tests the joins concept at medium level. The reference solution is one of several valid approaches; the value comes from generating it without scaffolding."
+        },
+        {
+          "difficulty": "hard",
+          "prompt": "Regression retrieval placeholder for Multi-Table Joins at hard.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Retrieval reference for joins hard\nSELECT vendor_id, COUNT(*) AS payments\nFROM payments\nWHERE paid_on >= '2026-01-01'\nGROUP BY vendor_id;",
+          "selfExplain": "Why joins matters here at hard: explain in your own words.",
+          "explanation": "This retrieval problem tests the joins concept at hard level. The reference solution is one of several valid approaches; the value comes from generating it without scaffolding."
+        }
+      ]
+    },
+    {
+      "id": "windows",
+      "title": "Window Functions",
+      "tier": "T1",
+      "frequency_signal": "Very common: ranking, running totals, period-over-period",
+      "sources": [
+        "https://example.com/regression-source"
+      ],
+      "language_mode": "sql",
+      "worked": [
+        {
+          "difficulty": "easy",
+          "prompt": "Regression placeholder for topic Window Functions at easy difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Worked example for windows at easy\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "Walk bullet 1 for windows easy.",
+            "Walk bullet 2 for windows easy.",
+            "Walk bullet 3 for windows easy.",
+            "Walk bullet 4 for windows easy."
+          ]
+        },
+        {
+          "difficulty": "medium",
+          "prompt": "Regression placeholder for topic Window Functions at medium difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Worked example for windows at medium\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "Walk bullet 1 for windows medium.",
+            "Walk bullet 2 for windows medium.",
+            "Walk bullet 3 for windows medium.",
+            "Walk bullet 4 for windows medium."
+          ]
+        },
+        {
+          "difficulty": "hard",
+          "prompt": "Regression placeholder for topic Window Functions at hard difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Worked example for windows at hard\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "Walk bullet 1 for windows hard.",
+            "Walk bullet 2 for windows hard.",
+            "Walk bullet 3 for windows hard.",
+            "Walk bullet 4 for windows hard."
+          ]
+        }
+      ],
+      "faded": [
+        {
+          "difficulty": "easy",
+          "prompt": "Regression placeholder (faded) for Window Functions at easy.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "scaffold": "-- Faded for windows easy\nSELECT production_id, _____(amount_usd) AS total\nFROM payments\nGROUP BY _____\nORDER BY total _____;",
+          "solution": "-- Faded for windows easy\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "First blank: aggregator (SUM)",
+            "Second blank: GROUP BY column (production_id)",
+            "Third blank: sort direction (DESC)",
+            "Fourth bullet for the windows faded case."
+          ]
+        },
+        {
+          "difficulty": "medium",
+          "prompt": "Regression placeholder (faded) for Window Functions at medium.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "scaffold": "-- Faded for windows medium\nSELECT production_id, _____(amount_usd) AS total\nFROM payments\nGROUP BY _____\nORDER BY total _____;",
+          "solution": "-- Faded for windows medium\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "First blank: aggregator (SUM)",
+            "Second blank: GROUP BY column (production_id)",
+            "Third blank: sort direction (DESC)",
+            "Fourth bullet for the windows faded case."
+          ]
+        },
+        {
+          "difficulty": "hard",
+          "prompt": "Regression placeholder (faded) for Window Functions at hard.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "scaffold": "-- Faded for windows hard\nSELECT production_id, _____(amount_usd) AS total\nFROM payments\nGROUP BY _____\nORDER BY total _____;",
+          "solution": "-- Faded for windows hard\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "First blank: aggregator (SUM)",
+            "Second blank: GROUP BY column (production_id)",
+            "Third blank: sort direction (DESC)",
+            "Fourth bullet for the windows faded case."
+          ]
+        }
+      ],
+      "retrieval": [
+        {
+          "difficulty": "easy",
+          "prompt": "Regression retrieval placeholder for Window Functions at easy.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Retrieval reference for windows easy\nSELECT vendor_id, COUNT(*) AS payments\nFROM payments\nWHERE paid_on >= '2026-01-01'\nGROUP BY vendor_id;",
+          "selfExplain": "Why windows matters here at easy: explain in your own words.",
+          "explanation": "This retrieval problem tests the windows concept at easy level. The reference solution is one of several valid approaches; the value comes from generating it without scaffolding."
+        },
+        {
+          "difficulty": "medium",
+          "prompt": "Regression retrieval placeholder for Window Functions at medium.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Retrieval reference for windows medium\nSELECT vendor_id, COUNT(*) AS payments\nFROM payments\nWHERE paid_on >= '2026-01-01'\nGROUP BY vendor_id;",
+          "selfExplain": "Why windows matters here at medium: explain in your own words.",
+          "explanation": "This retrieval problem tests the windows concept at medium level. The reference solution is one of several valid approaches; the value comes from generating it without scaffolding."
+        },
+        {
+          "difficulty": "hard",
+          "prompt": "Regression retrieval placeholder for Window Functions at hard.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Retrieval reference for windows hard\nSELECT vendor_id, COUNT(*) AS payments\nFROM payments\nWHERE paid_on >= '2026-01-01'\nGROUP BY vendor_id;",
+          "selfExplain": "Why windows matters here at hard: explain in your own words.",
+          "explanation": "This retrieval problem tests the windows concept at hard level. The reference solution is one of several valid approaches; the value comes from generating it without scaffolding."
+        }
+      ]
+    },
+    {
+      "id": "ctes",
+      "title": "CTEs and Query Structure",
+      "tier": "T1",
+      "frequency_signal": "Signals senior-level code organization",
+      "sources": [
+        "https://example.com/regression-source"
+      ],
+      "language_mode": "sql",
+      "worked": [
+        {
+          "difficulty": "easy",
+          "prompt": "Regression placeholder for topic CTEs and Query Structure at easy difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Worked example for ctes at easy\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "Walk bullet 1 for ctes easy.",
+            "Walk bullet 2 for ctes easy.",
+            "Walk bullet 3 for ctes easy.",
+            "Walk bullet 4 for ctes easy."
+          ]
+        },
+        {
+          "difficulty": "medium",
+          "prompt": "Regression placeholder for topic CTEs and Query Structure at medium difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Worked example for ctes at medium\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "Walk bullet 1 for ctes medium.",
+            "Walk bullet 2 for ctes medium.",
+            "Walk bullet 3 for ctes medium.",
+            "Walk bullet 4 for ctes medium."
+          ]
+        },
+        {
+          "difficulty": "hard",
+          "prompt": "Regression placeholder for topic CTEs and Query Structure at hard difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Worked example for ctes at hard\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "Walk bullet 1 for ctes hard.",
+            "Walk bullet 2 for ctes hard.",
+            "Walk bullet 3 for ctes hard.",
+            "Walk bullet 4 for ctes hard."
+          ]
+        }
+      ],
+      "faded": [
+        {
+          "difficulty": "easy",
+          "prompt": "Regression placeholder (faded) for CTEs and Query Structure at easy.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "scaffold": "-- Faded for ctes easy\nSELECT production_id, _____(amount_usd) AS total\nFROM payments\nGROUP BY _____\nORDER BY total _____;",
+          "solution": "-- Faded for ctes easy\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "First blank: aggregator (SUM)",
+            "Second blank: GROUP BY column (production_id)",
+            "Third blank: sort direction (DESC)",
+            "Fourth bullet for the ctes faded case."
+          ]
+        },
+        {
+          "difficulty": "medium",
+          "prompt": "Regression placeholder (faded) for CTEs and Query Structure at medium.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "scaffold": "-- Faded for ctes medium\nSELECT production_id, _____(amount_usd) AS total\nFROM payments\nGROUP BY _____\nORDER BY total _____;",
+          "solution": "-- Faded for ctes medium\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "First blank: aggregator (SUM)",
+            "Second blank: GROUP BY column (production_id)",
+            "Third blank: sort direction (DESC)",
+            "Fourth bullet for the ctes faded case."
+          ]
+        },
+        {
+          "difficulty": "hard",
+          "prompt": "Regression placeholder (faded) for CTEs and Query Structure at hard.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "scaffold": "-- Faded for ctes hard\nSELECT production_id, _____(amount_usd) AS total\nFROM payments\nGROUP BY _____\nORDER BY total _____;",
+          "solution": "-- Faded for ctes hard\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "First blank: aggregator (SUM)",
+            "Second blank: GROUP BY column (production_id)",
+            "Third blank: sort direction (DESC)",
+            "Fourth bullet for the ctes faded case."
+          ]
+        }
+      ],
+      "retrieval": [
+        {
+          "difficulty": "easy",
+          "prompt": "Regression retrieval placeholder for CTEs and Query Structure at easy.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Retrieval reference for ctes easy\nSELECT vendor_id, COUNT(*) AS payments\nFROM payments\nWHERE paid_on >= '2026-01-01'\nGROUP BY vendor_id;",
+          "selfExplain": "Why ctes matters here at easy: explain in your own words.",
+          "explanation": "This retrieval problem tests the ctes concept at easy level. The reference solution is one of several valid approaches; the value comes from generating it without scaffolding."
+        },
+        {
+          "difficulty": "medium",
+          "prompt": "Regression retrieval placeholder for CTEs and Query Structure at medium.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Retrieval reference for ctes medium\nSELECT vendor_id, COUNT(*) AS payments\nFROM payments\nWHERE paid_on >= '2026-01-01'\nGROUP BY vendor_id;",
+          "selfExplain": "Why ctes matters here at medium: explain in your own words.",
+          "explanation": "This retrieval problem tests the ctes concept at medium level. The reference solution is one of several valid approaches; the value comes from generating it without scaffolding."
+        },
+        {
+          "difficulty": "hard",
+          "prompt": "Regression retrieval placeholder for CTEs and Query Structure at hard.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Retrieval reference for ctes hard\nSELECT vendor_id, COUNT(*) AS payments\nFROM payments\nWHERE paid_on >= '2026-01-01'\nGROUP BY vendor_id;",
+          "selfExplain": "Why ctes matters here at hard: explain in your own words.",
+          "explanation": "This retrieval problem tests the ctes concept at hard level. The reference solution is one of several valid approaches; the value comes from generating it without scaffolding."
+        }
+      ]
+    },
+    {
+      "id": "dates",
+      "title": "Date Manipulation",
+      "tier": "T1",
+      "frequency_signal": "Fiscal periods, rolling windows, durations",
+      "sources": [
+        "https://example.com/regression-source"
+      ],
+      "language_mode": "sql",
+      "worked": [
+        {
+          "difficulty": "easy",
+          "prompt": "Regression placeholder for topic Date Manipulation at easy difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Worked example for dates at easy\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "Walk bullet 1 for dates easy.",
+            "Walk bullet 2 for dates easy.",
+            "Walk bullet 3 for dates easy.",
+            "Walk bullet 4 for dates easy."
+          ]
+        },
+        {
+          "difficulty": "medium",
+          "prompt": "Regression placeholder for topic Date Manipulation at medium difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Worked example for dates at medium\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "Walk bullet 1 for dates medium.",
+            "Walk bullet 2 for dates medium.",
+            "Walk bullet 3 for dates medium.",
+            "Walk bullet 4 for dates medium."
+          ]
+        },
+        {
+          "difficulty": "hard",
+          "prompt": "Regression placeholder for topic Date Manipulation at hard difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Worked example for dates at hard\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "Walk bullet 1 for dates hard.",
+            "Walk bullet 2 for dates hard.",
+            "Walk bullet 3 for dates hard.",
+            "Walk bullet 4 for dates hard."
+          ]
+        }
+      ],
+      "faded": [
+        {
+          "difficulty": "easy",
+          "prompt": "Regression placeholder (faded) for Date Manipulation at easy.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "scaffold": "-- Faded for dates easy\nSELECT production_id, _____(amount_usd) AS total\nFROM payments\nGROUP BY _____\nORDER BY total _____;",
+          "solution": "-- Faded for dates easy\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "First blank: aggregator (SUM)",
+            "Second blank: GROUP BY column (production_id)",
+            "Third blank: sort direction (DESC)",
+            "Fourth bullet for the dates faded case."
+          ]
+        },
+        {
+          "difficulty": "medium",
+          "prompt": "Regression placeholder (faded) for Date Manipulation at medium.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "scaffold": "-- Faded for dates medium\nSELECT production_id, _____(amount_usd) AS total\nFROM payments\nGROUP BY _____\nORDER BY total _____;",
+          "solution": "-- Faded for dates medium\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "First blank: aggregator (SUM)",
+            "Second blank: GROUP BY column (production_id)",
+            "Third blank: sort direction (DESC)",
+            "Fourth bullet for the dates faded case."
+          ]
+        },
+        {
+          "difficulty": "hard",
+          "prompt": "Regression placeholder (faded) for Date Manipulation at hard.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "scaffold": "-- Faded for dates hard\nSELECT production_id, _____(amount_usd) AS total\nFROM payments\nGROUP BY _____\nORDER BY total _____;",
+          "solution": "-- Faded for dates hard\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "First blank: aggregator (SUM)",
+            "Second blank: GROUP BY column (production_id)",
+            "Third blank: sort direction (DESC)",
+            "Fourth bullet for the dates faded case."
+          ]
+        }
+      ],
+      "retrieval": [
+        {
+          "difficulty": "easy",
+          "prompt": "Regression retrieval placeholder for Date Manipulation at easy.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Retrieval reference for dates easy\nSELECT vendor_id, COUNT(*) AS payments\nFROM payments\nWHERE paid_on >= '2026-01-01'\nGROUP BY vendor_id;",
+          "selfExplain": "Why dates matters here at easy: explain in your own words.",
+          "explanation": "This retrieval problem tests the dates concept at easy level. The reference solution is one of several valid approaches; the value comes from generating it without scaffolding."
+        },
+        {
+          "difficulty": "medium",
+          "prompt": "Regression retrieval placeholder for Date Manipulation at medium.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Retrieval reference for dates medium\nSELECT vendor_id, COUNT(*) AS payments\nFROM payments\nWHERE paid_on >= '2026-01-01'\nGROUP BY vendor_id;",
+          "selfExplain": "Why dates matters here at medium: explain in your own words.",
+          "explanation": "This retrieval problem tests the dates concept at medium level. The reference solution is one of several valid approaches; the value comes from generating it without scaffolding."
+        },
+        {
+          "difficulty": "hard",
+          "prompt": "Regression retrieval placeholder for Date Manipulation at hard.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Retrieval reference for dates hard\nSELECT vendor_id, COUNT(*) AS payments\nFROM payments\nWHERE paid_on >= '2026-01-01'\nGROUP BY vendor_id;",
+          "selfExplain": "Why dates matters here at hard: explain in your own words.",
+          "explanation": "This retrieval problem tests the dates concept at hard level. The reference solution is one of several valid approaches; the value comes from generating it without scaffolding."
+        }
+      ]
+    },
+    {
+      "id": "dedup",
+      "title": "Deduplication",
+      "tier": "T1",
+      "frequency_signal": "Vendor name normalization, fuzzy dup detection",
+      "sources": [
+        "https://example.com/regression-source"
+      ],
+      "language_mode": "sql",
+      "worked": [
+        {
+          "difficulty": "easy",
+          "prompt": "Regression placeholder for topic Deduplication at easy difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Worked example for dedup at easy\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "Walk bullet 1 for dedup easy.",
+            "Walk bullet 2 for dedup easy.",
+            "Walk bullet 3 for dedup easy.",
+            "Walk bullet 4 for dedup easy."
+          ]
+        },
+        {
+          "difficulty": "medium",
+          "prompt": "Regression placeholder for topic Deduplication at medium difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Worked example for dedup at medium\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "Walk bullet 1 for dedup medium.",
+            "Walk bullet 2 for dedup medium.",
+            "Walk bullet 3 for dedup medium.",
+            "Walk bullet 4 for dedup medium."
+          ]
+        },
+        {
+          "difficulty": "hard",
+          "prompt": "Regression placeholder for topic Deduplication at hard difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Worked example for dedup at hard\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "Walk bullet 1 for dedup hard.",
+            "Walk bullet 2 for dedup hard.",
+            "Walk bullet 3 for dedup hard.",
+            "Walk bullet 4 for dedup hard."
+          ]
+        }
+      ],
+      "faded": [
+        {
+          "difficulty": "easy",
+          "prompt": "Regression placeholder (faded) for Deduplication at easy.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "scaffold": "-- Faded for dedup easy\nSELECT production_id, _____(amount_usd) AS total\nFROM payments\nGROUP BY _____\nORDER BY total _____;",
+          "solution": "-- Faded for dedup easy\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "First blank: aggregator (SUM)",
+            "Second blank: GROUP BY column (production_id)",
+            "Third blank: sort direction (DESC)",
+            "Fourth bullet for the dedup faded case."
+          ]
+        },
+        {
+          "difficulty": "medium",
+          "prompt": "Regression placeholder (faded) for Deduplication at medium.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "scaffold": "-- Faded for dedup medium\nSELECT production_id, _____(amount_usd) AS total\nFROM payments\nGROUP BY _____\nORDER BY total _____;",
+          "solution": "-- Faded for dedup medium\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "First blank: aggregator (SUM)",
+            "Second blank: GROUP BY column (production_id)",
+            "Third blank: sort direction (DESC)",
+            "Fourth bullet for the dedup faded case."
+          ]
+        },
+        {
+          "difficulty": "hard",
+          "prompt": "Regression placeholder (faded) for Deduplication at hard.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "scaffold": "-- Faded for dedup hard\nSELECT production_id, _____(amount_usd) AS total\nFROM payments\nGROUP BY _____\nORDER BY total _____;",
+          "solution": "-- Faded for dedup hard\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "First blank: aggregator (SUM)",
+            "Second blank: GROUP BY column (production_id)",
+            "Third blank: sort direction (DESC)",
+            "Fourth bullet for the dedup faded case."
+          ]
+        }
+      ],
+      "retrieval": [
+        {
+          "difficulty": "easy",
+          "prompt": "Regression retrieval placeholder for Deduplication at easy.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Retrieval reference for dedup easy\nSELECT vendor_id, COUNT(*) AS payments\nFROM payments\nWHERE paid_on >= '2026-01-01'\nGROUP BY vendor_id;",
+          "selfExplain": "Why dedup matters here at easy: explain in your own words.",
+          "explanation": "This retrieval problem tests the dedup concept at easy level. The reference solution is one of several valid approaches; the value comes from generating it without scaffolding."
+        },
+        {
+          "difficulty": "medium",
+          "prompt": "Regression retrieval placeholder for Deduplication at medium.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Retrieval reference for dedup medium\nSELECT vendor_id, COUNT(*) AS payments\nFROM payments\nWHERE paid_on >= '2026-01-01'\nGROUP BY vendor_id;",
+          "selfExplain": "Why dedup matters here at medium: explain in your own words.",
+          "explanation": "This retrieval problem tests the dedup concept at medium level. The reference solution is one of several valid approaches; the value comes from generating it without scaffolding."
+        },
+        {
+          "difficulty": "hard",
+          "prompt": "Regression retrieval placeholder for Deduplication at hard.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Retrieval reference for dedup hard\nSELECT vendor_id, COUNT(*) AS payments\nFROM payments\nWHERE paid_on >= '2026-01-01'\nGROUP BY vendor_id;",
+          "selfExplain": "Why dedup matters here at hard: explain in your own words.",
+          "explanation": "This retrieval problem tests the dedup concept at hard level. The reference solution is one of several valid approaches; the value comes from generating it without scaffolding."
+        }
+      ]
+    },
+    {
+      "id": "case_agg",
+      "title": "CASE and Conditional Aggregation",
+      "tier": "T1",
+      "frequency_signal": "Bucketing, pivoting, flag composition",
+      "sources": [
+        "https://example.com/regression-source"
+      ],
+      "language_mode": "sql",
+      "worked": [
+        {
+          "difficulty": "easy",
+          "prompt": "Regression placeholder for topic CASE and Conditional Aggregation at easy difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Worked example for case_agg at easy\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "Walk bullet 1 for case_agg easy.",
+            "Walk bullet 2 for case_agg easy.",
+            "Walk bullet 3 for case_agg easy.",
+            "Walk bullet 4 for case_agg easy."
+          ]
+        },
+        {
+          "difficulty": "medium",
+          "prompt": "Regression placeholder for topic CASE and Conditional Aggregation at medium difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Worked example for case_agg at medium\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "Walk bullet 1 for case_agg medium.",
+            "Walk bullet 2 for case_agg medium.",
+            "Walk bullet 3 for case_agg medium.",
+            "Walk bullet 4 for case_agg medium."
+          ]
+        },
+        {
+          "difficulty": "hard",
+          "prompt": "Regression placeholder for topic CASE and Conditional Aggregation at hard difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Worked example for case_agg at hard\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "Walk bullet 1 for case_agg hard.",
+            "Walk bullet 2 for case_agg hard.",
+            "Walk bullet 3 for case_agg hard.",
+            "Walk bullet 4 for case_agg hard."
+          ]
+        }
+      ],
+      "faded": [
+        {
+          "difficulty": "easy",
+          "prompt": "Regression placeholder (faded) for CASE and Conditional Aggregation at easy.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "scaffold": "-- Faded for case_agg easy\nSELECT production_id, _____(amount_usd) AS total\nFROM payments\nGROUP BY _____\nORDER BY total _____;",
+          "solution": "-- Faded for case_agg easy\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "First blank: aggregator (SUM)",
+            "Second blank: GROUP BY column (production_id)",
+            "Third blank: sort direction (DESC)",
+            "Fourth bullet for the case_agg faded case."
+          ]
+        },
+        {
+          "difficulty": "medium",
+          "prompt": "Regression placeholder (faded) for CASE and Conditional Aggregation at medium.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "scaffold": "-- Faded for case_agg medium\nSELECT production_id, _____(amount_usd) AS total\nFROM payments\nGROUP BY _____\nORDER BY total _____;",
+          "solution": "-- Faded for case_agg medium\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "First blank: aggregator (SUM)",
+            "Second blank: GROUP BY column (production_id)",
+            "Third blank: sort direction (DESC)",
+            "Fourth bullet for the case_agg faded case."
+          ]
+        },
+        {
+          "difficulty": "hard",
+          "prompt": "Regression placeholder (faded) for CASE and Conditional Aggregation at hard.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "scaffold": "-- Faded for case_agg hard\nSELECT production_id, _____(amount_usd) AS total\nFROM payments\nGROUP BY _____\nORDER BY total _____;",
+          "solution": "-- Faded for case_agg hard\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "First blank: aggregator (SUM)",
+            "Second blank: GROUP BY column (production_id)",
+            "Third blank: sort direction (DESC)",
+            "Fourth bullet for the case_agg faded case."
+          ]
+        }
+      ],
+      "retrieval": [
+        {
+          "difficulty": "easy",
+          "prompt": "Regression retrieval placeholder for CASE and Conditional Aggregation at easy.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Retrieval reference for case_agg easy\nSELECT vendor_id, COUNT(*) AS payments\nFROM payments\nWHERE paid_on >= '2026-01-01'\nGROUP BY vendor_id;",
+          "selfExplain": "Why case_agg matters here at easy: explain in your own words.",
+          "explanation": "This retrieval problem tests the case_agg concept at easy level. The reference solution is one of several valid approaches; the value comes from generating it without scaffolding."
+        },
+        {
+          "difficulty": "medium",
+          "prompt": "Regression retrieval placeholder for CASE and Conditional Aggregation at medium.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Retrieval reference for case_agg medium\nSELECT vendor_id, COUNT(*) AS payments\nFROM payments\nWHERE paid_on >= '2026-01-01'\nGROUP BY vendor_id;",
+          "selfExplain": "Why case_agg matters here at medium: explain in your own words.",
+          "explanation": "This retrieval problem tests the case_agg concept at medium level. The reference solution is one of several valid approaches; the value comes from generating it without scaffolding."
+        },
+        {
+          "difficulty": "hard",
+          "prompt": "Regression retrieval placeholder for CASE and Conditional Aggregation at hard.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Retrieval reference for case_agg hard\nSELECT vendor_id, COUNT(*) AS payments\nFROM payments\nWHERE paid_on >= '2026-01-01'\nGROUP BY vendor_id;",
+          "selfExplain": "Why case_agg matters here at hard: explain in your own words.",
+          "explanation": "This retrieval problem tests the case_agg concept at hard level. The reference solution is one of several valid approaches; the value comes from generating it without scaffolding."
+        }
+      ]
+    },
+    {
+      "id": "nulls",
+      "title": "NULL Handling",
+      "tier": "T1",
+      "frequency_signal": "NULL semantics trip even experienced candidates",
+      "sources": [
+        "https://example.com/regression-source"
+      ],
+      "language_mode": "sql",
+      "worked": [
+        {
+          "difficulty": "easy",
+          "prompt": "Regression placeholder for topic NULL Handling at easy difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Worked example for nulls at easy\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "Walk bullet 1 for nulls easy.",
+            "Walk bullet 2 for nulls easy.",
+            "Walk bullet 3 for nulls easy.",
+            "Walk bullet 4 for nulls easy."
+          ]
+        },
+        {
+          "difficulty": "medium",
+          "prompt": "Regression placeholder for topic NULL Handling at medium difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Worked example for nulls at medium\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "Walk bullet 1 for nulls medium.",
+            "Walk bullet 2 for nulls medium.",
+            "Walk bullet 3 for nulls medium.",
+            "Walk bullet 4 for nulls medium."
+          ]
+        },
+        {
+          "difficulty": "hard",
+          "prompt": "Regression placeholder for topic NULL Handling at hard difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Worked example for nulls at hard\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "Walk bullet 1 for nulls hard.",
+            "Walk bullet 2 for nulls hard.",
+            "Walk bullet 3 for nulls hard.",
+            "Walk bullet 4 for nulls hard."
+          ]
+        }
+      ],
+      "faded": [
+        {
+          "difficulty": "easy",
+          "prompt": "Regression placeholder (faded) for NULL Handling at easy.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "scaffold": "-- Faded for nulls easy\nSELECT production_id, _____(amount_usd) AS total\nFROM payments\nGROUP BY _____\nORDER BY total _____;",
+          "solution": "-- Faded for nulls easy\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "First blank: aggregator (SUM)",
+            "Second blank: GROUP BY column (production_id)",
+            "Third blank: sort direction (DESC)",
+            "Fourth bullet for the nulls faded case."
+          ]
+        },
+        {
+          "difficulty": "medium",
+          "prompt": "Regression placeholder (faded) for NULL Handling at medium.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "scaffold": "-- Faded for nulls medium\nSELECT production_id, _____(amount_usd) AS total\nFROM payments\nGROUP BY _____\nORDER BY total _____;",
+          "solution": "-- Faded for nulls medium\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "First blank: aggregator (SUM)",
+            "Second blank: GROUP BY column (production_id)",
+            "Third blank: sort direction (DESC)",
+            "Fourth bullet for the nulls faded case."
+          ]
+        },
+        {
+          "difficulty": "hard",
+          "prompt": "Regression placeholder (faded) for NULL Handling at hard.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "scaffold": "-- Faded for nulls hard\nSELECT production_id, _____(amount_usd) AS total\nFROM payments\nGROUP BY _____\nORDER BY total _____;",
+          "solution": "-- Faded for nulls hard\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "First blank: aggregator (SUM)",
+            "Second blank: GROUP BY column (production_id)",
+            "Third blank: sort direction (DESC)",
+            "Fourth bullet for the nulls faded case."
+          ]
+        }
+      ],
+      "retrieval": [
+        {
+          "difficulty": "easy",
+          "prompt": "Regression retrieval placeholder for NULL Handling at easy.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Retrieval reference for nulls easy\nSELECT vendor_id, COUNT(*) AS payments\nFROM payments\nWHERE paid_on >= '2026-01-01'\nGROUP BY vendor_id;",
+          "selfExplain": "Why nulls matters here at easy: explain in your own words.",
+          "explanation": "This retrieval problem tests the nulls concept at easy level. The reference solution is one of several valid approaches; the value comes from generating it without scaffolding."
+        },
+        {
+          "difficulty": "medium",
+          "prompt": "Regression retrieval placeholder for NULL Handling at medium.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Retrieval reference for nulls medium\nSELECT vendor_id, COUNT(*) AS payments\nFROM payments\nWHERE paid_on >= '2026-01-01'\nGROUP BY vendor_id;",
+          "selfExplain": "Why nulls matters here at medium: explain in your own words.",
+          "explanation": "This retrieval problem tests the nulls concept at medium level. The reference solution is one of several valid approaches; the value comes from generating it without scaffolding."
+        },
+        {
+          "difficulty": "hard",
+          "prompt": "Regression retrieval placeholder for NULL Handling at hard.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Retrieval reference for nulls hard\nSELECT vendor_id, COUNT(*) AS payments\nFROM payments\nWHERE paid_on >= '2026-01-01'\nGROUP BY vendor_id;",
+          "selfExplain": "Why nulls matters here at hard: explain in your own words.",
+          "explanation": "This retrieval problem tests the nulls concept at hard level. The reference solution is one of several valid approaches; the value comes from generating it without scaffolding."
+        }
+      ]
+    },
+    {
+      "id": "full_outer",
+      "title": "FULL OUTER JOIN and Reconciliation",
+      "tier": "T2",
+      "frequency_signal": "AP vs HUB ledger reconciliation",
+      "sources": [
+        "https://example.com/regression-source"
+      ],
+      "language_mode": "sql",
+      "worked": [
+        {
+          "difficulty": "easy",
+          "prompt": "Regression placeholder for topic FULL OUTER JOIN and Reconciliation at easy difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Worked example for full_outer at easy\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "Walk bullet 1 for full_outer easy.",
+            "Walk bullet 2 for full_outer easy.",
+            "Walk bullet 3 for full_outer easy.",
+            "Walk bullet 4 for full_outer easy."
+          ]
+        },
+        {
+          "difficulty": "medium",
+          "prompt": "Regression placeholder for topic FULL OUTER JOIN and Reconciliation at medium difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Worked example for full_outer at medium\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "Walk bullet 1 for full_outer medium.",
+            "Walk bullet 2 for full_outer medium.",
+            "Walk bullet 3 for full_outer medium.",
+            "Walk bullet 4 for full_outer medium."
+          ]
+        },
+        {
+          "difficulty": "hard",
+          "prompt": "Regression placeholder for topic FULL OUTER JOIN and Reconciliation at hard difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Worked example for full_outer at hard\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "Walk bullet 1 for full_outer hard.",
+            "Walk bullet 2 for full_outer hard.",
+            "Walk bullet 3 for full_outer hard.",
+            "Walk bullet 4 for full_outer hard."
+          ]
+        }
+      ],
+      "faded": [
+        {
+          "difficulty": "easy",
+          "prompt": "Regression placeholder (faded) for FULL OUTER JOIN and Reconciliation at easy.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "scaffold": "-- Faded for full_outer easy\nSELECT production_id, _____(amount_usd) AS total\nFROM payments\nGROUP BY _____\nORDER BY total _____;",
+          "solution": "-- Faded for full_outer easy\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "First blank: aggregator (SUM)",
+            "Second blank: GROUP BY column (production_id)",
+            "Third blank: sort direction (DESC)",
+            "Fourth bullet for the full_outer faded case."
+          ]
+        },
+        {
+          "difficulty": "medium",
+          "prompt": "Regression placeholder (faded) for FULL OUTER JOIN and Reconciliation at medium.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "scaffold": "-- Faded for full_outer medium\nSELECT production_id, _____(amount_usd) AS total\nFROM payments\nGROUP BY _____\nORDER BY total _____;",
+          "solution": "-- Faded for full_outer medium\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "First blank: aggregator (SUM)",
+            "Second blank: GROUP BY column (production_id)",
+            "Third blank: sort direction (DESC)",
+            "Fourth bullet for the full_outer faded case."
+          ]
+        },
+        {
+          "difficulty": "hard",
+          "prompt": "Regression placeholder (faded) for FULL OUTER JOIN and Reconciliation at hard.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "scaffold": "-- Faded for full_outer hard\nSELECT production_id, _____(amount_usd) AS total\nFROM payments\nGROUP BY _____\nORDER BY total _____;",
+          "solution": "-- Faded for full_outer hard\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "First blank: aggregator (SUM)",
+            "Second blank: GROUP BY column (production_id)",
+            "Third blank: sort direction (DESC)",
+            "Fourth bullet for the full_outer faded case."
+          ]
+        }
+      ],
+      "retrieval": [
+        {
+          "difficulty": "easy",
+          "prompt": "Regression retrieval placeholder for FULL OUTER JOIN and Reconciliation at easy.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Retrieval reference for full_outer easy\nSELECT vendor_id, COUNT(*) AS payments\nFROM payments\nWHERE paid_on >= '2026-01-01'\nGROUP BY vendor_id;",
+          "selfExplain": "Why full_outer matters here at easy: explain in your own words.",
+          "explanation": "This retrieval problem tests the full_outer concept at easy level. The reference solution is one of several valid approaches; the value comes from generating it without scaffolding."
+        },
+        {
+          "difficulty": "medium",
+          "prompt": "Regression retrieval placeholder for FULL OUTER JOIN and Reconciliation at medium.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Retrieval reference for full_outer medium\nSELECT vendor_id, COUNT(*) AS payments\nFROM payments\nWHERE paid_on >= '2026-01-01'\nGROUP BY vendor_id;",
+          "selfExplain": "Why full_outer matters here at medium: explain in your own words.",
+          "explanation": "This retrieval problem tests the full_outer concept at medium level. The reference solution is one of several valid approaches; the value comes from generating it without scaffolding."
+        },
+        {
+          "difficulty": "hard",
+          "prompt": "Regression retrieval placeholder for FULL OUTER JOIN and Reconciliation at hard.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Retrieval reference for full_outer hard\nSELECT vendor_id, COUNT(*) AS payments\nFROM payments\nWHERE paid_on >= '2026-01-01'\nGROUP BY vendor_id;",
+          "selfExplain": "Why full_outer matters here at hard: explain in your own words.",
+          "explanation": "This retrieval problem tests the full_outer concept at hard level. The reference solution is one of several valid approaches; the value comes from generating it without scaffolding."
+        }
+      ]
+    },
+    {
+      "id": "self_joins",
+      "title": "Self-Joins",
+      "tier": "T2",
+      "frequency_signal": "Intervals, overlaps, first/last-per-group",
+      "sources": [
+        "https://example.com/regression-source"
+      ],
+      "language_mode": "sql",
+      "worked": [
+        {
+          "difficulty": "easy",
+          "prompt": "Regression placeholder for topic Self-Joins at easy difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Worked example for self_joins at easy\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "Walk bullet 1 for self_joins easy.",
+            "Walk bullet 2 for self_joins easy.",
+            "Walk bullet 3 for self_joins easy.",
+            "Walk bullet 4 for self_joins easy."
+          ]
+        },
+        {
+          "difficulty": "medium",
+          "prompt": "Regression placeholder for topic Self-Joins at medium difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Worked example for self_joins at medium\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "Walk bullet 1 for self_joins medium.",
+            "Walk bullet 2 for self_joins medium.",
+            "Walk bullet 3 for self_joins medium.",
+            "Walk bullet 4 for self_joins medium."
+          ]
+        },
+        {
+          "difficulty": "hard",
+          "prompt": "Regression placeholder for topic Self-Joins at hard difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Worked example for self_joins at hard\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "Walk bullet 1 for self_joins hard.",
+            "Walk bullet 2 for self_joins hard.",
+            "Walk bullet 3 for self_joins hard.",
+            "Walk bullet 4 for self_joins hard."
+          ]
+        }
+      ],
+      "faded": [
+        {
+          "difficulty": "easy",
+          "prompt": "Regression placeholder (faded) for Self-Joins at easy.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "scaffold": "-- Faded for self_joins easy\nSELECT production_id, _____(amount_usd) AS total\nFROM payments\nGROUP BY _____\nORDER BY total _____;",
+          "solution": "-- Faded for self_joins easy\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "First blank: aggregator (SUM)",
+            "Second blank: GROUP BY column (production_id)",
+            "Third blank: sort direction (DESC)",
+            "Fourth bullet for the self_joins faded case."
+          ]
+        },
+        {
+          "difficulty": "medium",
+          "prompt": "Regression placeholder (faded) for Self-Joins at medium.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "scaffold": "-- Faded for self_joins medium\nSELECT production_id, _____(amount_usd) AS total\nFROM payments\nGROUP BY _____\nORDER BY total _____;",
+          "solution": "-- Faded for self_joins medium\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "First blank: aggregator (SUM)",
+            "Second blank: GROUP BY column (production_id)",
+            "Third blank: sort direction (DESC)",
+            "Fourth bullet for the self_joins faded case."
+          ]
+        },
+        {
+          "difficulty": "hard",
+          "prompt": "Regression placeholder (faded) for Self-Joins at hard.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "scaffold": "-- Faded for self_joins hard\nSELECT production_id, _____(amount_usd) AS total\nFROM payments\nGROUP BY _____\nORDER BY total _____;",
+          "solution": "-- Faded for self_joins hard\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "First blank: aggregator (SUM)",
+            "Second blank: GROUP BY column (production_id)",
+            "Third blank: sort direction (DESC)",
+            "Fourth bullet for the self_joins faded case."
+          ]
+        }
+      ],
+      "retrieval": [
+        {
+          "difficulty": "easy",
+          "prompt": "Regression retrieval placeholder for Self-Joins at easy.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Retrieval reference for self_joins easy\nSELECT vendor_id, COUNT(*) AS payments\nFROM payments\nWHERE paid_on >= '2026-01-01'\nGROUP BY vendor_id;",
+          "selfExplain": "Why self_joins matters here at easy: explain in your own words.",
+          "explanation": "This retrieval problem tests the self_joins concept at easy level. The reference solution is one of several valid approaches; the value comes from generating it without scaffolding."
+        },
+        {
+          "difficulty": "medium",
+          "prompt": "Regression retrieval placeholder for Self-Joins at medium.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Retrieval reference for self_joins medium\nSELECT vendor_id, COUNT(*) AS payments\nFROM payments\nWHERE paid_on >= '2026-01-01'\nGROUP BY vendor_id;",
+          "selfExplain": "Why self_joins matters here at medium: explain in your own words.",
+          "explanation": "This retrieval problem tests the self_joins concept at medium level. The reference solution is one of several valid approaches; the value comes from generating it without scaffolding."
+        },
+        {
+          "difficulty": "hard",
+          "prompt": "Regression retrieval placeholder for Self-Joins at hard.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Retrieval reference for self_joins hard\nSELECT vendor_id, COUNT(*) AS payments\nFROM payments\nWHERE paid_on >= '2026-01-01'\nGROUP BY vendor_id;",
+          "selfExplain": "Why self_joins matters here at hard: explain in your own words.",
+          "explanation": "This retrieval problem tests the self_joins concept at hard level. The reference solution is one of several valid approaches; the value comes from generating it without scaffolding."
+        }
+      ]
+    },
+    {
+      "id": "set_ops",
+      "title": "Set Operations",
+      "tier": "T2",
+      "frequency_signal": "UNION / INTERSECT / EXCEPT for snapshot diffs",
+      "sources": [
+        "https://example.com/regression-source"
+      ],
+      "language_mode": "sql",
+      "worked": [
+        {
+          "difficulty": "easy",
+          "prompt": "Regression placeholder for topic Set Operations at easy difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Worked example for set_ops at easy\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "Walk bullet 1 for set_ops easy.",
+            "Walk bullet 2 for set_ops easy.",
+            "Walk bullet 3 for set_ops easy.",
+            "Walk bullet 4 for set_ops easy."
+          ]
+        },
+        {
+          "difficulty": "medium",
+          "prompt": "Regression placeholder for topic Set Operations at medium difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Worked example for set_ops at medium\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "Walk bullet 1 for set_ops medium.",
+            "Walk bullet 2 for set_ops medium.",
+            "Walk bullet 3 for set_ops medium.",
+            "Walk bullet 4 for set_ops medium."
+          ]
+        },
+        {
+          "difficulty": "hard",
+          "prompt": "Regression placeholder for topic Set Operations at hard difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Worked example for set_ops at hard\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "Walk bullet 1 for set_ops hard.",
+            "Walk bullet 2 for set_ops hard.",
+            "Walk bullet 3 for set_ops hard.",
+            "Walk bullet 4 for set_ops hard."
+          ]
+        }
+      ],
+      "faded": [
+        {
+          "difficulty": "easy",
+          "prompt": "Regression placeholder (faded) for Set Operations at easy.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "scaffold": "-- Faded for set_ops easy\nSELECT production_id, _____(amount_usd) AS total\nFROM payments\nGROUP BY _____\nORDER BY total _____;",
+          "solution": "-- Faded for set_ops easy\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "First blank: aggregator (SUM)",
+            "Second blank: GROUP BY column (production_id)",
+            "Third blank: sort direction (DESC)",
+            "Fourth bullet for the set_ops faded case."
+          ]
+        },
+        {
+          "difficulty": "medium",
+          "prompt": "Regression placeholder (faded) for Set Operations at medium.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "scaffold": "-- Faded for set_ops medium\nSELECT production_id, _____(amount_usd) AS total\nFROM payments\nGROUP BY _____\nORDER BY total _____;",
+          "solution": "-- Faded for set_ops medium\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "First blank: aggregator (SUM)",
+            "Second blank: GROUP BY column (production_id)",
+            "Third blank: sort direction (DESC)",
+            "Fourth bullet for the set_ops faded case."
+          ]
+        },
+        {
+          "difficulty": "hard",
+          "prompt": "Regression placeholder (faded) for Set Operations at hard.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "scaffold": "-- Faded for set_ops hard\nSELECT production_id, _____(amount_usd) AS total\nFROM payments\nGROUP BY _____\nORDER BY total _____;",
+          "solution": "-- Faded for set_ops hard\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "First blank: aggregator (SUM)",
+            "Second blank: GROUP BY column (production_id)",
+            "Third blank: sort direction (DESC)",
+            "Fourth bullet for the set_ops faded case."
+          ]
+        }
+      ],
+      "retrieval": [
+        {
+          "difficulty": "easy",
+          "prompt": "Regression retrieval placeholder for Set Operations at easy.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Retrieval reference for set_ops easy\nSELECT vendor_id, COUNT(*) AS payments\nFROM payments\nWHERE paid_on >= '2026-01-01'\nGROUP BY vendor_id;",
+          "selfExplain": "Why set_ops matters here at easy: explain in your own words.",
+          "explanation": "This retrieval problem tests the set_ops concept at easy level. The reference solution is one of several valid approaches; the value comes from generating it without scaffolding."
+        },
+        {
+          "difficulty": "medium",
+          "prompt": "Regression retrieval placeholder for Set Operations at medium.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Retrieval reference for set_ops medium\nSELECT vendor_id, COUNT(*) AS payments\nFROM payments\nWHERE paid_on >= '2026-01-01'\nGROUP BY vendor_id;",
+          "selfExplain": "Why set_ops matters here at medium: explain in your own words.",
+          "explanation": "This retrieval problem tests the set_ops concept at medium level. The reference solution is one of several valid approaches; the value comes from generating it without scaffolding."
+        },
+        {
+          "difficulty": "hard",
+          "prompt": "Regression retrieval placeholder for Set Operations at hard.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Retrieval reference for set_ops hard\nSELECT vendor_id, COUNT(*) AS payments\nFROM payments\nWHERE paid_on >= '2026-01-01'\nGROUP BY vendor_id;",
+          "selfExplain": "Why set_ops matters here at hard: explain in your own words.",
+          "explanation": "This retrieval problem tests the set_ops concept at hard level. The reference solution is one of several valid approaches; the value comes from generating it without scaffolding."
+        }
+      ]
+    },
+    {
+      "id": "pandas",
+      "title": "Pandas - groupby, merge, rolling",
+      "tier": "PY",
+      "frequency_signal": "Single Python question expected",
+      "sources": [
+        "https://example.com/regression-source"
+      ],
+      "language_mode": "python",
+      "worked": [
+        {
+          "difficulty": "easy",
+          "prompt": "Regression placeholder for topic Pandas - groupby, merge, rolling at easy difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Worked example for pandas at easy\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "Walk bullet 1 for pandas easy.",
+            "Walk bullet 2 for pandas easy.",
+            "Walk bullet 3 for pandas easy.",
+            "Walk bullet 4 for pandas easy."
+          ]
+        },
+        {
+          "difficulty": "medium",
+          "prompt": "Regression placeholder for topic Pandas - groupby, merge, rolling at medium difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Worked example for pandas at medium\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "Walk bullet 1 for pandas medium.",
+            "Walk bullet 2 for pandas medium.",
+            "Walk bullet 3 for pandas medium.",
+            "Walk bullet 4 for pandas medium."
+          ]
+        },
+        {
+          "difficulty": "hard",
+          "prompt": "Regression placeholder for topic Pandas - groupby, merge, rolling at hard difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Worked example for pandas at hard\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "Walk bullet 1 for pandas hard.",
+            "Walk bullet 2 for pandas hard.",
+            "Walk bullet 3 for pandas hard.",
+            "Walk bullet 4 for pandas hard."
+          ]
+        }
+      ],
+      "faded": [
+        {
+          "difficulty": "easy",
+          "prompt": "Regression placeholder (faded) for Pandas - groupby, merge, rolling at easy.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "scaffold": "-- Faded for pandas easy\nSELECT production_id, _____(amount_usd) AS total\nFROM payments\nGROUP BY _____\nORDER BY total _____;",
+          "solution": "-- Faded for pandas easy\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "First blank: aggregator (SUM)",
+            "Second blank: GROUP BY column (production_id)",
+            "Third blank: sort direction (DESC)",
+            "Fourth bullet for the pandas faded case."
+          ]
+        },
+        {
+          "difficulty": "medium",
+          "prompt": "Regression placeholder (faded) for Pandas - groupby, merge, rolling at medium.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "scaffold": "-- Faded for pandas medium\nSELECT production_id, _____(amount_usd) AS total\nFROM payments\nGROUP BY _____\nORDER BY total _____;",
+          "solution": "-- Faded for pandas medium\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "First blank: aggregator (SUM)",
+            "Second blank: GROUP BY column (production_id)",
+            "Third blank: sort direction (DESC)",
+            "Fourth bullet for the pandas faded case."
+          ]
+        },
+        {
+          "difficulty": "hard",
+          "prompt": "Regression placeholder (faded) for Pandas - groupby, merge, rolling at hard.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "scaffold": "-- Faded for pandas hard\nSELECT production_id, _____(amount_usd) AS total\nFROM payments\nGROUP BY _____\nORDER BY total _____;",
+          "solution": "-- Faded for pandas hard\nSELECT production_id, SUM(amount_usd) AS total\nFROM payments\nGROUP BY production_id\nORDER BY total DESC;",
+          "walk": [
+            "First blank: aggregator (SUM)",
+            "Second blank: GROUP BY column (production_id)",
+            "Third blank: sort direction (DESC)",
+            "Fourth bullet for the pandas faded case."
+          ]
+        }
+      ],
+      "retrieval": [
+        {
+          "difficulty": "easy",
+          "prompt": "Regression retrieval placeholder for Pandas - groupby, merge, rolling at easy.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Retrieval reference for pandas easy\nSELECT vendor_id, COUNT(*) AS payments\nFROM payments\nWHERE paid_on >= '2026-01-01'\nGROUP BY vendor_id;",
+          "selfExplain": "Why pandas matters here at easy: explain in your own words.",
+          "explanation": "This retrieval problem tests the pandas concept at easy level. The reference solution is one of several valid approaches; the value comes from generating it without scaffolding."
+        },
+        {
+          "difficulty": "medium",
+          "prompt": "Regression retrieval placeholder for Pandas - groupby, merge, rolling at medium.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Retrieval reference for pandas medium\nSELECT vendor_id, COUNT(*) AS payments\nFROM payments\nWHERE paid_on >= '2026-01-01'\nGROUP BY vendor_id;",
+          "selfExplain": "Why pandas matters here at medium: explain in your own words.",
+          "explanation": "This retrieval problem tests the pandas concept at medium level. The reference solution is one of several valid approaches; the value comes from generating it without scaffolding."
+        },
+        {
+          "difficulty": "hard",
+          "prompt": "Regression retrieval placeholder for Pandas - groupby, merge, rolling at hard.",
+          "schemas": [
+            {
+              "table": "payments",
+              "columns": [
+                "payment_id",
+                "production_id",
+                "vendor_id",
+                "amount_usd",
+                "paid_on"
+              ],
+              "rows": [
+                [
+                  "PMT-001",
+                  "P101",
+                  "V001",
+                  12500,
+                  "2026-04-12"
+                ],
+                [
+                  "PMT-002",
+                  "P101",
+                  "V002",
+                  8000,
+                  "2026-04-15"
+                ],
+                [
+                  "PMT-003",
+                  "P102",
+                  "V001",
+                  4500,
+                  "2026-04-22"
+                ]
+              ]
+            }
+          ],
+          "solution": "-- Retrieval reference for pandas hard\nSELECT vendor_id, COUNT(*) AS payments\nFROM payments\nWHERE paid_on >= '2026-01-01'\nGROUP BY vendor_id;",
+          "selfExplain": "Why pandas matters here at hard: explain in your own words.",
+          "explanation": "This retrieval problem tests the pandas concept at hard level. The reference solution is one of several valid approaches; the value comes from generating it without scaffolding."
+        }
+      ]
+    }
+  ],
+  "real_questions": [
+    {
+      "id": "rq_001",
+      "category": "SQL",
+      "title": "Top 3 vendors per production",
+      "prompt": "Return the top 3 vendors by spend per production, tiebreak on vendor_id.",
+      "concepts": [
+        "window functions",
+        "ROW_NUMBER",
+        "tiebreak"
+      ],
+      "difficulty": "medium",
+      "source": "Regression fixture (would be a real Glassdoor URL in a live run)",
+      "source_url": "https://example.com/regression-glassdoor-thread"
+    },
+    {
+      "id": "rq_002",
+      "category": "Python",
+      "title": "Rolling 7-day average per group",
+      "prompt": "Given a payments DataFrame with date and amount columns and a production_id, compute a 7-day rolling average per production.",
+      "concepts": [
+        "pandas groupby",
+        "rolling",
+        "merge"
+      ],
+      "difficulty": "medium",
+      "source": "Regression fixture (would be a real source URL in a live run)",
+      "source_url": "https://example.com/regression-blind-thread"
+    }
+  ],
+  "exam_meta": {
+    "format": "45-60 minute CoderPad screen, ~4 SQL + 1 Python",
+    "alternateFormat": "Some candidates report a take-home variant",
+    "keyInsight": "The screen tests verbalized reasoning under time pressure, not memorized syntax",
+    "highROI": "Practice writing complete queries before running anything (mirrors the actual interview)"
+  },
+  "patterns": {
+    "sql": [
+      {
+        "title": "Top N per group",
+        "summary": "ROW_NUMBER + filter pattern",
+        "snippet": "ROW_NUMBER() OVER (PARTITION BY g ORDER BY x DESC)"
+      },
+      {
+        "title": "Half-open date interval",
+        "summary": "Avoids BETWEEN gotchas with timestamps",
+        "snippet": "WHERE col >= start AND col < end"
+      }
+    ],
+    "python": [
+      {
+        "title": "groupby + agg",
+        "summary": "Aggregate by group with multiple metrics",
+        "snippet": "df.groupby('g').agg(total=('amt','sum'))"
+      }
+    ]
+  }
+}
