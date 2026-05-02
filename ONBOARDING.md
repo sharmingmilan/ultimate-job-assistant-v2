@@ -2,7 +2,7 @@
 
 **Status:** Public-facing. This is the doc someone clones (or copies into a sanitized public companion repo) to set up their own personalized version of Ultimate Job Assistant.
 
-**Last updated:** 2026-05-02
+**Last updated:** 2026-05-02 (revised — added Step 7: auto-sync workflow with fine-grained PAT)
 
 **Audience:** A new user who wants to use this toolkit for their own job search. You will replace every reference to the original author with your own profile, plug in your own base resume, and customize the workflow to your career situation.
 
@@ -130,6 +130,79 @@ When the `interview-prep` skill outputs a folder like `interview-prep/[company]-
 5. Add to your iPhone home screen via Safari → Share → Add to Home Screen
 
 That's it. No backend, no database, no monthly cost.
+
+### Step 7 — (Optional, advanced) Auto-sync canonical → deploy-source repo
+
+Skip this step unless you're running a **two-tier publish** like the original author: one private canonical repo for your real work, plus a separate sanitized "deploy-source" repo that hosts a public website (a download page, docs, etc.) via Netlify. If you only have one private repo for personal use, you don't need this.
+
+The setup below makes every push to `main` on your canonical repo automatically run `scripts/sync_to_public.py` against the deploy-source repo (allowlist + STRICT PII scan + curated zip rebuild) and push the result. Edit-to-live latency: ~30 seconds.
+
+**Pre-flight check:**
+
+- You already have two private repos (e.g., `you/ultimate-job-assistant` and `you/ultimate-job-assistant-public`).
+- `scripts/sync_to_public.py` runs cleanly when you invoke it manually.
+- The deploy-source repo is connected to Netlify (or another host) via OAuth and serves the live site.
+
+**1. Workflow file.** The canonical repo already ships `.github/workflows/auto-sync-to-public.yml`. Open it once and confirm the destination repo URL matches your fork. Default points at `sharmingmilan/ultimate-job-assistant-public` — change it if you forked.
+
+**2. Create a fine-grained Personal Access Token.** Open:
+
+```
+https://github.com/settings/personal-access-tokens/new
+```
+
+Fill it in:
+
+| Field | Value |
+|---|---|
+| Token name | `uja-auto-sync (canonical → deploy-source, fine-grained)` |
+| Resource owner | your GitHub username |
+| Expiration | Custom → ~365 days (1 year recommended) |
+| Repository access | **Only select repositories** → pick the **deploy-source** repo only (not the canonical) |
+| Repository permissions → **Contents** | **Read and write** ← critical — Read-only is not enough, the workflow needs to push |
+| Repository permissions → Metadata | Read-only (auto-granted; leave it) |
+| Every other permission | No access |
+
+Click **Generate token** and copy the `github_pat_...` string immediately — GitHub only shows it once.
+
+> **Common gotcha:** if you set Contents to "Read-only" by mistake, the workflow will fail at the clone step with `403 — Write access to repository not granted`. The fix is to edit the existing PAT (Repository permissions → Contents → switch to Read and write → Save). Updating the permission does **not** regenerate the token, so the secret value stays valid.
+
+**Why fine-grained over classic.** A classic PAT with `repo` scope works too, but it grants full read+write on every private repo you own. The fine-grained PAT can only touch the one repo it's scoped to, so a leak is much less damaging.
+
+**3. Store the token as a repo secret on the canonical repo.** Open:
+
+```
+https://github.com/<you>/<canonical-repo>/settings/secrets/actions
+```
+
+Click **New repository secret**:
+
+- **Name:** `PUBLIC_REPO_TOKEN` (exact spelling — the workflow reads this name)
+- **Secret:** paste the `github_pat_...` value
+- **Add secret**
+
+**4. Verify it works.** Push any small change to `main` on canonical, or trigger the workflow manually:
+
+```
+https://github.com/<you>/<canonical-repo>/actions/workflows/auto-sync-to-public.yml
+```
+
+Click **Run workflow** → **Run workflow**. Wait ~30 seconds. All six steps should be green:
+
+```
+✅ Set up job
+✅ Checkout canonical
+✅ Set up Python
+✅ Clone deploy-source repo
+✅ Run sync (allowlist + STRICT PII + curated zip build)
+✅ Commit + push if anything changed
+```
+
+If step 4 fails with `403 — Write access to repository not granted`, the PAT's Contents permission is Read-only — see the gotcha above. If it fails with the explicit message `PUBLIC_REPO_TOKEN secret is not set`, the secret name is misspelled or wasn't saved.
+
+**5. Confirm the live site picked it up.** Hit your Netlify URL after the workflow goes green. The downloadable zip's `last-modified` header should show the time the workflow ran, not earlier.
+
+**Rotating the PAT.** When the 1-year expiration approaches, GitHub emails a warning. Generate a fresh fine-grained PAT with the same settings, update the `PUBLIC_REPO_TOKEN` secret value (overwrite, don't add a new secret), then revoke the old PAT.
 
 ---
 
