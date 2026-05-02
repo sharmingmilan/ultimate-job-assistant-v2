@@ -365,3 +365,16 @@ Both GitHub repos are in sync as of v0.1.0 + the noindex commit. The simplified 
 ### What's Next
 
 Open a fresh Cowork session (Claude Sonnet 4.6 recommended). Use the handoff prompt at the end of this session to brief that session. The fresh session starts at SPEC §14 Phase 8 (zip generation in `sync_to_public.py`) and works through Phase 12 (custom domain wiring).
+
+### Late addition: public base-resume template
+
+After the v0.1.1 doc commit, added a starter resume template for public users:
+
+- New file: `scripts/generate_template_resume.py` (uses python-docx) generates a clean DOCX that mirrors the section structure of Milan's real base resume (PROFESSIONAL SUMMARY, PROFESSIONAL EXPERIENCE, SKILLS, EDUCATION) but with all values replaced by `[BRACKETED]` placeholder text.
+- Output: `references/templates/base-resume-template.docx` (~38 KB).
+- Sync allowlist already covers `references/templates/`, so the template flows to the public companion repo automatically.
+- ONBOARDING.md Step 3 now points users at this template if they don't already have a resume in a usable shape.
+- STRICT PII scan over the new template: zero hits (all content is bracketed placeholders).
+- SPEC §13 decisions list now includes item 9 documenting the template.
+
+This unblocks the v0.1.1 zip-distribution model: when someone downloads `ultimate-job-assistant.zip` from the website, they immediately have a fillable resume template alongside the skill code.

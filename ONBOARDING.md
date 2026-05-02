@@ -75,7 +75,15 @@ base-resumes/[your-role-type].docx
 
 Examples: `base-resumes/data-analyst.docx`, `base-resumes/product-manager.docx`. You can have multiple base resumes for different role types.
 
-If you also want the resume-targeter eval to run against a sanitized version of your resume, also place a redacted copy at:
+**Don't have a resume in the right structure?** A starter template is bundled with the project at:
+
+```
+references/templates/base-resume-template.docx
+```
+
+Open it, replace every value in `[BRACKETS]` with your real content (name, contact line, summary, work history, skills, education), save it under `base-resumes/[your-role-type].docx`, and you're done. The template mirrors a structure that the `resume-targeter` skill works well with: header line, PROFESSIONAL SUMMARY, PROFESSIONAL EXPERIENCE (one company per block with bullets), SKILLS, EDUCATION.
+
+If you also want the resume-targeter eval to run against a sanitized version of your resume, place a redacted copy at:
 
 ```
 skills/resume-targeter/evals/files/data_analyst_base.docx
