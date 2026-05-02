@@ -4,8 +4,8 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="robots" content="noindex,nofollow" />
-  <title>Ultimate Job Assistant — research-driven, agentic job application toolkit</title>
-  <meta name="description" content="A modular, research-driven personal job-application toolkit that runs inside Claude. Decoded JDs, targeted resumes, scored matches, speaking points, portfolio coaching, networking outreach, and a deployable interview-prep PWA per role." />
+  <title>Ultimate Job Assistant</title>
+  <meta name="description" content="A personal, research-driven job-application toolkit that runs inside Claude. Download the latest version." />
   <meta name="theme-color" content="#0f172a" />
   <link rel="icon" href="assets/favicon.svg" />
 
@@ -15,162 +15,77 @@
     .gradient-text { background: linear-gradient(120deg, #38bdf8 0%, #f472b6 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-200 antialiased">
+<body class="bg-slate-950 text-slate-200 antialiased min-h-screen flex flex-col">
 
-<header class="border-b border-slate-800 sticky top-0 z-10 bg-slate-950/80 backdrop-blur">
-  <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+<header class="border-b border-slate-800">
+  <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
     <a href="./" class="flex items-center gap-2">
       <span class="inline-block w-7 h-7 rounded bg-gradient-to-br from-sky-400 to-pink-400"></span>
       <span class="font-bold tracking-tight">Ultimate Job Assistant</span>
     </a>
-    <nav class="flex items-center gap-5 text-sm">
+    <nav class="flex items-center gap-5 text-sm text-slate-400">
       <a href="./docs/" class="hover:text-sky-300">Docs</a>
-      <a href="./docs/onboarding.html" class="hover:text-sky-300">Onboarding</a>
-      <a href="./docs/skills.html" class="hover:text-sky-300">Skills</a>
-      <a href="https://github.com/" target="_blank" rel="noreferrer" class="rounded border border-slate-700 px-3 py-1 hover:bg-slate-800">GitHub</a>
     </nav>
   </div>
 </header>
 
-<main>
-<section class="max-w-6xl mx-auto px-6 pt-20 pb-24">
-  <p class="text-sm text-sky-400 uppercase tracking-widest mb-4">v0.1.0 · Open source · Personal use</p>
-  <h1 class="text-5xl md:text-6xl font-bold leading-tight tracking-tight max-w-4xl">
-    A complete <span class="gradient-text">job application package</span><br />
-    in one Claude session.
-  </h1>
-  <p class="mt-6 text-lg text-slate-400 max-w-2xl leading-relaxed">
-    Ultimate Job Assistant is a research-driven, agentic toolkit that runs inside Claude. It decodes the job, researches the company, targets your resume, scores the match, drafts your "why this company" pitch, coaches a portfolio piece, finds warm introductions, and ships a deployable interview-prep study site for the role. Every step is human-in-the-loop. Nothing fabricated.
-  </p>
-  <div class="mt-10 flex flex-wrap gap-3">
-    <a href="./docs/onboarding.html" class="rounded bg-sky-500 hover:bg-sky-400 text-slate-950 font-semibold px-5 py-2.5">Get started</a>
-    <a href="./docs/" class="rounded border border-slate-700 hover:bg-slate-800 px-5 py-2.5">Read the docs</a>
-  </div>
+<main class="flex-1 flex items-center">
+  <section class="max-w-3xl mx-auto px-6 py-16 text-center">
+    <h1 class="text-5xl md:text-6xl font-bold leading-tight tracking-tight">
+      Your <span class="gradient-text">job application toolkit</span>,<br />
+      packaged in one zip.
+    </h1>
+    <p class="mt-6 text-lg text-slate-400 max-w-xl mx-auto">
+      A personal, research-driven toolkit that runs inside Claude. Decoded JDs, targeted resumes, scored matches, speaking points, portfolio coaching, networking outreach, and a deployable interview-prep PWA per role.
+    </p>
 
-  <div class="mt-12 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl text-center">
-    <div class="rounded-lg border border-slate-800 bg-slate-900/40 p-4">
-      <div class="text-3xl font-bold text-slate-100">8</div>
-      <div class="text-xs text-slate-400 uppercase tracking-wider">Skills</div>
+    <div class="mt-10 flex flex-col items-center gap-3">
+      <a
+        href="./downloads/ultimate-job-assistant.zip"
+        class="inline-flex items-center gap-3 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold px-8 py-4 text-lg transition shadow-lg shadow-sky-500/20"
+        download
+      >
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        Download the latest
+      </a>
+      <p class="text-xs text-slate-500" id="zip-meta">Always synced to the latest source &middot; one zip, ~2 MB</p>
     </div>
-    <div class="rounded-lg border border-slate-800 bg-slate-900/40 p-4">
-      <div class="text-3xl font-bold text-slate-100">$0</div>
-      <div class="text-xs text-slate-400 uppercase tracking-wider">Hosting cost</div>
-    </div>
-    <div class="rounded-lg border border-slate-800 bg-slate-900/40 p-4">
-      <div class="text-3xl font-bold text-slate-100">100%</div>
-      <div class="text-xs text-slate-400 uppercase tracking-wider">Local, no SaaS</div>
-    </div>
-    <div class="rounded-lg border border-slate-800 bg-slate-900/40 p-4">
-      <div class="text-3xl font-bold text-slate-100">~30s</div>
-      <div class="text-xs text-slate-400 uppercase tracking-wider">PWA deploy</div>
-    </div>
-  </div>
-</section>
 
-<section class="border-t border-slate-800 bg-slate-900/30">
-  <div class="max-w-6xl mx-auto px-6 py-20">
-    <h2 class="text-3xl font-bold mb-3 text-slate-100">What it does, in one chain</h2>
-    <p class="text-slate-400 max-w-3xl mb-12">For each role you target, the orchestrator walks you through eleven steps. Required steps run automatically; optional steps each get an explicit "yes / no / skip" prompt before executing.</p>
-
-    <div class="grid md:grid-cols-2 gap-6">
-      <div class="rounded-lg border border-slate-800 bg-slate-950/50 p-6">
-        <p class="text-xs uppercase tracking-wider text-pink-400 mb-2">Required path</p>
-        <ol class="space-y-3 text-slate-300">
-          <li class="flex gap-3"><span class="text-slate-500 font-mono text-sm">01</span><div><strong>Setup</strong><div class="text-sm text-slate-400">Identifies company and role from the JD; sets the naming convention.</div></div></li>
-          <li class="flex gap-3"><span class="text-slate-500 font-mono text-sm">02</span><div><strong>Decoded JD</strong><div class="text-sm text-slate-400">Explicit requirements, implicit expectations, confidence-tagged.</div></div></li>
-          <li class="flex gap-3"><span class="text-slate-500 font-mono text-sm">04</span><div><strong>Resume targeter</strong><div class="text-sm text-slate-400">Deep company research, adaptive Q&A, bullet rewrite with your approval.</div></div></li>
-          <li class="flex gap-3"><span class="text-slate-500 font-mono text-sm">06</span><div><strong>"Why this company"</strong><div class="text-sm text-slate-400">Speaking points grounded in the research brief.</div></div></li>
-          <li class="flex gap-3"><span class="text-slate-500 font-mono text-sm">10</span><div><strong>Wrap-up</strong><div class="text-sm text-slate-400">Tracker update, doc-freshness pass.</div></div></li>
-        </ol>
-      </div>
-      <div class="rounded-lg border border-slate-800 bg-slate-950/50 p-6">
-        <p class="text-xs uppercase tracking-wider text-emerald-400 mb-2">Optional steps</p>
-        <ol class="space-y-3 text-slate-300">
-          <li class="flex gap-3"><span class="text-slate-500 font-mono text-sm">03/05</span><div><strong>Resume scoring</strong><div class="text-sm text-slate-400">Before / after match scores against the decoded JD.</div></div></li>
-          <li class="flex gap-3"><span class="text-slate-500 font-mono text-sm">07</span><div><strong>Cover letter</strong><div class="text-sm text-slate-400">Drafted from the speaking points.</div></div></li>
-          <li class="flex gap-3"><span class="text-slate-500 font-mono text-sm">08</span><div><strong>Portfolio piece</strong><div class="text-sm text-slate-400">Scope, source data, plan, execute, package. The "dream company" investment.</div></div></li>
-          <li class="flex gap-3"><span class="text-slate-500 font-mono text-sm">09</span><div><strong>Networking outreach</strong><div class="text-sm text-slate-400">Find contacts, draft warm-intro messages.</div></div></li>
-          <li class="flex gap-3"><span class="text-slate-500 font-mono text-sm">9.5</span><div><strong class="text-sky-300">Interview-prep PWA — new in v0.1.0</strong><div class="text-sm text-slate-400">A deployable study site with worked examples, faded scaffolds, and free-recall problems. Sourced real questions from Glassdoor / Blind / Levels.fyi. Installable on your phone.</div></div></li>
-        </ol>
-      </div>
+    <div class="mt-12 flex justify-center gap-4 text-sm">
+      <a href="./docs/onboarding.html" class="text-slate-400 hover:text-sky-300">Setup guide &rarr;</a>
+      <span class="text-slate-700">&middot;</span>
+      <a href="./docs/" class="text-slate-400 hover:text-sky-300">All docs</a>
     </div>
-  </div>
-</section>
-
-<section class="max-w-6xl mx-auto px-6 py-20">
-  <h2 class="text-3xl font-bold mb-3 text-slate-100">The interview-prep PWA</h2>
-  <p class="text-slate-400 max-w-3xl mb-10">Built on a fixed pedagogical loop: <strong>worked example → faded scaffold → free recall</strong>, plus interleaving and spacing across topics. Modeled on the proven Netflix Interview Prep build that this project is forked from.</p>
-
-  <div class="grid md:grid-cols-3 gap-6">
-    <div class="rounded-lg border border-slate-800 bg-slate-900/40 p-6">
-      <p class="text-xs uppercase tracking-wider text-pink-400 mb-2">Came</p>
-      <h3 class="font-semibold text-slate-100 mb-2">Read the worked example</h3>
-      <p class="text-sm text-slate-400">Three solutions per topic at increasing difficulty. Every walkthrough explains <em>why</em> a construct was chosen, not just what it does.</p>
-    </div>
-    <div class="rounded-lg border border-slate-800 bg-slate-900/40 p-6">
-      <p class="text-xs uppercase tracking-wider text-orange-400 mb-2">Saw</p>
-      <h3 class="font-semibold text-slate-100 mb-2">Fill in the blanks</h3>
-      <p class="text-sm text-slate-400">Same problems, but with strategic blanks at error-prone tokens (join type, NULL operator, window-function choice). The scaffolding fades.</p>
-    </div>
-    <div class="rounded-lg border border-slate-800 bg-slate-900/40 p-6">
-      <p class="text-xs uppercase tracking-wider text-emerald-400 mb-2">Conquered</p>
-      <h3 class="font-semibold text-slate-100 mb-2">Write it from scratch</h3>
-      <p class="text-sm text-slate-400">New problems, blank editor, no scaffolding. Self-explain prompts after every attempt.</p>
-    </div>
-  </div>
-
-  <div class="mt-10 rounded-lg border border-sky-700/30 bg-sky-950/30 p-6 text-sm text-slate-300 max-w-3xl">
-    <p class="font-semibold text-sky-200 mb-2">Citations live in the footer of every generated PWA.</p>
-    <p>The pedagogy draws on Sweller &amp; Cooper (1985), Renkl (2014), Atkinson et al. (2003), Roediger &amp; Karpicke (2006), Rohrer (2012), Cepeda et al. (2006), Paivio (1971), Mayer (2009), and Chi et al. (1994). No vibes-based study advice; every claim is sourced.</p>
-  </div>
-</section>
-
-<section class="border-t border-slate-800 bg-slate-900/30">
-  <div class="max-w-6xl mx-auto px-6 py-20 text-center">
-    <h2 class="text-3xl font-bold text-slate-100 mb-3">Three things keep this honest</h2>
-    <div class="grid md:grid-cols-3 gap-6 mt-12 max-w-4xl mx-auto text-left">
-      <div>
-        <h3 class="font-semibold text-slate-100 mb-2">No fabrication</h3>
-        <p class="text-sm text-slate-400">Every claim about a company or interview process cites a credible source. Worked examples may use synthetic data; reported real questions in the "Real Qs" tab cite Glassdoor, Blind, Levels.fyi, or official posts.</p>
-      </div>
-      <div>
-        <h3 class="font-semibold text-slate-100 mb-2">Human-in-the-loop</h3>
-        <p class="text-sm text-slate-400">Every skill checkpoints with you before producing output. Bullet rewrites, content drafts, networking messages — you approve everything before it's saved or sent.</p>
-      </div>
-      <div>
-        <h3 class="font-semibold text-slate-100 mb-2">Specific over vague</h3>
-        <p class="text-sm text-slate-400">Resume bullets carry numbers, tools, outcomes, scope. Worked examples carry business motivation, not just mechanical asks. Cheap, generic content gets discarded.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="max-w-6xl mx-auto px-6 py-20">
-  <h2 class="text-3xl font-bold mb-3 text-slate-100">Get started</h2>
-  <p class="text-slate-400 max-w-3xl mb-10">The setup walkthrough takes about 30–45 minutes, mostly because the most valuable input — your <code class="bg-slate-900 rounded px-1.5 py-0.5 text-sky-300">memory.md</code> — is worth thinking through carefully.</p>
-  <div class="rounded-lg border border-slate-800 bg-slate-900/40 p-6 max-w-3xl">
-    <ol class="space-y-4 text-slate-300">
-      <li class="flex gap-3"><span class="text-slate-500 font-mono">1.</span><div><strong>Clone the repo.</strong><div class="text-sm text-slate-400 mt-1">Get the public companion repo onto your machine.</div></div></li>
-      <li class="flex gap-3"><span class="text-slate-500 font-mono">2.</span><div><strong>Personalize <code class="bg-slate-800 rounded px-1 text-sky-300">memory.md</code>.</strong><div class="text-sm text-slate-400 mt-1">Identity, work style, anchor stories, formatting preferences. Most important file in the project.</div></div></li>
-      <li class="flex gap-3"><span class="text-slate-500 font-mono">3.</span><div><strong>Drop in your base resume.</strong><div class="text-sm text-slate-400 mt-1">DOCX preferred. Goes in <code class="bg-slate-800 rounded px-1 text-sky-300">base-resumes/</code>.</div></div></li>
-      <li class="flex gap-3"><span class="text-slate-500 font-mono">4.</span><div><strong>Open Claude Desktop in Cowork mode.</strong><div class="text-sm text-slate-400 mt-1">Select the project folder. Say <em>"I want to apply to [Company] for the [Role]."</em> The orchestrator takes it from there.</div></div></li>
-    </ol>
-    <a href="./docs/onboarding.html" class="inline-block mt-6 rounded bg-sky-500 hover:bg-sky-400 text-slate-950 font-semibold px-5 py-2.5">Full onboarding guide →</a>
-  </div>
-</section>
-
+  </section>
 </main>
 
-<footer class="border-t border-slate-800 mt-12">
-  <div class="max-w-6xl mx-auto px-6 py-10 text-sm text-slate-500 flex flex-wrap items-center justify-between gap-4">
-    <p>Ultimate Job Assistant · v0.1.0 · MIT-style personal license · No tracking, no analytics, no SaaS.</p>
-    <div class="flex gap-5">
-      <a href="./docs/" class="hover:text-slate-300">Docs</a>
-      <a href="./docs/skills.html" class="hover:text-slate-300">Skills</a>
-      <a href="https://github.com/" class="hover:text-slate-300">GitHub</a>
-    </div>
+<footer class="border-t border-slate-800">
+  <div class="max-w-5xl mx-auto px-6 py-6 text-xs text-slate-500 flex flex-wrap items-center justify-between gap-3">
+    <p>Ultimate Job Assistant &middot; v0.1.0 &middot; Personal use</p>
+    <p>No tracking. No analytics. No SaaS.</p>
   </div>
 </footer>
+
+<script>
+  // Show zip last-modified date if the file responds to a HEAD request
+  fetch('./downloads/ultimate-job-assistant.zip', { method: 'HEAD' })
+    .then(r => {
+      const lm = r.headers.get('last-modified');
+      const sz = r.headers.get('content-length');
+      const meta = document.getElementById('zip-meta');
+      if (meta && (lm || sz)) {
+        const parts = [];
+        if (sz) parts.push(`${(parseInt(sz, 10) / 1024 / 1024).toFixed(1)} MB`);
+        if (lm) parts.push(`updated ${new Date(lm).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}`);
+        meta.textContent = `Always synced to the latest source · ${parts.join(' · ')}`;
+      }
+    })
+    .catch(() => {});
+</script>
 
 </body>
 </html>

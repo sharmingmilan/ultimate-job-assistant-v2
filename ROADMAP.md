@@ -140,13 +140,15 @@ A small `analytics.json` at the project root; every PWA writes summary stats on 
 
 ---
 
-## Track 6 — Auto-deploy (CD on tag)
+## ~~Track 6 — Auto-deploy (CD on tag)~~ — promoted to v0.1.1
 
-Today CI runs lint + smoke. CD is manual (Netlify Drop). Add: on tagged release, deploy a sample PWA to a preview URL.
+This track is now part of the committed v0.1.1 build (SPEC §14). The form is slightly different from the original framing: rather than auto-deploying on tagged release, the v0.1.1 plan auto-deploys on **every push to main** of the canonical private repo, via a GitHub Action that:
 
-### Why later
+1. Runs `scripts/sync_to_public.py` with strict PII scan
+2. Pushes the sanitized result to the deploy-source repo
+3. Netlify (now the host) auto-rebuilds when the deploy-source repo changes
 
-Personal use doesn't need it. Useful if the project goes public — gives strangers a live demo to look at.
+Edit-to-live latency target: ~30 seconds.
 
 ---
 
@@ -173,5 +175,9 @@ Things explicitly NOT planned, even with infinite time:
 | 2026-05-02 | Do NOT amend commit `49bc5be` | The original commit retains the unredacted resume fixture. Per the new repo strategy, this is fine — the repo is private and stays private. Working-tree redacted version remains for use as the active eval fixture. |
 | 2026-05-02 | **Public companion repo confirmed (option b)** | Selected over single-doc and branch-based publish. New repo `ultimate-job-assistant-public` will hold sanitized skill code + templates + ONBOARDING + website source. Sync via allowlisted script with PII scanner; never automatic. See SPEC §13.1. |
 | 2026-05-02 | **Public website: shape C, GitHub Pages, part of v0.1.0** | Landing page + multi-page docs site. Astro is the default stack (decision flips during Phase 7 design if MkDocs Material fits better). Live demo PWA (option D) deferred to v0.1.1. See SPEC §13.2 and Phase 7 in §14. |
+| 2026-05-02 (Phase 7 design) | **Stack flipped from Astro to plain static HTML + Tailwind CDN** | Mirrors PWA-template philosophy. ~1 hr build vs 3+ for Astro. GitHub Pages serves directly with `upload-pages-artifact` + `deploy-pages`. |
+| 2026-05-02 (post-v0.1.0 same day) | **noindex + robots.txt added** | Site stays live and public-repo-hosted but is invisible to search engines. Personal-toolkit note added to README. URL becomes the credential. |
+| 2026-05-02 (post-v0.1.0 evening) | **Landing page simplified to download-first** | One primary CTA: "Download the latest". HEAD-fetch JS displays zip size + date. Documentation pages still exist but understated. |
+| 2026-05-02 (final architecture revision) | **Both repos go private, hosting moves to Netlify, zip distribution** | Even with `noindex`, a public GitHub repo is still searchable on GitHub itself. Moving hosting from GitHub Pages to Netlify (free tier, reads private repos via OAuth) lets both repos go private while keeping the site live. The website exposes `/downloads/ultimate-job-assistant.zip` for anyone with the URL — that becomes the public artifact. Auto-sync via GitHub Action on the canonical private repo. Custom domain (~$12/yr) confirmed for v0.1.1. See SPEC §13 (current state) and §14 v0.1.1 phases 8-12. |
 
 Append future decisions here as they're made.

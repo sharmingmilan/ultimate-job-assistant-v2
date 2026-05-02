@@ -382,16 +382,31 @@ The project is "v0.1.0 ready" when:
 
 ---
 
-## 13. Decisions (confirmed by Milan, 2026-05-02)
+## 13. Decisions (confirmed by Milan, 2026-05-02; revised same day)
 
-1. **Repo strategy — two-tier, REVISED 2026-05-02:**
-   - **Private repo** holds the canonical project including any artifacts that contain personal data (e.g., `skills/resume-targeter/evals/files/data_analyst_base.docx` in the v0.1.0 baseline commit `49bc5be` retains real PII). This repo is **never made public.**
-   - **Public artifact** is `ONBOARDING.md` (and any future companion public repo derived from it). It contains a sanitized walk-through that lets a new user clone the public companion (or a sanitized export of this project) and personalize it to their own profile, base resume, memory.md content, etc.
-   - The earlier "flip private → public after first successful run" plan is **superseded** by this two-tier model. Milan's exact words: *"that can go private repo but never public. also want to maintain an onboarding doc in public for full onboarding of repo to personalize it to user preference."*
-2. **Custom domain:** skip. Use Netlify-generated URLs.
-3. **Iconography:** one **generic neutral icon for the Ultimate Job Assistant app**. Reused for every PWA generated; not regenerated per application.
-4. **Existing `interview-prep/` PDFs:** keep in place; no migration. New `[convention]-pwa/` subfolders coexist.
-5. **Approval cadence:** proceed automatically when self-audit is fully green. Stop and surface on any ⚠️ or ❌.
+1. **Repo strategy — two-tier, FINAL form (2026-05-02 evening revision):**
+   - **Private canonical repo** (`ultimate-job-assistant`) holds the canonical project including any artifacts that contain personal data (e.g., the unredacted resume fixture preserved in baseline commit `49bc5be`). Never made public.
+   - **Sanitized deploy-source repo** (`ultimate-job-assistant-public`) is **also private**. Despite the name, this repo is no longer publicly browsable on GitHub. It exists solely as a sanitized mirror that a hosting provider (Netlify) reads via OAuth to serve the website. The "public" in its name is historical — it carries the public-facing/sanitized state, not public visibility.
+   - **Public-facing surface** is the website only. The website exposes `/downloads/ultimate-job-assistant.zip` for anyone with the site URL — no GitHub account required to download. The zip is the canonical public artifact.
+   - **Why the change.** Earlier (morning of 2026-05-02) the plan was: keep the deploy-source repo public so GitHub Pages on the free tier could serve the site. Milan revised this in the evening: even with `noindex` and `robots.txt`, a public GitHub repo is still searchable on GitHub itself. Moving hosting to Netlify lets both repos go private while keeping the site live. Cost stays $0/mo (Netlify free tier reads private GitHub repos with OAuth).
+2. **Hosting:** **Netlify** (free tier), reading the private deploy-source repo via GitHub OAuth. Replaces GitHub Pages. URL goes from `sharmingmilan.github.io/...` to `*.netlify.app` (or to a custom domain when purchased).
+3. **Custom domain:** **buy one, ~$12/yr.** Likely candidates: `ujassist.app` or `ultimatejobassistant.com` via Cloudflare or Namecheap. Milan buys the domain; Claude wires the DNS to Netlify.
+4. **Distribution model:** **zip download from the website.** `scripts/sync_to_public.py` regenerates `website/downloads/ultimate-job-assistant.zip` on every sync. The simplified landing page (`website/index.html`) has one primary CTA — "Download the latest" — and a HEAD-fetch JS snippet that displays the zip's size and last-modified date.
+5. **Sync trigger:** **GitHub Action on the private canonical repo.** Triggers on every push to `main`, runs `sync_to_public.py` with the STRICT PII scanner gate, and pushes to the deploy-source repo. Requires a Personal Access Token stored as repo secret `PUBLIC_REPO_TOKEN` (scope: `repo`). Milan creates the PAT manually.
+6. **Iconography:** one **generic neutral icon for the Ultimate Job Assistant app**. Reused for every PWA generated; not regenerated per application.
+7. **Existing `interview-prep/` PDFs:** keep in place; no migration. New `[convention]-pwa/` subfolders coexist.
+8. **Approval cadence:** proceed automatically when self-audit is fully green. Stop and surface on any ⚠️ or ❌. Repeated-but-already-approved warnings (e.g., expected SOFT PII hits in private repos) count as informational, not blocking.
+
+### 13.A Superseded decisions (history)
+
+The following items represent prior thinking that has been replaced; they are kept here so the historical context is recoverable.
+
+| Date | Earlier decision | Replaced by |
+|---|---|---|
+| 2026-05-02 morning | "Flip private → public after first successful run" | The two-tier strategy in §13.1 (private + sanitized companion). |
+| 2026-05-02 morning | "Public companion repo can be public on GitHub; site lives on GitHub Pages with `noindex`" | §13.1: both repos private; site moves to Netlify. |
+| 2026-05-02 afternoon | "Stack for the website is plain static HTML + Tailwind CDN, served via GitHub Pages" | Stack stays the same (still plain HTML + Tailwind CDN). Hosting moves to Netlify. |
+| 2026-05-02 afternoon | "Custom domain skipped for v0.1.0" | §13.3: custom domain confirmed as part of the v0.1.1 path. |
 
 ### 13.1 Public artifact strategy (decided 2026-05-02)
 
@@ -436,17 +451,30 @@ The decision was explicitly anticipated in the original spec ("decision can flip
 
 ## 14. Execution plan
 
-| Phase | Subject | Deliverable | Checkpoint |
+### v0.1.0 (shipped — committed and tagged 2026-05-02)
+
+| Phase | Subject | Deliverable | Status |
 |---|---|---|---|
-| 0 | Bootstrap project | New project folder, copied content, git init, root docs | Structure mirrors Job Assist + new dirs documented |
-| 1 | Author SKILL.md | `skills/interview-prep/SKILL.md` (full pedagogy + workflow A–F) | Self-explainable to future Claude |
-| 2 | Build PWA template | `template/`, `content-schema.json`, smoke test green | Sample content renders without JS errors |
-| 3 | Wire orchestrator | Updated `orchestrator/SKILL.md`, `CLAUDE.md`, `tracker.md` | Cross-doc consistency audit passes |
-| 4 | Git + CI/CD | `.github/workflows/ci.yml`, baseline commit, README.md | CI green on a clean clone |
-| 5 | Regression test | Run skill against Netflix JD; structural diff | Structural parity confirmed |
-| 6 | ROADMAP + audit | `ROADMAP.md`, consistency audit | All Job Assist conventions honored |
-| 7 | Companion repo + website | `ultimate-job-assistant-public` repo, sync script, Astro site (landing + docs), GitHub Pages deploy | PII scanner clean before first push; site renders on Pages |
-| (tag) | Tag `v0.1.0` | Final tag after Phase 7 ships | All acceptance criteria in §10 met |
+| 0 | Bootstrap project | New project folder, copied content, git init, root docs | ✅ commit `49bc5be` |
+| 1 | Author SKILL.md | `skills/interview-prep/SKILL.md` (full pedagogy + workflow A–F) | ✅ commit `eb0d7ac` |
+| 2 | Build PWA template | `template/`, `content-schema.json`, smoke test green | ✅ commit `eb0d7ac` |
+| 3 | Wire orchestrator | Updated `orchestrator/SKILL.md`, `CLAUDE.md`, `tracker.md` | ✅ commit `eb0d7ac` |
+| 4 | Git + CI/CD | `.github/workflows/ci.yml`, baseline commit, README.md | ✅ commit `eb0d7ac` |
+| 5 | Regression test | Run skill against Netflix JD; structural diff | ✅ commit `d67c9d0` |
+| 6 | ROADMAP + audit | `ROADMAP.md`, consistency audit | ✅ commit `d67c9d0` |
+| 7 | Companion repo + website | `ultimate-job-assistant-public` repo, sync script, static landing+docs, GitHub Pages deploy | ✅ commit `3682c8a`, tagged `v0.1.0` |
+| 7.5 | noindex + robots.txt + landing simplification | site stays live, search-invisible | ✅ commit `f02d9d4` (private), `bd975b2` (public) |
+
+### v0.1.1 (next — fresh-session work)
+
+| Phase | Subject | Deliverable | Acceptance |
+|---|---|---|---|
+| 8 | Add zip generation to `sync_to_public.py` | `website/downloads/ultimate-job-assistant.zip` is regenerated on every sync; `.gitkeep` keeps the dir | Sample sync produces a fresh zip; landing page HEAD-fetch displays size + date |
+| 9 | Migrate hosting to Netlify | Netlify connected to deploy-source repo via OAuth; site live at `*.netlify.app`; GitHub Pages disabled | Netlify URL responds 200; download works |
+| 10 | Make deploy-source repo private | `ultimate-job-assistant-public` flipped to `private: true` via API | Netlify still serves (OAuth stays valid) |
+| 11 | Auto-sync GitHub Action | `.github/workflows/auto-sync-to-public.yml` on the canonical private repo, gated on STRICT PII scan | Push to canonical → public is auto-updated within ~30 s |
+| 12 | Custom domain | Milan buys; Claude wires DNS to Netlify | HTTPS provisioned, custom URL responds 200 |
+| (tag) | Tag `v0.1.1` | Tag after phase 12 ships | All §10 acceptance criteria, plus zip-distribution criteria pass |
 
 ---
 

@@ -243,19 +243,23 @@ When applying to a new role at a company that already has a `research/[company].
 - Netflix full lifecycle test (decode, score before 56%, resume, score after 82%, speaking points, cover letter, portfolio, networking)
 - Folder structure consolidation, output-type restructure, all SKILL.md output paths updated
 
-**In progress (UJA v0.1.0 — see SPEC.md for full plan):**
-- Phase 0: Bootstrap project (this session)
-- Phase 1: Author `interview-prep/SKILL.md`
-- Phase 2: Build PWA template + content schema
-- Phase 3: Wire skill into orchestrator as Step 9.5
-- Phase 4: Git + CI/CD setup
-- Phase 5: Regression test using Netflix Interview Prep content
-- Phase 6: ROADMAP.md + final consistency audit + v0.1.0 tag
+**Shipped in UJA v0.1.0 (2026-05-02, tagged):**
+- Phases 0–7 complete. Two GitHub repos exist on github.com/sharmingmilan: `ultimate-job-assistant` (private) and `ultimate-job-assistant-public` (currently public).
+- Site live at https://sharmingmilan.github.io/ultimate-job-assistant-public/
+- `noindex` + `robots.txt: Disallow /` added post-v0.1.0; site is search-invisible.
+- Landing page simplified to a download-first design (single "Download the latest" CTA).
 
-**Next up after v0.1.0:**
-- First real run of `interview-prep` against an actual upcoming application
-- Decision point: flip repo to public after the first successful real run (requires explicit Milan approval)
-- See ROADMAP.md for SaaS pivot path
+**In progress (UJA v0.1.1 — see SPEC.md §14 for full phase list):**
+- Phase 8: Add zip generation to `scripts/sync_to_public.py` (regenerates `website/downloads/ultimate-job-assistant.zip` on every sync).
+- Phase 9: Migrate hosting from GitHub Pages → Netlify (free tier, reads private repos via OAuth).
+- Phase 10: Flip `ultimate-job-assistant-public` to private. The "public" in the name becomes historical — both repos are private; Netlify reads the deploy-source repo via OAuth.
+- Phase 11: GitHub Action on canonical private repo for auto-sync on every push to main.
+- Phase 12: Wire custom domain to Netlify (Milan buys ~$12/yr, Claude does DNS).
+- Tag `v0.1.1` after Phase 12 ships.
+
+**Next up after v0.1.1:**
+- First real run of `interview-prep` against an actual upcoming application.
+- See ROADMAP.md for longer-term tracks (SaaS pivot, in-browser code execution, real spaced repetition).
 
 ---
 

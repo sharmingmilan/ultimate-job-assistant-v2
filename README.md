@@ -81,16 +81,25 @@ Ultimate Job Assistant/
 
 ## Status
 
-**Version:** v0.1.0 (in build)
+**Version:** v0.1.0 shipped (2026-05-02). v0.1.1 in active build.
 
-See [SPEC.md](SPEC.md) for the build plan and acceptance criteria, and [ROADMAP.md](ROADMAP.md) for what comes after v0.1.0.
+**v0.1.0** delivered the eight skills, the interview-prep PWA template, the regression test, the public-facing website, and the git + CI/CD plumbing. Site is live, search-invisible, hosted on GitHub Pages.
+
+**v0.1.1** (in progress) reshapes the distribution model:
+- Both GitHub repos go private (the deploy-source repo currently named `ultimate-job-assistant-public` keeps its name but flips to private)
+- Hosting moves to Netlify (free tier, reads private GitHub repos via OAuth)
+- The website's primary action becomes downloading a zip of the latest sanitized state
+- Auto-sync via GitHub Action on every push to the canonical private repo
+- Custom domain wired in once Milan buys one
+
+See [SPEC.md](SPEC.md) §13 for the current decision set and §14 for the v0.1.1 phase list. [ROADMAP.md](ROADMAP.md) covers the longer-term tracks beyond v0.1.1.
 
 ---
 
 ## License
 
-Personal project. Currently private. See SPEC.md §13 for the public-release decision path.
+Personal project. Both repos private going forward. The website hosts a downloadable zip of the latest sanitized state; that zip is the public artifact, not the GitHub repo itself.
 
 ---
 
-> **Note**: This is a personal toolkit, hosted publicly so the link can be shared but **not promoted**. Search engines are blocked via `robots.txt` and `noindex`. If you found this and want to fork or adapt it for your own job search, please open an issue first so we can chat about your use case.
+> **Note**: This is a personal toolkit. The website hosts a downloadable zip of the sanitized state for anyone with the URL. Search engines are blocked via `robots.txt` and `noindex`. If you found this and want to fork or adapt it for your own job search, please reach out first so we can chat about your use case.

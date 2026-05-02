@@ -332,3 +332,36 @@ Moved to CLAUDE.md "Current Status & What's Next" section. SESSION_LOG.md is now
 ### What's Next
 
 Phase 7: companion repo + landing page + GitHub Pages docs site. Then the v0.1.0 tag. See SPEC.md §14 and ROADMAP.md.
+
+---
+
+## Session: 2026-05-02 (UJA Session 2 — same-day continuation) — v0.1.0 ship + v0.1.1 architecture pivot
+
+### What Got Done
+
+- **v0.1.0 shipped end-to-end this session.** Phase 7 completed: `scripts/sync_to_public.py` written with allowlist + PII gate, `website/` source authored as plain static HTML + Tailwind CDN (decision flipped from Astro mid-Phase 7), `.github-pages-workflow.yml` placed for the public companion repo. Tagged `v0.1.0`.
+- **GitHub publish executed.** Both repos created on github.com/sharmingmilan: `ultimate-job-assistant` (private, full v0.1.0 history including baseline `49bc5be`) and `ultimate-job-assistant-public` (public at the time, sanitized via sync). Auth done via GitHub device-flow over curl with GitHub CLI's public client_id, since SDK auth doesn't work due to no dynamic client registration. Site deployed to GitHub Pages successfully.
+- **Post-ship policy turn 1 — `noindex`.** Site stays live and hosted on GitHub Pages, but `noindex` meta tags + `robots.txt: Disallow /` added. Search engines blocked. README updated with personal-toolkit note. Commit `f02d9d4` (private), `bd975b2` (public).
+- **Post-ship policy turn 2 — landing-page simplification.** Rewrote `website/index.html` from product-marketing copy to a download-first design: one big "Download the latest" CTA, HEAD-fetch JS that displays size + last-modified date once the zip exists, secondary links to docs. Old marketing-style landing replaced.
+- **Architecture pivot for v0.1.1.** After working through GitHub Pro pricing and hosting alternatives, settled on the final form: both repos private, hosting moves to Netlify (free tier reads private GitHub repos via OAuth), website distributes a zip download as the public artifact. Custom domain (~$12/yr) confirmed for v0.1.1.
+
+### Key Decisions
+
+- **Both repos go private.** The deploy-source repo `ultimate-job-assistant-public` keeps its name but flips to private. Even with `noindex`, a public GitHub repo is searchable on GitHub itself; making it private removes that surface area. See SPEC §13.
+- **Netlify replaces GitHub Pages.** GitHub Pages on the free tier requires a public source repo. Netlify's free tier does not. Moving lets both repos go private. URL changes from `*.github.io` to `*.netlify.app` (or to a custom domain when bought).
+- **Distribution via website zip download.** The website regenerates `website/downloads/ultimate-job-assistant.zip` on every sync. Anyone with the site URL can download. No GitHub account required to consume.
+- **Auto-sync trigger: GitHub Action on canonical private repo push to main.** Every push runs the sync, which gates on the STRICT PII scanner. Edit-to-live latency target ~30 seconds.
+- **The implementation work for v0.1.1 happens in a fresh Cowork session.** This session ends with all v0.1.1 design decisions documented in SPEC.md §13 + §14, ROADMAP.md decision log, and a self-contained handoff prompt that the fresh session uses to pick up.
+
+### What Got Pushed Where (this session)
+
+Three more commits landed on canonical `main` after v0.1.0:
+  - `f02d9d4` — noindex + robots.txt + personal-toolkit README note
+  - `eb0d7ac` and earlier already pushed in Session 1
+  - The simplified landing page edit + the v0.1.1 doc updates are in the working tree at log time and will be committed below.
+
+Both GitHub repos are in sync as of v0.1.0 + the noindex commit. The simplified landing page and these doc updates ship in the next commit.
+
+### What's Next
+
+Open a fresh Cowork session (Claude Sonnet 4.6 recommended). Use the handoff prompt at the end of this session to brief that session. The fresh session starts at SPEC §14 Phase 8 (zip generation in `sync_to_public.py`) and works through Phase 12 (custom domain wiring).
