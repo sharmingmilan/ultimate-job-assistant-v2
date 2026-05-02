@@ -57,6 +57,11 @@ node_modules/
 *.log
 /tmp/
 
+# The website's downloadable zip is built in the deploy-source (public) repo
+# by scripts/sync_to_public.py. The canonical repo never carries it; if a
+# stray copy lands here from a manual test, ignore it rather than commit it.
+website/downloads/ultimate-job-assistant.zip
+
 # Local backup files (e.g., .docx.bak created during sanitization passes).
 # These often contain pre-redaction PII. Never commit them.
 *.bak

@@ -9,7 +9,12 @@ Workflow:
   3. After copy, run scripts/scan_pii.py --strict over the destination tree.
   4. If the scanner finds anything, ABORT and roll back the destination changes
      (only the just-synced files; pre-existing public files are untouched).
-  5. If clean, print a diff for the user to eyeball before committing.
+  5. Build website/downloads/ultimate-job-assistant.zip from the sanitized
+     deploy-source working tree (excludes .git, node_modules, build caches,
+     macOS metadata, and the downloads dir itself). Sets the zip mtime to now
+     so the live site can show "updated <date>" via a HEAD request. Verifies
+     the zip contains required members (e.g. references/templates/base-resume-template.docx).
+  6. Print a diff for the user to eyeball before committing.
 
 This script never automatically commits or pushes. The user does that manually
 after reviewing the diff.
@@ -22,13 +27,16 @@ Exit codes:
     0  sync completed (or dry-run reported what would change)
     1  PII scanner blocked the sync (rolled back)
     2  bad arguments or destination structure
-    3  unexpected error
+    3  zip build failed (missing required members) or unexpected error
 """
 
 import argparse
+import os
 import shutil
 import subprocess
 import sys
+import time
+import zipfile
 from pathlib import Path
 
 # Allowlist: tuples of (src_path_relative_to_repo_root, dst_path_relative_to_public_root).
@@ -92,6 +100,132 @@ EXCLUDE_DST = {
 
 def run(cmd, cwd=None, check=True):
     return subprocess.run(cmd, cwd=cwd, check=check, capture_output=True, text=True)
+
+
+# Paths inside the deploy-source repo that the zip MUST NOT contain.
+# These are checked against the path RELATIVE to the deploy-source root.
+ZIP_EXCLUDE_DIRS = {".git", "node_modules", ".github/cache", "__pycache__", ".cache"}
+# The zip must not include itself or its parent download directory (would
+# either be empty or stale on every regeneration).
+ZIP_EXCLUDE_PATH_PREFIXES = ("website/downloads/",)
+ZIP_EXCLUDE_FILES = {".DS_Store"}
+
+# Output location of the zip, relative to the deploy-source repo root.
+ZIP_RELPATH = "website/downloads/ultimate-job-assistant.zip"
+# Files we expect to find in every published zip. Verified after build.
+ZIP_REQUIRED_MEMBERS = (
+    "references/templates/base-resume-template.docx",
+    "ONBOARDING.md",
+    "skills/interview-prep/SKILL.md",
+    "website/index.html",
+)
+
+
+def _should_exclude_from_zip(rel_posix: str) -> bool:
+    """Return True if a path inside the deploy-source repo should NOT go in the zip."""
+    parts = rel_posix.split("/")
+    # Exclude any file inside an excluded directory at any depth.
+    for skip in ZIP_EXCLUDE_DIRS:
+        skip_parts = skip.split("/")
+        # match skip_parts as a prefix-window anywhere in parts
+        for i in range(len(parts) - len(skip_parts) + 1):
+            if parts[i:i + len(skip_parts)] == skip_parts:
+                return True
+    if any(rel_posix.startswith(p) for p in ZIP_EXCLUDE_PATH_PREFIXES):
+        return True
+    if parts and parts[-1] in ZIP_EXCLUDE_FILES:
+        return True
+    return False
+
+
+def build_zip(public_root: Path) -> Path:
+    """
+    Bundle the deploy-source repo's working tree into website/downloads/ultimate-job-assistant.zip.
+
+    Excludes .git, node_modules, build caches, the downloads dir itself, and
+    macOS metadata. Sets the zip mtime to "now" so the live site can show an
+    accurate "updated <date>" via a HEAD request. Adds website/downloads/.gitkeep
+    so the directory survives in git even when the zip is gitignored.
+
+    After write, verifies the required members are present (e.g. the public
+    base-resume template). Aborts the sync if a required member is missing.
+    """
+    zip_path = public_root / ZIP_RELPATH
+    zip_path.parent.mkdir(parents=True, exist_ok=True)
+
+    gitkeep = zip_path.parent / ".gitkeep"
+    if not gitkeep.exists():
+        gitkeep.write_text("# Keep website/downloads/ in git so the path is stable for the landing page.\n")
+
+    # Write to a temp file in the same directory then atomically rename, so a
+    # partially-written zip is never observable to the live site.
+    tmp_path = zip_path.with_suffix(".zip.tmp")
+    if tmp_path.exists():
+        tmp_path.unlink()
+
+    file_count = 0
+    total_bytes = 0
+    with zipfile.ZipFile(tmp_path, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=6) as zf:
+        # Walk every file, sorted for reproducible output.
+        all_files = []
+        for dirpath, dirnames, filenames in os.walk(public_root):
+            # Prune excluded directories so we don't recurse into them.
+            rel_dir = Path(dirpath).relative_to(public_root).as_posix()
+            keep_dirs = []
+            for d in dirnames:
+                child_rel = (rel_dir + "/" + d).lstrip("/") if rel_dir != "." else d
+                if not _should_exclude_from_zip(child_rel + "/"):
+                    keep_dirs.append(d)
+            dirnames[:] = sorted(keep_dirs)
+            for fn in sorted(filenames):
+                full = Path(dirpath) / fn
+                rel = full.relative_to(public_root).as_posix()
+                if _should_exclude_from_zip(rel):
+                    continue
+                all_files.append((full, rel))
+
+        for full, rel in all_files:
+            try:
+                size = full.stat().st_size
+            except OSError:
+                continue
+            zf.write(full, arcname=rel)
+            file_count += 1
+            total_bytes += size
+
+    # Verify required members are present.
+    missing = []
+    with zipfile.ZipFile(tmp_path, "r") as zf:
+        names = set(zf.namelist())
+        for required in ZIP_REQUIRED_MEMBERS:
+            if required not in names:
+                missing.append(required)
+    if missing:
+        tmp_path.unlink()
+        raise RuntimeError(
+            "Zip build aborted — required members missing from bundle:\n  - "
+            + "\n  - ".join(missing)
+        )
+
+    # Atomic replace.
+    if zip_path.exists():
+        zip_path.unlink()
+    tmp_path.rename(zip_path)
+
+    # Stamp mtime to now so the live site's HEAD-fetch shows today's date.
+    now = time.time()
+    os.utime(zip_path, (now, now))
+
+    print(f"  ZIP BUILT: {ZIP_RELPATH}")
+    print(f"    files:   {file_count}")
+    print(f"    raw:     {total_bytes / 1024:.1f} KB uncompressed")
+    print(f"    on-disk: {zip_path.stat().st_size / 1024:.1f} KB compressed")
+    print(f"    mtime:   {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(now))}")
+    print(f"    .gitkeep present at: website/downloads/.gitkeep")
+    print(f"    verified members:")
+    for m in ZIP_REQUIRED_MEMBERS:
+        print(f"      ✅ {m}")
+    return zip_path
 
 
 def is_excluded(rel_dst: str) -> bool:
@@ -187,6 +321,7 @@ def main():
         print()
 
     if args.dry_run:
+        print("(Step 3 skipped in dry run: zip build runs only on real syncs.)")
         print("Dry run complete.  Re-run without --dry-run to actually sync.")
         sys.exit(0)
 
@@ -211,7 +346,23 @@ def main():
         sys.exit(1)
 
     print()
-    print("Step 3: scanner clean.  Diff to review:")
+    print("Step 3: build website/downloads/ultimate-job-assistant.zip from sanitized tree")
+    try:
+        build_zip(dst_root)
+    except RuntimeError as e:
+        print()
+        print("=" * 60)
+        print("ZIP BUILD ABORTED.")
+        print(str(e))
+        print()
+        print("The PII scan was clean, but the resulting bundle is missing")
+        print("expected members. Fix the allowlist or template generation, then")
+        print("re-run sync.")
+        print("=" * 60)
+        sys.exit(3)
+
+    print()
+    print("Step 4: scanner clean + zip built.  Diff to review:")
     diff = subprocess.run(["git", "status", "--short"], cwd=dst_root, capture_output=True, text=True)
     print(diff.stdout or "(no changes)")
 
