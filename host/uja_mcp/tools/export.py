@@ -224,6 +224,225 @@ def _serialize_manifest(manifest: dict) -> bytes:
     ).encode("utf-8")
 
 
+# ---------------------------------------------------------------------------
+# Folder walker + minimum-viable validation (Block 3)
+# ---------------------------------------------------------------------------
+
+
+# Mapping per ADR-002 D4 zip layout + Session 12 brief Block 3 table.
+# Each tuple: (project-root subpath, in-zip subfolder, file-pattern, kind).
+# Required entries are enforced explicitly in `_walk_application_files`;
+# this table only describes optional single-file slots.
+_OPTIONAL_FILE_SLOTS: tuple[tuple[str, str, str, str], ...] = (
+    ("resumes",          "resume",          "{id}.pdf",        KIND_RESUME_PDF),
+    ("scores",           "scores",          "{id}-before.md",  KIND_SCORE_BEFORE),
+    ("scores",           "scores",          "{id}-after.md",   KIND_SCORE_AFTER),
+    ("speaking-points",  "speaking-points", "{id}.md",         KIND_SPEAKING_POINTS_MD),
+    ("speaking-points",  "speaking-points", "{id}.pdf",        KIND_SPEAKING_POINTS_PDF),
+    ("cover-letters",    "cover-letter",    "{id}.md",         KIND_COVER_LETTER_MD),
+    ("cover-letters",    "cover-letter",    "{id}.pdf",        KIND_COVER_LETTER_PDF),
+)
+
+
+def _resolve_relative(root: Path, rel: str) -> Path:
+    """Sandbox-bounded resolve helper that raises ToolError on violation."""
+    try:
+        return resolve_within_root(root, rel)
+    except SandboxViolation as e:
+        raise ToolError(f"sandbox: {rel}: {e}") from None
+
+
+def _read_optional_file(root: Path, rel: str) -> Optional[bytes]:
+    """Read a file under the project root if it exists and is a regular file.
+
+    Returns None if absent. Sandbox violations raise ToolError so symlink
+    shenanigans are rejected even for optional slots.
+    """
+    resolved = _resolve_relative(root, rel)
+    if not resolved.exists():
+        return None
+    if not resolved.is_file():
+        # Optional slot occupied by a directory or device file: surface
+        # rather than silently swallow — the caller's expectation that
+        # `<id>.md` is a file is part of the convention.
+        raise ToolError(f"expected a regular file at {rel}, found a non-file")
+    return resolved.read_bytes()
+
+
+def _walk_application_files(
+    root: Path, company_role: str
+) -> list[tuple[str, str, bytes]]:
+    """Collect every per-output-type file that belongs in the export zip.
+
+    Returns a list of `(in_zip_path, kind, content_bytes)` rows where
+    `in_zip_path` is relative to the zip's top-level `<id>/` directory
+    (so manifest paths and zip arcnames match the `<id>/<in_zip_path>`
+    pattern downstream).
+
+    Order:
+      1. Required: decoded JD `.md` (raises ToolError if absent).
+      2. Required: resume DOCX (raises ToolError if absent).
+      3. Optional single-file slots from `_OPTIONAL_FILE_SLOTS`, in
+         table order — included only if the source file exists.
+      4. Optional portfolio subfolder (`portfolio/<id>/`), recursive
+         copy preserving in-folder relative paths (R3: strict prefix,
+         singular).
+      5. Optional networking files (`networking/<id>*.md`), sorted by
+         filename.
+
+    Sandbox-bounded throughout — every read goes through
+    `resolve_within_root`.
+    """
+    rows: list[tuple[str, str, bytes]] = []
+
+    # 1. Decoded JD (required).
+    decoded_rel = f"decoded-jds/{company_role}.md"
+    decoded_bytes = _read_optional_file(root, decoded_rel)
+    if decoded_bytes is None:
+        raise ToolError(
+            f"missing required file: {decoded_rel}. "
+            f"The export pipeline requires a decoded JD before bundling."
+        )
+    rows.append(
+        (f"decoded-jd/{company_role}.md", KIND_DECODED_JD, decoded_bytes)
+    )
+
+    # 2. Resume DOCX (required).
+    resume_rel = f"resumes/{company_role}.docx"
+    resume_bytes = _read_optional_file(root, resume_rel)
+    if resume_bytes is None:
+        raise ToolError(
+            f"missing required file: {resume_rel}. "
+            f"The export pipeline requires the targeted resume DOCX."
+        )
+    rows.append(
+        (f"resume/{company_role}.docx", KIND_RESUME_DOCX, resume_bytes)
+    )
+
+    # 3. Optional single-file slots in table order.
+    for src_dir, dst_subfolder, pattern, kind in _OPTIONAL_FILE_SLOTS:
+        filename = pattern.format(id=company_role)
+        rel = f"{src_dir}/{filename}"
+        content = _read_optional_file(root, rel)
+        if content is None:
+            continue
+        rows.append((f"{dst_subfolder}/{filename}", kind, content))
+
+    # 4. Optional portfolio subfolder (R3: strict prefix match, singular).
+    portfolio_rel = f"portfolio/{company_role}"
+    portfolio_resolved = _resolve_relative(root, portfolio_rel)
+    if portfolio_resolved.exists() and portfolio_resolved.is_dir():
+        for sub_path in sorted(
+            portfolio_resolved.rglob("*"),
+            key=lambda p: p.relative_to(portfolio_resolved).as_posix(),
+        ):
+            if not sub_path.is_file():
+                continue
+            # Re-check sandbox on each resolved file path: rglob can
+            # follow symlinks pointing outside the root.
+            try:
+                sub_path_resolved = resolve_within_root(root, sub_path)
+            except SandboxViolation as e:
+                raise ToolError(f"sandbox: portfolio/{sub_path.name}: {e}") from None
+            rel_inside = sub_path_resolved.relative_to(
+                portfolio_resolved
+            ).as_posix()
+            content = sub_path_resolved.read_bytes()
+            rows.append(
+                (f"portfolio/{rel_inside}", KIND_PORTFOLIO, content)
+            )
+
+    # 5. Optional networking files matching `<id>*.md`.
+    networking_resolved = _resolve_relative(root, "networking")
+    if networking_resolved.exists() and networking_resolved.is_dir():
+        candidates = sorted(
+            networking_resolved.glob(f"{company_role}*.md"),
+            key=lambda p: p.name,
+        )
+        for net_path in candidates:
+            if not net_path.is_file():
+                continue
+            try:
+                net_resolved = resolve_within_root(root, net_path)
+            except SandboxViolation as e:
+                raise ToolError(f"sandbox: networking/{net_path.name}: {e}") from None
+            content = net_resolved.read_bytes()
+            rows.append(
+                (f"networking/{net_path.name}", KIND_NETWORKING, content)
+            )
+
+    return rows
+
+
+# ---------------------------------------------------------------------------
+# README renderer (Block 3) — human-readable in-zip index.
+# ---------------------------------------------------------------------------
+
+
+# Friendly labels for the manifest's `kind` enum, used by the README.
+_KIND_LABELS: dict[str, str] = {
+    KIND_DECODED_JD: "Decoded job description",
+    KIND_RESUME_DOCX: "Resume (DOCX)",
+    KIND_RESUME_PDF: "Resume (PDF)",
+    KIND_SCORE_BEFORE: "Resume score (before)",
+    KIND_SCORE_AFTER: "Resume score (after)",
+    KIND_SPEAKING_POINTS_MD: "Speaking points (markdown)",
+    KIND_SPEAKING_POINTS_PDF: "Speaking points (PDF)",
+    KIND_COVER_LETTER_MD: "Cover letter (markdown)",
+    KIND_COVER_LETTER_PDF: "Cover letter (PDF)",
+    KIND_PORTFOLIO: "Portfolio file",
+    KIND_NETWORKING: "Networking note",
+}
+
+
+def _render_readme(
+    *,
+    company: str,
+    role_slug: str,
+    application_month: str,
+    status: str,
+    files: list[dict],
+) -> bytes:
+    """Build the human-readable in-zip `README.md`.
+
+    Lists the files included with kind labels and sizes. Carries no
+    timestamp (R1 spirit: the entire zip is byte-deterministic). Tone
+    matches `host/frontend/README.md` — short, plain, no marketing.
+    """
+    lines: list[str] = []
+    lines.append(f"# {company} - {role_slug} ({application_month})")
+    lines.append("")
+    lines.append(f"Application package, status: {status}.")
+    lines.append("")
+    lines.append("## Contents")
+    lines.append("")
+    sorted_files = sorted(files, key=lambda f: f["path"])
+    for f in sorted_files:
+        label = _KIND_LABELS.get(f["kind"], f["kind"])
+        lines.append(f"- `{f['path']}` - {label} ({f['size']} bytes)")
+    lines.append("")
+    lines.append("## Notes")
+    lines.append("")
+    lines.append(
+        "Generated by the Ultimate Job Assistant export pipeline "
+        "(ADR-002 D4)."
+    )
+    lines.append(
+        "Zip bytes are deterministic - re-running the export against "
+        "the same on-disk state produces byte-identical output."
+    )
+    lines.append("")
+    return "\n".join(lines).encode("utf-8")
+
+
+# ---------------------------------------------------------------------------
+# Public entrypoint (Block 3 implementation; index.json call lands in Block 4)
+# ---------------------------------------------------------------------------
+
+
+_EXPORTS_REL = "website/v2/exports"
+
+
 def export_application(
     company_role: str,
     status: str = "submitted",
@@ -268,6 +487,56 @@ def export_application(
     produces byte-identical zip bytes (verified by sha256 in the
     protocol-level test).
     """
-    raise NotImplementedError(
-        "Phase 24 Block 1 placeholder; Block 2-4 fill this in."
+    company, role_slug, application_month = _parse_company_role(company_role)
+    status = _validate_status(status)
+    root = _root()
+
+    rows = _walk_application_files(root, company_role)
+    manifest_files = [
+        {"path": in_zip_path, "kind": kind, "size": len(content)}
+        for in_zip_path, kind, content in rows
+    ]
+
+    manifest = _build_manifest(
+        company=company,
+        role_slug=role_slug,
+        application_month=application_month,
+        status=status,
+        files=manifest_files,
     )
+    manifest_bytes = _serialize_manifest(manifest)
+    readme_bytes = _render_readme(
+        company=company,
+        role_slug=role_slug,
+        application_month=application_month,
+        status=status,
+        files=manifest_files,
+    )
+
+    # Compose zip arcnames under the top-level `<id>/` directory so the
+    # zip extracts into a single named folder (ADR-002 D4 layout).
+    zip_entries: list[tuple[str, bytes]] = []
+    for in_zip_path, _kind, content in rows:
+        zip_entries.append((f"{company_role}/{in_zip_path}", content))
+    zip_entries.append((f"{company_role}/manifest.json", manifest_bytes))
+    zip_entries.append((f"{company_role}/README.md", readme_bytes))
+
+    # Ensure the exports dir exists, then write the zip via the sandbox.
+    exports_dir = _resolve_relative(root, _EXPORTS_REL)
+    exports_dir.mkdir(parents=True, exist_ok=True)
+    zip_rel = f"{_EXPORTS_REL}/{company_role}.zip"
+    zip_path = _resolve_relative(root, zip_rel)
+    _write_deterministic_zip(zip_path, zip_entries)
+
+    size_bytes = zip_path.stat().st_size
+    sha256 = hashlib.sha256(zip_path.read_bytes()).hexdigest()
+
+    # Block 4 wires the website/v2/exports/index.json maintenance call
+    # into this return shape via an `index_entry` field.
+    return {
+        "company_role": company_role,
+        "zip_path": zip_rel,
+        "size_bytes": size_bytes,
+        "sha256": sha256,
+        "manifest": manifest,
+    }
