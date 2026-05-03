@@ -48,6 +48,11 @@ export function ChatTab() {
   const [input, setInput] = useState("")
   const abortRef = useRef<AbortController | null>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
+  // Tracks which conversation the in-flight stream is writing to. The load-
+  // history useEffect skips fetching when activeId matches this ref, so the
+  // `conversation` SSE event firing setActiveId mid-stream doesn't wipe the
+  // in-flight asstRow with a stale DB read. Cleared in send()'s finally.
+  const streamingConvIdRef = useRef<string | null>(null)
 
   const loadConvs = useCallback(async () => {
     try {
@@ -64,6 +69,7 @@ export function ChatTab() {
   // Load message history when switching conversations.
   useEffect(() => {
     if (!activeId) { setRows([]); return }
+    if (streamingConvIdRef.current === activeId) return  // stream owns this conv right now; do not wipe in-flight rows
     let cancelled = false
     setHistoryLoading(true)
     api.getConversation(activeId)
@@ -116,6 +122,7 @@ export function ChatTab() {
         message: text,
         signal: ac.signal,
         onEvent: (ev: ChatEvent) => handleEvent(ev, asstRowId, (cid) => {
+          streamingConvIdRef.current = cid  // set BEFORE setActiveId so the load-history skip-check sees it
           assignedConvId = cid
           setActiveId(cid)
         }),
@@ -131,6 +138,7 @@ export function ChatTab() {
         setStreamErr(e instanceof Error ? e.message : String(e))
       }
     } finally {
+      streamingConvIdRef.current = null  // clear in-flight marker; future history loads run normally again
       setStreaming(false)
       setRows((prev) => prev.map((r) => r.id === asstRowId ? { ...r, pending: false } : r))
       // If we just created a brand-new conversation, make sure the sidebar shows it.
