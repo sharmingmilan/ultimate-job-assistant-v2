@@ -4,8 +4,7 @@
 # This hook is the local guardrail that replaces server-side branch protection
 # (which is Pro-gated on free private repos). It catches the realistic failure
 # mode: muscle-memory `git push` from a local checkout that happens to be on
-# `main`. Bypass with --no-verify if you genuinely need to (very rare; auto-sync
-# will publish to the live site within ~30 seconds of any push to main).
+# `main`. Bypass with --no-verify if you genuinely need to (rare).
 #
 # Install:
 #   bash scripts/install-hooks.sh
@@ -23,6 +22,21 @@ PROTECTED_BRANCHES=("main")
 remote="$1"
 url="$2"
 
+# Detect which canonical we're on so the warning message is accurate.
+# v1 canonical has auto-sync wired (push to main publishes within ~30s).
+# v2 canonical does NOT yet have auto-sync wired — push to main is safer
+# in practice, but we still block by default to enforce PR discipline.
+canonical_kind="unknown"
+case "$url" in
+  *ultimate-job-assistant-v2*|*ultimate-job-assistant-v2.git)
+    canonical_kind="v2"
+    ;;
+  *ultimate-job-assistant.git|*ultimate-job-assistant)
+    # Match v1 canonical, but NOT v2 (handled above first).
+    canonical_kind="v1"
+    ;;
+esac
+
 # Each line on stdin is: <local_ref> <local_sha> <remote_ref> <remote_sha>
 while read -r local_ref local_sha remote_ref remote_sha; do
   for protected in "${PROTECTED_BRANCHES[@]}"; do
@@ -30,9 +44,21 @@ while read -r local_ref local_sha remote_ref remote_sha; do
       echo "" >&2
       echo "  ERROR: direct pushes to '${protected}' are disabled by pre-push hook." >&2
       echo "" >&2
-      echo "  Why: every push to main triggers the auto-sync GitHub Action," >&2
-      echo "  which publishes to the live site (https://ultimatejobassist.netlify.app)" >&2
-      echo "  within ~30 seconds. WIP shouldn't ship that fast." >&2
+      case "$canonical_kind" in
+        v1)
+          echo "  Why: every push to main on v1 canonical triggers the auto-sync" >&2
+          echo "  GitHub Action, which publishes to https://ultimatejobassist.netlify.app" >&2
+          echo "  within ~30 seconds. WIP shouldn't ship that fast." >&2
+          ;;
+        v2)
+          echo "  Why: this is the v2 canonical; direct pushes to main bypass review." >&2
+          echo "  Auto-sync to v2 deploy-source is not yet wired (V2_SETUP.md Step 8)," >&2
+          echo "  but PR discipline is still the right default while v0.2.0 is in flight." >&2
+          ;;
+        *)
+          echo "  Why: direct pushes to main bypass review." >&2
+          ;;
+      esac
       echo "" >&2
       echo "  Fix: open a pull request from your feature branch instead." >&2
       echo "" >&2

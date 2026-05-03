@@ -32,7 +32,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterator, Optional
 
-CURRENT_SCHEMA_VERSION = 1
+CURRENT_SCHEMA_VERSION = 2
 DB_RELATIVE_PATH = ".uja/state.db"
 
 
@@ -74,7 +74,9 @@ def _migrate(conn: sqlite3.Connection) -> None:
 
     if current < 1:
         _migrate_to_v1(conn)
-    # add: if current < 2: _migrate_to_v2(conn) ...
+    if current < 2:
+        _migrate_to_v2(conn)
+    # add: if current < 3: _migrate_to_v3(conn) ...
 
     conn.execute("DELETE FROM schema_version")
     conn.execute("INSERT INTO schema_version (version) VALUES (?)", (CURRENT_SCHEMA_VERSION,))
@@ -264,3 +266,166 @@ def get_keychain_pointer(conn: sqlite3.Connection) -> Optional[dict]:
         "SELECT service, key_name, last_updated_at FROM keychain_pointer WHERE id = 1"
     ).fetchone()
     return dict(row) if row else None
+
+
+def _migrate_to_v2(conn: sqlite3.Connection) -> None:
+    """Phase 16 schema additions: pending_changes + pending_questions.
+
+    Both tables persist Anthropic tool-use side effects whose resolution
+    requires human input (approve/reject a diff; answer a question). The
+    chat loop yields a structured payload referencing the row ID; the UI
+    reads the row, renders an interaction primitive, posts the user's
+    decision back, which updates the row and unblocks the loop.
+    """
+    conn.executescript(
+        """
+        CREATE TABLE IF NOT EXISTS pending_changes (
+          id              TEXT PRIMARY KEY,
+          conversation_id TEXT NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
+          tool_use_id     TEXT,
+          changes_json    TEXT NOT NULL,  -- list of {path, before, after}
+          summary         TEXT NOT NULL DEFAULT '',
+          status          TEXT NOT NULL DEFAULT 'pending'
+                          CHECK (status IN ('pending','approved','rejected','applied','expired')),
+          created_at      TEXT NOT NULL,
+          resolved_at     TEXT
+        );
+        CREATE INDEX IF NOT EXISTS idx_pending_changes_conv
+          ON pending_changes (conversation_id, status);
+
+        CREATE TABLE IF NOT EXISTS pending_questions (
+          id              TEXT PRIMARY KEY,
+          conversation_id TEXT NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
+          tool_use_id     TEXT,
+          question        TEXT NOT NULL,
+          options_json    TEXT,           -- nullable JSON list
+          answer          TEXT,           -- nullable until answered
+          status          TEXT NOT NULL DEFAULT 'pending'
+                          CHECK (status IN ('pending','answered','expired')),
+          created_at      TEXT NOT NULL,
+          answered_at     TEXT
+        );
+        CREATE INDEX IF NOT EXISTS idx_pending_questions_conv
+          ON pending_questions (conversation_id, status);
+        """
+    )
+
+
+# ----- Pending changes (propose_changes tool) -----
+
+def create_pending_change(
+    conn: sqlite3.Connection,
+    conversation_id: str,
+    tool_use_id: Optional[str],
+    changes: list[dict],
+    summary: str = "",
+) -> str:
+    """Persist a set of proposed file changes; return the change-set ID.
+
+    `changes` is a list of {"path": str, "before": str|None, "after": str}
+    dicts. `before` is None for new-file proposals.
+    """
+    cs_id = _new_id()
+    conn.execute(
+        "INSERT INTO pending_changes "
+        "(id, conversation_id, tool_use_id, changes_json, summary, status, created_at) "
+        "VALUES (?,?,?,?,?,?,?)",
+        (cs_id, conversation_id, tool_use_id, json.dumps(changes), summary, "pending", _utc_now_iso()),
+    )
+    return cs_id
+
+
+def get_pending_change(conn: sqlite3.Connection, change_id: str) -> Optional[dict]:
+    row = conn.execute(
+        "SELECT id, conversation_id, tool_use_id, changes_json, summary, "
+        "       status, created_at, resolved_at "
+        "FROM pending_changes WHERE id = ?",
+        (change_id,),
+    ).fetchone()
+    if not row:
+        return None
+    out = dict(row)
+    out["changes"] = json.loads(out.pop("changes_json"))
+    return out
+
+
+def list_pending_changes(conn: sqlite3.Connection, conversation_id: str) -> list[dict]:
+    rows = conn.execute(
+        "SELECT id, tool_use_id, summary, status, created_at, resolved_at "
+        "FROM pending_changes WHERE conversation_id = ? ORDER BY created_at ASC",
+        (conversation_id,),
+    ).fetchall()
+    return [dict(r) for r in rows]
+
+
+def resolve_pending_change(
+    conn: sqlite3.Connection, change_id: str, status: str
+) -> bool:
+    if status not in ("approved", "rejected", "applied", "expired"):
+        raise ValueError(f"invalid status: {status}")
+    cur = conn.execute(
+        "UPDATE pending_changes SET status = ?, resolved_at = ? "
+        "WHERE id = ? AND status = 'pending'",
+        (status, _utc_now_iso(), change_id),
+    )
+    return cur.rowcount > 0
+
+
+# ----- Pending questions (ask_user tool) -----
+
+def create_pending_question(
+    conn: sqlite3.Connection,
+    conversation_id: str,
+    tool_use_id: Optional[str],
+    question: str,
+    options: Optional[list[str]] = None,
+) -> str:
+    q_id = _new_id()
+    conn.execute(
+        "INSERT INTO pending_questions "
+        "(id, conversation_id, tool_use_id, question, options_json, status, created_at) "
+        "VALUES (?,?,?,?,?,?,?)",
+        (
+            q_id, conversation_id, tool_use_id, question,
+            json.dumps(options) if options else None,
+            "pending", _utc_now_iso(),
+        ),
+    )
+    return q_id
+
+
+def get_pending_question(conn: sqlite3.Connection, question_id: str) -> Optional[dict]:
+    row = conn.execute(
+        "SELECT id, conversation_id, tool_use_id, question, options_json, "
+        "       answer, status, created_at, answered_at "
+        "FROM pending_questions WHERE id = ?",
+        (question_id,),
+    ).fetchone()
+    if not row:
+        return None
+    out = dict(row)
+    raw_opts = out.pop("options_json")
+    out["options"] = json.loads(raw_opts) if raw_opts else None
+    return out
+
+
+def list_pending_questions(conn: sqlite3.Connection, conversation_id: str) -> list[dict]:
+    rows = conn.execute(
+        "SELECT id, tool_use_id, question, status, created_at, answered_at "
+        "FROM pending_questions WHERE conversation_id = ? ORDER BY created_at ASC",
+        (conversation_id,),
+    ).fetchall()
+    return [dict(r) for r in rows]
+
+
+def answer_pending_question(
+    conn: sqlite3.Connection, question_id: str, answer: str
+) -> bool:
+    cur = conn.execute(
+        "UPDATE pending_questions "
+        "SET status = 'answered', answer = ?, answered_at = ? "
+        "WHERE id = ? AND status = 'pending'",
+        (answer, _utc_now_iso(), question_id),
+    )
+    return cur.rowcount > 0
+

@@ -4,7 +4,9 @@ ANTHROPIC_TOOL_DEFS — list of dicts in Anthropic /v1/messages tool format.
 TOOL_REGISTRY      — dict mapping tool name to a callable (project_root, **input) -> dict.
 
 Phase 15 fully implements file tools and read_workspace_metadata.
-Phase 16 will replace the skill stubs with real implementations.
+Phase 16 wires real implementations of run_skill (skill catalog +
+SKILL.md content load), propose_changes (persisted pending change-sets
+for human approval), and ask_user (persisted pending questions).
 """
 
 from __future__ import annotations
@@ -13,7 +15,7 @@ import json
 from pathlib import Path
 from typing import Any, Callable
 
-from . import file_tools, skill_stubs
+from . import file_tools, skill_tools
 from .file_tools import ToolError
 
 
@@ -88,35 +90,59 @@ ANTHROPIC_TOOL_DEFS: list[dict] = [
     {
         "name": "run_skill",
         "description": (
-            "Phase 16: run a SKILL.md workflow. In Phase 15 returns a "
-            "not_implemented payload."
+            "Load a SKILL.md from the project's skills/ directory. With "
+            "`name` omitted, returns the catalog of available skills + "
+            "their descriptions so you can pick one. With `name` set, "
+            "returns the full SKILL.md content + the inputs you passed; "
+            "follow the SKILL.md instructions in subsequent turns. The "
+            "agent loop stays in you, not in the host."
         ),
         "input_schema": {
             "type": "object",
             "properties": {
-                "name": {"type": "string"},
-                "inputs": {"type": "object"},
+                "name": {"type": "string", "description": "Skill name (e.g. 'orchestrator', 'resume-targeter'). Omit to list all available skills."},
+                "inputs": {"type": "object", "description": "Optional inputs for the skill (per its SKILL.md contract)."},
             },
-            "required": ["name"],
         },
     },
     {
         "name": "propose_changes",
         "description": (
-            "Phase 16: surface a proposed multi-file diff for user approval. "
-            "In Phase 15 returns not_implemented."
+            "Persist a list of proposed file changes as a pending change-set "
+            "for human approval. Pass `changes`: a list of "
+            "{path, before?, after, delete?} dicts. Returns a change_set_id; "
+            "nothing is applied to disk until the user approves in the UI. "
+            "Wait for the next turn before assuming the change landed."
         ),
         "input_schema": {
             "type": "object",
-            "properties": {"diff": {"type": "string"}},
-            "required": ["diff"],
+            "properties": {
+                "changes": {
+                    "type": "array",
+                    "description": "List of edits. Each item: {path, before?, after, delete?}.",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "path": {"type": "string"},
+                            "before": {"type": "string"},
+                            "after": {"type": "string"},
+                            "delete": {"type": "boolean"},
+                        },
+                        "required": ["path"],
+                    },
+                },
+                "summary": {"type": "string", "description": "Optional one-line summary of the change-set."},
+                "diff": {"type": "string", "description": "Legacy: a unified-diff string (use `changes` for new code)."},
+            },
         },
     },
     {
         "name": "ask_user",
         "description": (
-            "Phase 17: ask the user a question via the chat UI. In Phase 15 "
-            "returns not_implemented."
+            "Ask the user a clarifying question and pause until they answer. "
+            "The chat loop returns the question_id; the UI renders an input "
+            "card. Do NOT invent an answer — the next assistant turn only "
+            "resumes once the user responds."
         ),
         "input_schema": {
             "type": "object",
@@ -137,9 +163,9 @@ TOOL_REGISTRY: dict[str, Callable[..., dict]] = {
     "edit_file": file_tools.edit_file,
     "list_files": file_tools.list_files,
     "read_workspace_metadata": file_tools.read_workspace_metadata,
-    "run_skill": skill_stubs.run_skill,
-    "propose_changes": skill_stubs.propose_changes,
-    "ask_user": skill_stubs.ask_user,
+    "run_skill": skill_tools.run_skill,
+    "propose_changes": skill_tools.propose_changes,
+    "ask_user": skill_tools.ask_user,
 }
 
 
