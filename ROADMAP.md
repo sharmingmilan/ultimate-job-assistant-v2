@@ -1,6 +1,6 @@
 # ROADMAP.md — Ultimate Job Assistant
 
-**Last updated:** 2026-05-02
+**Last updated:** 2026-05-02 (Session 4 — v0.2.0 promoted to committed; new decisions in log)
 **Status:** Living document. The full v0.1.0 build plan lives in SPEC.md. This file captures *post-v0.1.0* work.
 
 ---
@@ -13,6 +13,44 @@ Each section below describes a possible future direction with rough scope, cost,
 2. A SPEC update or follow-up SPEC document is written (every committed item earns its own spec)
 
 Items live here so the design seams in v0.1.0 stay aware of where we might go later.
+
+---
+
+## ~~Track 0 — Self-hosted local web app~~ — promoted to v0.2.0
+
+This track is now the committed v0.2.0 build (SPEC.md §14 / ADR-001). Captured here briefly so the roadmap stays the entry point for "what's coming next."
+
+### Shape
+
+A self-hosted local web app the user runs on their own computer, brings their own Anthropic API key to, and uses through a browser tab. Path A (Cowork mode in Claude Desktop) and Path B (web app) become two surfaces over the same `skills/[name]/SKILL.md` files. Same on-disk folder structure either way.
+
+### Architecture (locked)
+
+| Concern | Decision |
+|---|---|
+| Skill execution | Skills-as-Tools — host registers a tool catalog with Claude API; agent loop stays in Claude |
+| Backend | Python 3.11+ + FastAPI |
+| Frontend | React + Vite + Tailwind + shadcn/ui (using the `anthropic-skills:web-artifacts-builder` patterns) |
+| Distribution | Curated-zip extension with `start-uja.sh` + `start-uja.bat` |
+| Persistence | SQLite at `<project-root>/.uja/state.db`, schema-versioned |
+| File access | Hard sandbox to one project-root folder picked at first launch |
+| API key | Encrypted at rest via OS keychain (Python `keyring`); never logged; outbound only to `api.anthropic.com` |
+| Network | `127.0.0.1` only by default; documented `--bind` override |
+| Branch protection | Local pre-push hook (Pro is required for server-side; we don't pay) |
+
+Full rationale, rejected alternatives, and the eight-tool catalog live in `docs/ADR-001-v0.2.0-architecture.md`.
+
+### Phasing
+
+Phases 14–22 in SPEC.md §14. Phase 14 (this ADR + branch setup) shipped 2026-05-02 / Session 4. Phase 15 (backend scaffold) is next.
+
+### Cost / mo
+
+$0 to operator. Users pay their own Anthropic bill.
+
+### Why this and not Track 1 (SaaS)
+
+Track 1 (SaaS multi-user) remains a possible future direction but requires auth, payments, hosting, GDPR/CCPA, and a real ops story. Track 0 is the much smaller step that gets the toolkit out of "you have to use Claude Desktop's Cowork mode" without taking on operator responsibilities. If Track 0 sees real usage, Track 1 becomes more attractive; if it doesn't, Track 1 was correctly deferred.
 
 ---
 
@@ -179,5 +217,8 @@ Things explicitly NOT planned, even with infinite time:
 | 2026-05-02 (post-v0.1.0 same day) | **noindex + robots.txt added** | Site stays live and public-repo-hosted but is invisible to search engines. Personal-toolkit note added to README. URL becomes the credential. |
 | 2026-05-02 (post-v0.1.0 evening) | **Landing page simplified to download-first** | One primary CTA: "Download the latest". HEAD-fetch JS displays zip size + date. Documentation pages still exist but understated. |
 | 2026-05-02 (final architecture revision) | **Both repos go private, hosting moves to Netlify, zip distribution** | Even with `noindex`, a public GitHub repo is still searchable on GitHub itself. Moving hosting from GitHub Pages to Netlify (free tier, reads private repos via OAuth) lets both repos go private while keeping the site live. The website exposes `/downloads/ultimate-job-assistant.zip` for anyone with the URL — that becomes the public artifact. Auto-sync via GitHub Action on the canonical private repo. Custom domain (~$12/yr) confirmed for v0.1.1. See SPEC §13 (current state) and §14 v0.1.1 phases 8-12. |
+| 2026-05-02 (Session 4) | **v0.2.0 = self-hosted local web app (Track 0 promoted)** | Adds a second way to run UJA: a Python+FastAPI backend + React+Vite+Tailwind+shadcn/ui frontend the user launches locally with `start-uja.sh` / `start-uja.bat`. Skills stay as `SKILL.md` (Skills-as-Tools); agent loop stays in Claude. Bring-your-own-API-key. Cost stays $0 to operator. Full architecture + alternatives in `docs/ADR-001-v0.2.0-architecture.md`. Phases 14–22 in SPEC.md §14. |
+| 2026-05-02 (Session 4) | **ROADMAP.md is canonical-only (drop from sync allowlist)** | Removed from `scripts/sync_to_public.py` ALLOWLIST and added to EXCLUDE_DST so any historical copy gets pruned from the deploy-source repo. Rationale: ROADMAP carries SaaS speculation and repo-strategy notes that have no business sitting in the deploy-source repo even though that repo is private. Asymmetry over the rest of the allowlist is deliberate. SPEC.md §13.10 captures the rule. |
+| 2026-05-02 (Session 4) | **Local pre-push hook replaces server-side branch protection** | GitHub branch protection / rulesets are Pro-gated on free private repos (verified via API: HTTP 403). `references/git-hooks/pre-push` refuses direct pushes to `main`. `scripts/install-hooks.sh` is the idempotent installer. SPEC.md §13.11 captures the rule. |
 
 Append future decisions here as they're made.

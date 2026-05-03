@@ -468,16 +468,33 @@ The decision was explicitly anticipated in the original spec ("decision can flip
 | 7 | Companion repo + website | `ultimate-job-assistant-public` repo, sync script, static landing+docs, GitHub Pages deploy | ✅ commit `3682c8a`, tagged `v0.1.0` |
 | 7.5 | noindex + robots.txt + landing simplification | site stays live, search-invisible | ✅ commit `f02d9d4` (private), `bd975b2` (public) |
 
-### v0.1.1 (next — fresh-session work)
+### v0.1.1 (Session 3 ship — phases 8–12 complete; awaiting Phase 13 for tag)
 
-| Phase | Subject | Deliverable | Acceptance |
+| Phase | Subject | Deliverable | Status |
 |---|---|---|---|
-| 8 | Add zip generation to `sync_to_public.py` | `website/downloads/ultimate-job-assistant.zip` is regenerated on every sync; `.gitkeep` keeps the dir | Sample sync produces a fresh zip; landing page HEAD-fetch displays size + date |
-| 9 | Migrate hosting to Netlify | Netlify connected to deploy-source repo via OAuth; site live at `*.netlify.app`; GitHub Pages disabled | Netlify URL responds 200; download works |
-| 10 | Make deploy-source repo private | `ultimate-job-assistant-public` flipped to `private: true` via API | Netlify still serves (OAuth stays valid) |
-| 11 | Auto-sync GitHub Action | `.github/workflows/auto-sync-to-public.yml` on the canonical private repo, gated on STRICT PII scan | Push to canonical → public is auto-updated within ~30 s |
-| 12 | Custom domain | Milan buys; Claude wires DNS to Netlify | HTTPS provisioned, custom URL responds 200 |
-| (tag) | Tag `v0.1.1` | Tag after phase 12 ships | All §10 acceptance criteria, plus zip-distribution criteria pass |
+| 8 | Add zip generation to `sync_to_public.py` | `build_zip()` curates `website/downloads/ultimate-job-assistant.zip` on every sync (drops maintainer-only paths, injects `references/zip-bundle/` user templates, verifies `ZIP_REQUIRED_MEMBERS`) | ✅ shipped |
+| 9 | Initial sync after zip-build | Both repos pushed; first generated zip contained the curated user starter kit including the bracketed base-resume template | ✅ shipped |
+| 10 | Migrate hosting to Netlify | Netlify connected to deploy-source repo via OAuth; site live at `ultimatejobassist.netlify.app`; GitHub Pages disabled | ✅ shipped |
+| 11 | Make deploy-source repo private | `ultimate-job-assistant-public` flipped to `private: true` via API; Netlify still serves (OAuth retains access through the visibility flip) | ✅ shipped |
+| 12 | Auto-sync GitHub Action | `.github/workflows/auto-sync-to-public.yml` on canonical, gated on STRICT PII scan, fine-grained PAT (`PUBLIC_REPO_TOKEN`, Contents: Read+write, scoped only to deploy-source). Round-trip latency push → live zip ≈ 30 s. ONBOARDING.md Step 7 documents the setup | ✅ shipped |
+| 13 | Custom domain | Milan buys (~$12/yr); Claude walks Netlify "Add custom domain" + emits A/CNAME records | ⏳ deferred (gates the `v0.1.1` tag) |
+| (tag) | Tag `v0.1.1` | Tag after phase 13 ships | ⏳ awaiting Phase 13 |
+
+### v0.2.0 (Session 4 — in flight on `dev/v0.2.0`)
+
+The self-hosted local web app — the second way to run UJA. Bring-your-own Anthropic API key; runs as `python3 -m uja` against the same project folder Cowork mode uses. Architecture decisions locked in `docs/ADR-001-v0.2.0-architecture.md`.
+
+| Phase | Subject | Deliverable | Status |
+|---|---|---|---|
+| 14 | ADR + branch setup | `docs/ADR-001-v0.2.0-architecture.md` answers all 9 open architecture questions; `dev/v0.2.0` branch created off `main`; pre-push hook installed (server-side branch protection is Pro-gated on free private repos, replaced with local hook + discipline) | ✅ shipped (this commit) |
+| 15 | Backend scaffold | FastAPI host with project-root picker, `/api/chat` SSE-streaming endpoint, file-sandboxed tool endpoints (`read_file`, `write_file`, `edit_file`, `list_files`, `run_skill`, `propose_changes`, `ask_user`, `read_workspace_metadata`), SQLite persistence at `<root>/.uja/state.db`, OS keychain for API key | (next) |
+| 16 | Skill registry | Every `skills/[name]/SKILL.md` registered as an Anthropic tool. Run the existing Netflix end-to-end regression entirely through the web app. Structurally diff outputs against v0.1.0 snapshots | |
+| 17 | Frontend | React + Vite + Tailwind + shadcn/ui frontend (chat pane, materials browser, multi-format preview via PDF.js / mammoth / marked). Bootstrapped with `anthropic-skills:web-artifacts-builder` patterns | |
+| 18 | Distribution | Cross-platform `start-uja.sh` + `start-uja.bat` integrated into curated zip pipeline. QUICKSTART.md gets a 30-second launch recipe | |
+| 19 | Comprehensive testing | Unit (tool definitions, message-loop reducer, sandbox boundary), integration (orchestrator on a fixture application; assert exact file outputs), E2E (Playwright through full chat flow + filesystem assertions), manual (Milan runs ONE real upcoming application end-to-end and writes a SESSION_LOG entry covering rough edges) | |
+| 20 | Docs refresh | Top-level CLAUDE.md gains a "Web App Mode" section; `references/zip-bundle/CLAUDE.md` gets a "First Session in Web App Mode" block parallel to the existing fresh-install onboarding; ONBOARDING.md grows a Path A (Cowork) vs Path B (web app) split; QUICKSTART.md gets a launch recipe; README.md surfaces both modes prominently; DESIGN_DOC.md gets a Skills-as-Tools section | |
+| 21 | Merge gate | Final review of `dev/v0.2.0`, run all tests once more on the merge candidate, squash-merge or merge-commit `dev/v0.2.0` into `main` only when Milan signs off. The merge IS the v0.2.0 publish moment | |
+| (tag) | Tag `v0.2.0` | Tag after phase 21 merges | |
 
 ---
 
