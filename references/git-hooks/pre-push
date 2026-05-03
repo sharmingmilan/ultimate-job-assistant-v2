@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+# pre-push hook — refuses direct pushes to protected branches.
+#
+# This hook is the local guardrail that replaces server-side branch protection
+# (which is Pro-gated on free private repos). It catches the realistic failure
+# mode: muscle-memory `git push` from a local checkout that happens to be on
+# `main`. Bypass with --no-verify if you genuinely need to (very rare; auto-sync
+# will publish to the live site within ~30 seconds of any push to main).
+#
+# Install:
+#   bash scripts/install-hooks.sh
+#
+# Uninstall:
+#   rm .git/hooks/pre-push
+#
+# This file lives at references/git-hooks/pre-push (tracked). The installer
+# copies it to .git/hooks/pre-push (untracked, since .git/ isn't in git).
+
+set -e
+
+PROTECTED_BRANCHES=("main")
+
+remote="$1"
+url="$2"
+
+# Each line on stdin is: <local_ref> <local_sha> <remote_ref> <remote_sha>
+while read -r local_ref local_sha remote_ref remote_sha; do
+  for protected in "${PROTECTED_BRANCHES[@]}"; do
+    if [[ "$remote_ref" == "refs/heads/${protected}" ]]; then
+      echo "" >&2
+      echo "  ERROR: direct pushes to '${protected}' are disabled by pre-push hook." >&2
+      echo "" >&2
+      echo "  Why: every push to main triggers the auto-sync GitHub Action," >&2
+      echo "  which publishes to the live site (https://ultimatejobassist.netlify.app)" >&2
+      echo "  within ~30 seconds. WIP shouldn't ship that fast." >&2
+      echo "" >&2
+      echo "  Fix: open a pull request from your feature branch instead." >&2
+      echo "" >&2
+      echo "    git push origin <your-branch>" >&2
+      echo "    gh pr create --base main --head <your-branch>" >&2
+      echo "" >&2
+      echo "  Bypass (use sparingly): re-run this push with --no-verify." >&2
+      echo "" >&2
+      exit 1
+    fi
+  done
+done
+
+exit 0
