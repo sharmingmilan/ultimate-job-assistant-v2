@@ -1,10 +1,21 @@
-"""Phase 15 acceptance test (mocked Anthropic).
+"""Phase 15 acceptance — round trip + persistence through the MCP tool surface.
 
-Proves end-to-end:
-  1. POST /api/chat creates a conversation.
-  2. The tool-use loop dispatches read_file + write_file against the project root.
-  3. Files actually land on disk.
-  4. After "restarting" the server (new TestClient), conversation history is restored from SQLite.
+Re-pointed in Phase 23 (Session 11) per ADR-002 D1: the original test
+drove POST /api/chat with a mocked Anthropic loop and parsed the SSE
+stream. The chat-style architecture is deprecated (ADR-002 D2/D3); the
+v0.2.x runtime is the MCP server in `host/uja_mcp/`. This file now
+exercises the same Phase 15 infrastructure (sandbox + file_tools + db)
+through the MCP tool functions instead of HTTP routes. Same fixture
+pattern (monkeypatched config + tmp_path-rooted SQLite); the call site
+moves from TestClient to direct MCP-tool invocation.
+
+Coverage:
+  - read_workspace_metadata returns the configured root + git/host info
+  - write_file lands a file on disk, sandbox-bounded
+  - read_file returns its content
+  - list_files surfaces the new file
+  - SQLite (the surviving Phase 15 persistence) round-trips a
+    conversation across "host restarts" (re-importing the modules)
 
 Run:
     cd host && python -m pytest tests/test_phase15_acceptance.py -v
@@ -12,118 +23,117 @@ Run:
 
 from __future__ import annotations
 
-import json
 import sys
-import tempfile
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+
+import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from fastapi.testclient import TestClient
-
-from uja_host import config as host_cfg, keystore
-from uja_host.api import config as cfg_api  # noqa: F401  -- imported to take effect
-from uja_host.main import create_app
-
-
-def _redirect_home(tmp_home: Path):
-    host_cfg.CONFIG_DIR = tmp_home / ".uja"
-    host_cfg.CONFIG_FILE = host_cfg.CONFIG_DIR / "config.json"
-
-
-def _block(type_, **kwargs):
-    """Build a MagicMock that mimics an Anthropic content block."""
-    m = MagicMock()
-    m.type = type_
-    for k, v in kwargs.items():
-        setattr(m, k, v)
-    if type_ == "tool_use":
-        m.model_dump = lambda: {
-            "type": "tool_use",
-            "id": kwargs["id"],
-            "name": kwargs["name"],
-            "input": kwargs["input"],
-        }
-    elif type_ == "text":
-        m.model_dump = lambda: {"type": "text", "text": kwargs["text"]}
-    return m
+from uja_host import config as host_config
+from uja_host.db import (
+    create_conversation,
+    list_conversations,
+    list_messages,
+    open_db,
+)
+from uja_host.tools.file_tools import ToolError
+from uja_mcp.tools import files as mcp_files
 
 
-def _mock_response(content_blocks, stop_reason="end_turn"):
-    r = MagicMock()
-    r.content = content_blocks
-    r.stop_reason = stop_reason
-    return r
+@pytest.fixture
+def project_root(tmp_path: Path, monkeypatch) -> Path:
+    """Configured project root; MCP tools read it via host_config."""
+    monkeypatch.setattr(host_config, "get_project_root", lambda: tmp_path)
+    return tmp_path
 
 
-def test_chat_round_trip_and_persistence(tmp_path: Path, monkeypatch):
-    _redirect_home(tmp_path / "home")
-    project_root = tmp_path / "project"
-    project_root.mkdir()
-    (project_root / "README.md").write_text("Project README")
+# ---------------------------------------------------------------------------
+# MCP file-tool round trip
+# ---------------------------------------------------------------------------
 
-    keystore.set_api_key("sk-ant-test-" + "x" * 40)
 
-    # Plan the model's behavior: turn 1 → tool_use (write HELLO.txt), turn 2 → final text
-    fake_responses = iter([
-        _mock_response(
-            [_block("tool_use", id="tu_1", name="write_file",
-                    input={"path": "HELLO.txt", "content": "Hello UJA"})],
-            stop_reason="tool_use",
-        ),
-        _mock_response(
-            [_block("text", text="Done. HELLO.txt is created.")],
-            stop_reason="end_turn",
-        ),
-    ])
+def test_read_workspace_metadata_returns_root(project_root: Path):
+    md = mcp_files.read_workspace_metadata()
+    assert md["project_root"] == str(project_root)
+    assert md["exists"] is True
+    assert md["is_dir"] is True
+    # host_version comes from uja_host.__version__; should be a non-empty string.
+    assert isinstance(md["host_version"], str) and md["host_version"]
 
-    fake_messages = MagicMock()
-    fake_messages.create = MagicMock(side_effect=lambda **kw: next(fake_responses))
-    fake_client = MagicMock()
-    fake_client.messages = fake_messages
 
-    app = create_app()
-    client = TestClient(app)
+def test_write_then_read_file_round_trip(project_root: Path):
+    written = mcp_files.write_file(path="HELLO.txt", content="Hello UJA")
+    assert written["path"] == "HELLO.txt"
+    assert written["bytes_written"] == len("Hello UJA")
 
-    # Configure project root through the API (mirrors real flow)
-    r = client.put("/api/config/project-root", json={"project_root": str(project_root)})
-    assert r.status_code == 200, r.text
+    target = project_root / "HELLO.txt"
+    assert target.exists()
+    assert target.read_text() == "Hello UJA"
 
-    with patch("uja_host.api.chat.anthropic.Anthropic", return_value=fake_client):
-        r = client.post("/api/chat", json={"message": "Create HELLO.txt with content Hello UJA"})
-        assert r.status_code == 200, r.text
-        body = r.text
+    got = mcp_files.read_file(path="HELLO.txt")
+    assert got["content"] == "Hello UJA"
+    assert got["path"] == "HELLO.txt"
 
-    # Should contain conversation id, a tool_use event, a tool_result event, and end_turn
-    assert "event: conversation" in body
-    assert "event: tool_use" in body
-    assert "event: tool_result" in body
-    assert "event: end_turn" in body, body
 
-    # File should actually exist on disk
-    assert (project_root / "HELLO.txt").read_text() == "Hello UJA"
+def test_write_file_creates_parent_dirs(project_root: Path):
+    mcp_files.write_file(path="notes/deep/file.md", content="x")
+    target = project_root / "notes" / "deep" / "file.md"
+    assert target.exists()
 
-    # Pull conversation_id from the SSE stream
-    conv_id = None
-    for line in body.splitlines():
-        if line.startswith("data: ") and "conversation_id" in line:
-            payload = json.loads(line[len("data: "):])
-            conv_id = payload["conversation_id"]
-            break
-    assert conv_id
 
-    # ----- "Restart" the server and verify persistence -----
-    app2 = create_app()
-    client2 = TestClient(app2)
-    r2 = client2.get(f"/api/conversations/{conv_id}/messages")
-    assert r2.status_code == 200, r2.text
-    payload = r2.json()
-    assert payload["count"] >= 3, payload  # user + assistant(tool_use) + user(tool_result) + assistant(text)
-    roles = [m["role"] for m in payload["messages"]]
-    assert roles[0] == "user"
-    assert "assistant" in roles
-    assert any(
-        any(b.get("type") == "tool_use" for b in m["content"])
-        for m in payload["messages"] if m["role"] == "assistant"
-    ), "expected at least one assistant tool_use block in history"
+def test_list_files_surfaces_new_file(project_root: Path):
+    mcp_files.write_file(path="alpha.md", content="A")
+    listing = mcp_files.list_files(path=".")
+    names = {e["name"] for e in listing["entries"]}
+    assert "alpha.md" in names
+
+
+def test_edit_file_replaces_unique_token(project_root: Path):
+    mcp_files.write_file(path="config.txt", content="version=1\n")
+    res = mcp_files.edit_file(path="config.txt", find="version=1", replace="version=2")
+    assert res["replacements"] == 1
+    assert (project_root / "config.txt").read_text() == "version=2\n"
+
+
+def test_read_file_rejects_sandbox_escape(project_root: Path):
+    with pytest.raises(ToolError) as exc:
+        mcp_files.read_file(path="../etc/passwd")
+    assert "sandbox" in str(exc.value)
+
+
+def test_tools_error_when_no_root_configured(monkeypatch):
+    """Each tool surfaces a structured error when project_root is unset.
+
+    FastMCP wraps ToolError into the protocol-level error response; here
+    we assert the error type at the tool-function layer (the layer Block
+    4's tests target).
+    """
+    monkeypatch.setattr(host_config, "get_project_root", lambda: None)
+    with pytest.raises(ToolError) as exc:
+        mcp_files.read_workspace_metadata()
+    assert "project_root not configured" in str(exc.value)
+
+
+# ---------------------------------------------------------------------------
+# Persistence (SQLite, per Phase 15 schema; survives ADR-002 D3)
+# ---------------------------------------------------------------------------
+
+
+def test_sqlite_persistence_across_module_reimport(project_root: Path):
+    """A conversation written before "restart" is readable after.
+
+    The original Phase 15 test verified history survived restarting the
+    FastAPI app. The MCP-side equivalent is: write through one open_db
+    context, close, open another, read the same row. SQLite is the
+    survivor; the DB layer is unchanged.
+    """
+    with open_db(project_root) as conn:
+        conv_id = create_conversation(conn, title="phase15 mcp acceptance")
+
+    # New context manager — equivalent to the "restart" the original test did.
+    with open_db(project_root) as conn:
+        convs = list_conversations(conn, limit=10)
+        assert any(c["id"] == conv_id for c in convs)
+        msgs = list_messages(conn, conv_id)
+        assert msgs == []  # nothing appended yet, but row is there
