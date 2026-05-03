@@ -581,3 +581,50 @@ Milan completes V2_SETUP.md Steps 1, 2, 4, 6, 7. Hand Claude the two PATs to exe
 - **Phase 17 — React + Vite + Tailwind + shadcn/ui.** Per ADR §D3 + §D10. Three tabs (Chat, Materials, Settings) with the polish-bar contract: empty/loading/error states, `cmd+k` / `cmd+enter` / `esc`, WCAG AA. Bigger scope; budget a focused session.
 - **V2 auto-sync workflow.** V2_SETUP.md Step 8 deferred this. Adapt v1's `.github/workflows/auto-sync-to-public.yml` once Phase 16 + 17 stabilize — no point auto-publishing a half-finished UI.
 
+## Session: 2026-05-02 (UJA Session 7 — same-day continuation) — Phase 17 frontend ships
+
+### What Got Done
+
+- **Phase 17 — React + Vite + Tailwind + shadcn/ui frontend.** Scaffolded `host/frontend/` as a Vite 8 + React 19 + TS 6 project, seeded with the `anthropic-skills:web-artifacts-builder` pattern (init-artifact.sh shadcn tarball). Trimmed the 30+ shadcn components the tarball ships down to the eight the app actually imports (button, card, input, label, alert, scroll-area, textarea, separator) so the dep tree stays honest. Wired the v2 logo's sky→pink gradient (`3cc7d46`) as a `bg-brand-gradient` utility + `text-brand-sky/pink`; system font stack instead of Inter to avoid the AI-slop tell flagged by the web-artifacts-builder skill.
+- **Three primary tabs, all built to the ADR §D10 polish bar.** Empty / loading / error states on every surface. Keyboard nav: `cmd+1/2/3` jumps tabs, `cmd+enter` sends from the composer, `esc` cancels in-flight chat. WCAG AA focus rings (2px ring with offset, visible against both themes); aria-* on every interactive control. Light + dark themes via CSS variables; theme picker in Settings persists to localStorage.
+  - **Chat:** sidebar lists `/api/conversations`; composer streams `/api/chat` as SSE through `lib/api.ts` (own SSE parser since EventSource doesn't support POST). Renders text + tool_use + tool_result blocks. Coalesces consecutive text deltas into one block. `propose_changes` tool_use renders an inline change-set diff card with sandbox-style red/green columns; `ask_user` tool_use renders a question card. Approve/reject and answer wiring deferred to Phase 17.5 — the underlying primitives already persist server-side from Phase 16.
+  - **Materials:** lazy file tree against the new `/api/files/tree` (only fetches children when a folder opens; cached locally). Right-pane previewer routes by extension — `.md` via marked + DOMPurify, `.docx` via mammoth (deferred import — only loads when a DOCX file is opened, keeping the initial bundle tiny), `.pdf` via native browser viewer in an iframe (PDF.js upgrade is a Phase 17.5 polish task per ADR §D4), text-ish via `<pre>`, image via `<img>`, fallback "open raw" link otherwise. All client-side per ADR §D4.
+  - **Settings:** project root (PUT /api/config/project-root), API key (write-only — never reads back from server, surfaces `using_memory_fallback` warning), theme picker, conversation list with delete (DELETE /api/conversations/{id}, cascades to messages + tool_invocations + pending_changes + pending_questions), about card (host version, schema version, root path).
+- **Onboarding.** Two-step flow that takes over the main pane when `/api/health` reports `project_root_configured: false`. Maps to existing `/api/config/project-root` + `/api/auth/key` endpoints. Bad keys rejected via `test_connection: true` before they hit the keychain. ApiError detail surfaced verbatim so the user can fix bad paths or rejected keys.
+- **Backend additions (Phase 17 piece 1 of 3, commit `eb064f4`).**
+  - New `host/uja_host/api/files.py` — three read-only endpoints: GET `/api/files/tree` (directory listing), `/text` (UTF-8 decode capped at 1 MB), `/raw` (raw bytes capped at 25 MB with sniffed Content-Type). All paths route through the existing sandbox helper; `..` traversal returns 404 with the sandbox message.
+  - `host/uja_host/api/conversations.py` gains DELETE `/api/conversations/{id}` backed by a new `db.delete_conversation()` helper. Cascades through pending_changes / pending_questions via existing FKs.
+  - `host/uja_host/main.py` mounts `host/frontend/dist/` at `/` via StaticFiles when it exists. In dev (no dist/), the mount is absent and Vite on `:5173` proxies `/api` to the host. In prod, FastAPI serves the SPA and the API from the same origin — route table matches `/api/*` first.
+- **Acceptance gate cleared.**
+  - `npm run build` green: total dist/ ≈ 890 KB raw across all chunks. **Initial bundle (CSS + react + radix + app shell + preview-md) ≈ 118 KB gzipped — well under the 500 KB Phase 17 ceiling.** mammoth (~119 KB gz) correctly deferred — only loads when a `.docx` file is opened in Materials.
+  - `tsc -b` green (with `ignoreDeprecations: 6.0` for TS 6's deprecated `baseUrl` warning — needed for shadcn @/ aliasing pattern).
+  - `pytest`: 21 passed / 3 skipped (unchanged from Session 6; Phase 16 live integration skeletons still gated on `UJA_RUN_LIVE_TESTS=1`).
+  - TestClient smoke: `GET /` serves the SPA shell, `/api/health` returns 200, `/api/files/tree` 409s without a project root and serves the tree with one configured. Sandbox enforcement still rejects `..` traversal.
+
+### Key Decisions
+
+- **Trim the shadcn tarball aggressively.** The init-artifact.sh tarball ships ~40 components by default, each pulling its own Radix dep. Phase 17 only imports eight of them. Keeping the rest meant either installing 25+ unused Radix packages (bundle bloat, install latency) or shipping TS errors. Cleaner: delete what we don't use; revisit when we genuinely need calendar / drawer / cmd / etc. Documented as the explicit "we kept eight" choice in the frontend-scaffold commit message so future sessions don't re-import the kitchen sink.
+- **Native iframe for PDF, not PDF.js — for now.** ADR §D4 names PDF.js explicitly. We started with the native browser viewer because it's free (zero bundle cost) and gives an acceptable preview for the use cases we know about (skim a generated cover letter, eyeball a resume). PDF.js gives page-nav callbacks + text selection events at the cost of ~150 KB gz, which we don't need for the v1 acceptance gate and would push us closer to the 500 KB ceiling. Captured as a Phase 17.5 polish item.
+- **Three feature branches, three `--no-ff` merges.** Same pattern Session 6 used. Each branch is independently reviewable: backend HTTP surface; frontend scaffold + configs + theme; tab implementations + onboarding. Keeps the diff readable in `git log --first-parent`.
+- **PDF.js + command palette (`cmd+k`) explicitly deferred.** The acceptance-gate criteria call them out as nice-to-haves; both make sense as a Phase 17.5 polish session once the three tabs are exercised against a live host and we know what the missing affordances actually are.
+
+### What Got Pushed Where (this session)
+
+- Three feature branches pushed to v2 canonical:
+  - `phase17/files-api` — `eb064f4` (5 files, +124/-1)
+  - `phase17/frontend-scaffold` — `8726302` (frontend scaffold; trimmed shadcn surface; theme + Vite config)
+  - `phase17/frontend-tabs` — `0ad6fc1` (App.tsx + Onboarding + ChatTab + MaterialsTab + SettingsTab)
+- `--no-ff` merges into v2 canonical `main`:
+  - `f977167` Merge phase17/files-api into main
+  - `7d53e3c` Merge phase17/frontend-scaffold into main
+  - `c821f2d` Merge phase17/frontend-tabs into main
+- Final v2 canonical `main` HEAD: `c821f2d`. v1 canonical untouched (v0.1.x site at https://ultimatejobassist.netlify.app stable). v2 deploy-source NOT auto-synced — V2_SETUP.md Step 8 still deferred; v2 site keeps serving the placeholder until either Milan runs `scripts/sync_to_public_v2.py` manually or auto-sync gets wired.
+
+### Outstanding for the next session
+
+- **Phase 17 live verification (Milan-side).** Boot the host with `./start-uja.sh`, hit the URL the start script opens, walk through Onboarding (project root + API key), and exercise each tab. The Chat tab is the riskiest — the SSE parser is custom (EventSource doesn't support POST), the tool_use → tool_result correlation is by id, and abort cancellation needs to roll back the placeholder assistant row cleanly. If anything misbehaves, the round-trip is fast (commits land directly through the same atomic-branch pattern Session 7 used).
+- **Phase 17.5 — approve/reject + answer endpoints.** The frontend cards exist with placeholder buttons; backend needs `POST /api/changes/<id>/approve|reject` (apply or drop pending_changes rows; for `apply`, write each `{path, after}` to disk through the sandbox) and `POST /api/questions/<id>/answer` (mark the row answered + synthesize a user-turn message in the conversation so the loop resumes). Small surface; budget ~half a session.
+- **Phase 17.5 polish (optional).** PDF.js page-nav + text selection. Command palette (`cmd+k`) over conversations + skills. Tool-call input rendered as a JSON tree instead of `<pre>{stringified}</pre>`. Each is a 1–2-hour add.
+- **V2 auto-sync workflow.** Now justified — the v2 site has something worth shipping. Adapt `.github/workflows/auto-sync-to-public.yml` from v1; PAT B already exists per V2_SETUP Step 4.
+- **Token rotation reminder.** The PAT A used this session appeared in chat history. Same posture as Session 6 — Milan should rotate it before the next session.
+

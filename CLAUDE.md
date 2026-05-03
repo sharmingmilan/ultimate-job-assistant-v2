@@ -1,5 +1,5 @@
 # CLAUDE.md -- Ultimate Job Assistant
-# Last updated: 2026-05-02 (Session 5 of UJA — Phase 15 backend scaffold + v2 repo separation prep)
+# Last updated: 2026-05-02 (Session 7 of UJA — Phase 17 frontend ships)
 
 ---
 
@@ -236,7 +236,7 @@ When applying to a new role at a company that already has a `research/[company].
 
 ## Current Status & What's Next
 
-**Last session:** Session 5 of Ultimate Job Assistant (May 2, 2026) — Phase 15 backend scaffold landed on `dev/v0.2.0`. v2 repo separation prep authored (V2_SETUP.md handoff doc, scripts/sync_to_public_v2.py, website/v2/ placeholder).
+**Last session:** Session 7 of Ultimate Job Assistant (May 2, 2026) — Phase 17 React + Vite + Tailwind + shadcn/ui frontend landed on v2 canonical `main` (commits eb064f4, 8726302, 0ad6fc1; merges f977167, 7d53e3c, c821f2d).
 
 **Completed in Job Assist (parent project):**
 - Waymo lifecycle Steps 8-10 (portfolio, networking, wrap-up). Full end-to-end test complete.
@@ -280,16 +280,32 @@ Self-hosted local web app where the user runs UJA in a browser against their own
 - Cleanup — pre-push hook now detects v1 vs v2 canonical for accurate warning text. V2_SETUP.md Step 2 has a footgun callout for the GitHub fine-grained PAT "All repositories" radio defaulting on edit.
 - Commits on v2 canonical `main`: `91d51c2` (hook), `5670c15` (V2_SETUP), `e84f1db` (skill_tools), `a2c8502` (tests), `2c0fd74` (`--no-ff` merge of `phase16/skill-registry`).
 
+**Shipped in UJA Session 7 (2026-05-02 same-day continuation, on v2 canonical's `main`):**
+- Phase 17 — React + Vite + Tailwind + shadcn/ui frontend in `host/frontend/`. Vite 8 + React 19 + TS 6, scaffolded with the `anthropic-skills:web-artifacts-builder` pattern, then trimmed to only the eight shadcn primitives the app actually uses (button, card, input, label, alert, scroll-area, textarea, separator). Brand sky→pink gradient from the v2 logo (`3cc7d46`) wired as `bg-brand-gradient` + `text-brand-sky/pink`. System font stack (no Inter — avoids the AI-slop tell).
+- Three primary tabs all built to the ADR §D10 polish bar (empty / loading / error states on every surface; `cmd+1`/`cmd+2`/`cmd+3` jumps tabs; `cmd+enter` sends; `esc` cancels in-flight chat; WCAG AA focus rings; aria-* on every interactive):
+  - Chat: conversation sidebar against `/api/conversations`, composer that streams `/api/chat` as SSE, renders text + tool_use + tool_result blocks. `propose_changes` and `ask_user` tool_use blocks render dedicated diff / question cards (approve/reject + answer wiring deferred to Phase 17.5; the change-set + question primitives already persist server-side from Phase 16).
+  - Materials: lazy file tree against the new `/api/files/tree`. Right-pane previewer routes by extension — md (marked + DOMPurify), docx (mammoth via deferred import), pdf (native iframe; PDF.js upgrade is a 17.5 polish task), text-ish, image. Per ADR §D4 all rendering is client-side.
+  - Settings: project root (PUT /api/config/project-root), API key (write-only, never reads back from server, surfaces memory-fallback warning), theme picker, conversation list with delete (DELETE /api/conversations/{id}), about card (host version, schema version, root path).
+- Two-step Onboarding flow that takes over the main pane when `/api/health` reports `project_root_configured: false`. Maps to existing config + auth endpoints; bad keys rejected via `test_connection: true` before they hit the keychain.
+- Backend additions (Phase 17 piece 1 of 3, commit `eb064f4`): new `host/uja_host/api/files.py` (GET /tree, /text, /raw — sandbox-bounded, 1 MB text cap, 25 MB raw cap), `delete_conversation()` helper + DELETE endpoint (cascades through pending_changes / pending_questions via existing FKs), `main.py` mounts `host/frontend/dist/` at `/` via StaticFiles in production.
+- Acceptance gate cleared:
+  - `npm run build` green: ~118 KB gzipped initial bundle (CSS + react + radix + app + preview-md). mammoth (~119 KB gz) correctly deferred — only loads when a `.docx` file is opened.
+  - `tsc -b` green (with `ignoreDeprecations: 6.0` for TS 6's deprecated `baseUrl` warning — needed for shadcn @/ aliasing).
+  - `pytest`: 21 passed / 3 skipped (unchanged from Session 6).
+  - TestClient smoke: `GET /` serves the SPA shell, `/api/health` returns 200, `/api/files/tree` 409s without project root and lists tree with one configured. Sandbox enforcement still rejects `..` traversal.
+- Atomic commits on three feature branches (`phase17/files-api`, `phase17/frontend-scaffold`, `phase17/frontend-tabs`), `--no-ff` merged to v2 canonical `main` per the Session 6 pattern. Final `main` HEAD: `c821f2d`.
+
 **v2 repo + site separation (decided 2026-05-02 / Session 5):**
 - v0.1.x stays at `sharmingmilan/ultimate-job-assistant` (canonical) + `sharmingmilan/ultimate-job-assistant-public` (deploy-source) → `https://ultimatejobassist.netlify.app`. Untouched.
 - v0.2.0 lives at `sharmingmilan/ultimate-job-assistant-v2` (canonical, private) + `sharmingmilan/ultimate-job-assistant-v2-public` (deploy-source, private) → `https://ultimatejobassist-v2.netlify.app`.
 - Long-term shape (one site or two) is parked. Decide post-Phase 17 when the React frontend exists.
 
 **Next up:**
-- Phase 16 live verification (Milan-side): boot the host with `./start-uja.sh`, set the Anthropic API key in the OS keychain, point at the project root, POST `/api/chat` with a message that triggers `run_skill('orchestrator')`, and confirm the SSE stream surfaces `tool_use` for run_skill and the model continues with file tools per the SKILL.md contract. Or run the integration smokes with `UJA_RUN_LIVE_TESTS=1` once they're filled in.
-- Phase 17 — React + Vite + Tailwind + shadcn/ui frontend (`host/frontend/`). Per ADR §D3 + §D10. Three tabs (Chat, Materials, Settings) with the polish-bar contract: empty/loading/error states, `cmd+k` / `cmd+enter` / `esc`, WCAG AA, < 1s first paint, < 200ms chat stream latency. Bigger scope; budget a focused session.
-- V2 auto-sync workflow (V2_SETUP.md Step 8 deferred). Adapt v1's `.github/workflows/auto-sync-to-public.yml` once Phase 16 + 17 stabilize.
-- Phase 18+: distribution polish, comprehensive tests, docs refresh, merge gate, tag `v0.2.0`. See SPEC.md §14 for the full phase list.
+- Phase 16 + 17 live verification (Milan-side): boot the host with `./start-uja.sh`, paste the API key in the new Settings tab (or use Onboarding on first run), pick the project root, then either run an `orchestrator` chat from the Chat tab or run the integration smokes with `UJA_RUN_LIVE_TESTS=1`. Verify the SSE stream surfaces tool_use blocks for `run_skill`, that `propose_changes` calls render the diff card, and that `ask_user` calls render the question card.
+- Phase 17.5 — change-set approve/reject and question-answer endpoints. The UI cards exist with placeholder buttons; backend needs `POST /api/changes/<id>/approve|reject` (apply or drop pending_changes rows) and `POST /api/questions/<id>/answer` (write the answer back as a synthesized user message in the conversation). Small surface; ~half a session.
+- Phase 17.5 polish (optional): swap the PDF iframe for PDF.js (page nav + text selection at ~150 KB gz), add a command palette (`cmd+k`) over conversations + skills, surface tool-call inputs with syntax-highlighted JSON tree.
+- V2 auto-sync workflow (V2_SETUP.md Step 8 deferred). Adapt v1's `.github/workflows/auto-sync-to-public.yml` so the v2 site stops serving the placeholder. Now justified because Phase 17 makes the site useful to deliver.
+- Phase 18+: distribution polish (start scripts launch the bundled host + open the browser to the right URL), comprehensive tests (unit, integration, Playwright E2E through the new Chat tab), docs refresh, merge gate, tag `v0.2.0`. See SPEC.md §14 for the full phase list.
 
 ---
 
