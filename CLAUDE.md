@@ -1,5 +1,5 @@
 # CLAUDE.md -- Ultimate Job Assistant
-# Last updated: 2026-05-02 (Session 7 of UJA — Phase 17 frontend ships)
+# Last updated: 2026-05-03 (Session 8 — Phase 17.5 ships + chat race fix + strategic pivots locked)
 
 ---
 
@@ -236,7 +236,7 @@ When applying to a new role at a company that already has a `research/[company].
 
 ## Current Status & What's Next
 
-**Last session:** Session 7 of Ultimate Job Assistant (May 2, 2026) — Phase 17 React + Vite + Tailwind + shadcn/ui frontend landed on v2 canonical `main` (commits eb064f4, 8726302, 0ad6fc1; merges f977167, 7d53e3c, c821f2d).
+**Last session:** Session 8 of Ultimate Job Assistant (May 3, 2026) — Phase 17.5 (close-the-HITL-loop) shipped, chat conversation-event race condition fixed, three strategic pivots locked that reshape v0.2.0+ scope.
 
 **Completed in Job Assist (parent project):**
 - Waymo lifecycle Steps 8-10 (portfolio, networking, wrap-up). Full end-to-end test complete.
@@ -300,12 +300,28 @@ Self-hosted local web app where the user runs UJA in a browser against their own
 - v0.2.0 lives at `sharmingmilan/ultimate-job-assistant-v2` (canonical, private) + `sharmingmilan/ultimate-job-assistant-v2-public` (deploy-source, private) → `https://ultimatejobassist-v2.netlify.app`.
 - Long-term shape (one site or two) is parked. Decide post-Phase 17 when the React frontend exists.
 
-**Next up:**
-- Phase 16 + 17 live verification (Milan-side): boot the host with `./start-uja.sh`, paste the API key in the new Settings tab (or use Onboarding on first run), pick the project root, then either run an `orchestrator` chat from the Chat tab or run the integration smokes with `UJA_RUN_LIVE_TESTS=1`. Verify the SSE stream surfaces tool_use blocks for `run_skill`, that `propose_changes` calls render the diff card, and that `ask_user` calls render the question card.
-- Phase 17.5 — change-set approve/reject and question-answer endpoints. The UI cards exist with placeholder buttons; backend needs `POST /api/changes/<id>/approve|reject` (apply or drop pending_changes rows) and `POST /api/questions/<id>/answer` (write the answer back as a synthesized user message in the conversation). Small surface; ~half a session.
-- Phase 17.5 polish (optional): swap the PDF iframe for PDF.js (page nav + text selection at ~150 KB gz), add a command palette (`cmd+k`) over conversations + skills, surface tool-call inputs with syntax-highlighted JSON tree.
-- V2 auto-sync workflow (V2_SETUP.md Step 8 deferred). Adapt v1's `.github/workflows/auto-sync-to-public.yml` so the v2 site stops serving the placeholder. Now justified because Phase 17 makes the site useful to deliver.
-- Phase 18+: distribution polish (start scripts launch the bundled host + open the browser to the right URL), comprehensive tests (unit, integration, Playwright E2E through the new Chat tab), docs refresh, merge gate, tag `v0.2.0`. See SPEC.md §14 for the full phase list.
+**Shipped in UJA Session 8 (2026-05-03):**
+
+- **Chat conversation-event race fix** (commit `95b1ef5`, merge `d4ae9c0`): load-history `useEffect` was wiping in-flight asstRow on every `conversation` SSE event, silently dropping all subsequent text/tool_use/tool_result. Fix tracks the streaming conversation via a ref, useEffect skips fetch when the in-flight stream owns the active conversation. 8 lines added to `ChatTab.tsx`.
+
+- **Phase 17.5 — HITL endpoints + frontend wiring + tests** (3 commits + merge `8a68e85`): `POST /api/changes/{id}/approve|reject` (sandbox-bounded disk writes + idempotency), `POST /api/questions/{id}/answer` (records + synthesizes user message into conversation), `chat.py` resume-mode (empty body when conversation_id set), frontend wires real Approve/Reject/Send-answer with state machine (pending → submitting → applied/rejected/answered/error) and auto-resume after each action. 15 unit tests, full suite 36/36 green.
+
+- **Two reusable patterns**: `.session-secrets/` for safely-delivered credentials (write to file, never paste in chat); test-workspace pattern (`cp -R ~/code/uja-v2 ~/code/uja-test-workspace`) for sandboxed agent writes.
+
+**Strategic pivots locked this session — Block B/C/D and v0.2.0 ship plan paused (see SESSION_LOG.md Session 8 for detail):**
+
+- **Pivot A** — Chat-style UI is the wrong metaphor for job-application workflows. v0.4.0 will be a Sims-style structured workflow tracker (per-application stages, discrete decisions, visible state, branching, undo). Canva MCP for design exploration. Chat becomes a sidecar.
+- **Pivot B** — v2 Netlify site reframes from "marketing landing for the local web app" to "delivery hub for **exportable** application packages + config templates." One zip per company-role containing decoded JD, targeted resume, cover letter, score, speaking points. Designed to be downloaded, sent to recruiters, archived, or shared. Static, search-invisible, URL-only access.
+- **Pivot C** — Anthropic-API-key + local-web-app architecture being reconsidered. Workflow likely stays in Cowork; local infrastructure exists for tooling (file ops, sandbox, persistence) not for running the agent loop. Reusable: backend, sandbox, file API, HITL endpoints, OS keychain. Deprecating: chat tab as primary surface, agent-loop-in-host pattern.
+
+**Next up (in priority order, all deferred from this session):**
+
+1. **ADR-002 — v0.2.0+ architecture rethink** based on Pivots A/B/C. Decide what ships under the v0.2.0 tag (probably just the bug fixes + HITL endpoints as a maintenance release), what becomes v0.2.x / v0.3.0 / v0.4.0. Update SPEC §14 phase plan.
+2. **v2 site rebuild per Pivot B** — **exportable** application package + config delivery hub. Static. No marketing. Canva MCP for visual style. ~1-2 day rebuild from scratch.
+3. **v0.4.0 workflow UI design exploration** — Sims-style game UI references via Canva MCP, sketch the structured workflow tracker, prototype one application's stage view, gather feedback.
+4. **v0.3.0 Tauri double-click app** stays planned for after v0.2.0 ships (whatever v0.2.0 ends up meaning post-rethink). Per-OS distribution: .dmg / .msi / .AppImage. Bundles Python interpreter so users install nothing.
+
+**What's preserved from earlier sessions and survives all pivots:** the FastAPI backend, sandbox helper, file API, persistence layer, OS-keychain key store, propose_changes/ask_user primitives, the HITL approve/reject/answer endpoints from this session, the test suite (36 passing tests). These are infrastructure the next architecture sits on top of.
 
 ---
 
@@ -316,6 +332,51 @@ Self-hosted local web app where the user runs UJA in a browser against their own
 - **Specific over vague** -- metrics, tools, outcomes in every bullet
 - **Plug-and-play** -- skill logic separated from user data so repo is forkable
 - **Doc freshness** -- propose updates at end of every session
+
+---
+
+## Working Principles (Session 8 codification)
+
+These four principles govern HOW work happens in any session, not WHAT the project does. Asked for explicitly by Milan in Session 8.
+
+- **Human-in-the-loop (HITL)** -- ask clarifying questions before non-trivial work; never assume scope; surface decisions for approval before acting. The HITL endpoints shipped in Phase 17.5 are the system-level expression of this principle.
+- **Atomic** -- one logical change per commit, one branch per block-piece, `--no-ff` merge to main. Reverting any single piece should be possible without surgery on unrelated changes. Sessions 6, 7, and 8 follow this pattern (look at `git log` for the commit-by-commit shape).
+- **Deterministic** -- same inputs produce same outputs. No flaky tests. No timestamps in committed artifacts. Pinned dependency versions in `host/requirements.txt` and `host/frontend/package.json`. Tests use fixed fixtures, not wall-clock-dependent state.
+- **Evidence-based** -- every claim backed by a file path, a line number, a search result, or a web source. No fabrication. When debugging, "I think X is the cause" is replaced with "lines 67-77 of ChatTab.tsx show X, the backend log at timestamp Y confirms Z, therefore the cause is W."
+
+### Credential handling pattern (Session 8 — load-bearing)
+
+Any credential (PAT, API key, OAuth token) MUST be delivered safely. Two failure modes observed in Session 8:
+
+1. **Pasting into chat.** The transcript persists permanently. Both a GitHub PAT and an Anthropic API key were leaked this way before the pattern was established. Always rotate any credential that lands in chat.
+2. **`cat`-then-`pbcopy` mid-Terminal-session.** Terminal scrollback retains the displayed value; selecting nearby output for an unrelated paste exposes the secret again.
+
+Standard pattern going forward:
+
+```bash
+# User writes the credential to a file in the workspace folder
+mkdir -p "<workspace>/.session-secrets"
+echo "PASTE_TOKEN_HERE" > "<workspace>/.session-secrets/cred-name.txt"
+chmod 600 "<workspace>/.session-secrets/cred-name.txt"
+
+# .gitignore must include .session-secrets/
+
+# Claude reads it via Read tool (file content goes only to model context, not visible in chat output)
+# OR consumes it in bash with stderr-redacted commands:
+TOKEN=$(cat "<workspace>/.session-secrets/cred-name.txt" | tr -d '[:space:]')
+git clone "https://x-access-token:${TOKEN}@github.com/owner/repo.git" target 2>&1 \
+    | sed -E 's|x-access-token:[^@]+@|x-access-token:<REDACTED>@|g'
+unset TOKEN
+
+# Folder gets cleaned up at end of session
+```
+
+For local-app onboarding screens (UJA's API key field, etc.):
+
+```bash
+# Put on clipboard silently — never display in Terminal
+cat "<path>/key.txt" | tr -d '\n' | pbcopy
+```
 
 ---
 
