@@ -467,3 +467,57 @@ Auto-sync produced `c3c42e5` on deploy-source from the cleanup merge. dev/v0.2.0
 Phase 15 — backend scaffold on `dev/v0.2.0`. Deliverables: FastAPI host with project-root picker (native folder picker on macOS via tkinter or via the browser's File System Access API), `/api/chat` SSE-streaming endpoint that loops messages through Claude with the 8-tool catalog from ADR D1, file-sandboxed tool endpoints, SQLite persistence at `<root>/.uja/state.db` with the schema in ADR D7, OS keychain integration via `keyring` for the API key. Test target: a `/api/chat` round-trip that successfully calls `read_file` and `write_file` against the project root and persists the conversation across server restart.
 
 The `.token-new.tmp` credential tempfile from this session is deleted at session end.
+
+---
+
+## UJA Session 5: May 2, 2026
+
+### What Happened
+
+**Phase 15 — backend scaffold for v0.2.0 — landed on `dev/v0.2.0`.**
+
+Per ADR-001 §D1–D8, built the local FastAPI host that powers the v0.2.0 web app. BYOK confirmed as the v0.2.0 distribution model; audience is Milan's inner circle (small, trusted, willing to bring their own Anthropic API key). Web-app surface ships alongside Cowork mode, not as a replacement.
+
+**Modules built (`host/uja_host/`):**
+
+- `sandbox.py` — `resolve_within_root()` rejects ../traversal, absolute paths outside root, symlinks pointing out, NUL bytes, empty strings. 9/9 boundary tests green.
+- `config.py` — `~/.uja/config.json` with project_root + schema_version. Native folder picker via `tkinter.filedialog` (lazy import; falls back gracefully when headless).
+- `db.py` — SQLite at `<project_root>/.uja/state.db`, schema-versioned, append-only messages table with per-conversation `seq` tiebreaker (caught a same-microsecond ordering bug during acceptance retest). Tables per ADR D7: schema_version, conversations, messages, tool_invocations, settings, keychain_pointer.
+- `keystore.py` — `keyring` wrapper, service `com.ultimatejobassistant.uja`, key `anthropic_api_key`. `redact_secrets(text)` strips `sk-ant-*` from logs. Memory fallback for headless CI with a clear warning.
+- `tools/__init__.py` + `tools/file_tools.py` + `tools/skill_stubs.py` — full 8-tool catalog from ADR D1. Phase 15 fully implements `read_file`, `write_file`, `edit_file`, `list_files`, `read_workspace_metadata`. `run_skill`, `propose_changes`, `ask_user` return structured `not_implemented` until Phase 16.
+- `api/config.py` — GET /api/config, PUT /api/config/project-root.
+- `api/auth.py` — GET/PUT/DELETE /api/auth/key (PUT has `test_connection=true` that calls Anthropic Haiku once with `max_tokens=8` and clears the key on failure).
+- `api/conversations.py` — GET /api/conversations, /api/conversations/{id}, /api/conversations/{id}/messages.
+- `api/chat.py` — POST /api/chat. Streams SSE: `conversation`, `iteration`, `text`, `tool_use`, `tool_result`, `end_turn`, `error`. Loops Anthropic API calls + tool execution until `stop_reason == 'end_turn'`. Caps at 12 iterations. Persists every assistant message and tool invocation to SQLite. Default model `claude-sonnet-4-6`.
+- `main.py` — FastAPI app + uvicorn entrypoint. CLI flags `--project-root`, `--bind` (default 127.0.0.1), `--port` (default 0 = random ephemeral), `--no-browser`. CORS allowlists localhost:5173 / :3000 for the future Vite dev server.
+
+**Launch scripts (root-level):**
+
+- `start-uja.sh` (macOS/Linux): detects Python 3.11+ via PATH probe, creates venv if missing, `pip install -r requirements.txt`, `python -m uja_host.main "$@"`.
+- `start-uja.bat` (Windows): same flow via `py -3.11`.
+
+**Tests:**
+
+- 9 sandbox boundary tests + 6 config tests + 8 DB tests + 6 keystore tests + 11 tool-catalog tests, all run inline during build.
+- `host/tests/test_phase15_acceptance.py` — pytest acceptance test, mocks Anthropic. Proves: tool-use loop dispatches correctly, sandboxed write hits disk, SSE event order is right (conversation → tool_use → tool_result → end_turn), conversation history persists across server restart. Passes.
+- `host/tests/live_smoke.sh` — bash script Milan runs locally with `ANTHROPIC_API_KEY` set. Spins up the server on port 18765, configures project root + key (with test_connection), POSTs a chat asking the agent to write `HELLO.txt`, restarts the server, fetches the conversation back. Not run in this session (no live key in dev sandbox).
+
+**Verified live**: server boots on `127.0.0.1:18888`, /api/health, /api/config, /api/auth/key all return 200 with correct JSON. uvicorn's own log line confirms bind.
+
+**Bug caught + fixed mid-session:** initial `_utc_now_iso()` used second-resolution timestamps. Same-second message inserts sorted by uuid (random), breaking `list_messages` insert order. Fix: bumped to microseconds AND added a per-conversation `seq` column as a guaranteed tiebreaker. Schema is still v1.
+
+### What's Next
+
+- **Phase 16** — skill registry. Replace the three stub tools with real implementations. Run the existing Netflix end-to-end regression entirely through the web app. Structurally diff outputs against v0.1.0 snapshots. Still on `dev/v0.2.0`.
+- **Phase 17** — React + Vite + Tailwind + shadcn/ui frontend (chat pane, materials browser, multi-format preview). Per ADR D3, scaffolded via the `anthropic-skills:web-artifacts-builder` patterns.
+- **Phase 18+** — distribution polish, comprehensive tests, docs, merge gate, tag `v0.2.0`. See SPEC.md §14.
+
+### Key Decisions Made This Session
+
+- BYOK confirmed as v0.2.0 model — explicit user signoff. No operator-paid SaaS path.
+- Audience scope confirmed as inner circle. No public-facing onboarding hardening required for v0.2.0.
+- Code lives at `host/` (root-level), with `host/uja_host/` as the importable Python package. Future React frontend goes in `host/frontend/` per ADR D3.
+- `~/.uja/config.json` is the bootstrap config (chicken-and-egg solver for "where does the SQLite DB live"). Inside `<project_root>/.uja/state.db` is the source of truth for conversation history.
+- Skill stub returns `{"status": "not_implemented", "phase": "..."}` so Claude gets a clear signal during Phase 15 chat sessions instead of crashing.
+- Default model wired to `claude-sonnet-4-6` (per ADR D10's "cost-estimate hint per model").
+
