@@ -274,13 +274,15 @@ Supersedes ADR-001 §D1, D2, D3, D6, D8, D10. Preserves §D4, D5, D7, D9.
 
 **Next up (in priority order):**
 
-1. **Phase 23 — MCP server scaffold (v0.2.1 target).** Stand up `host/uja_mcp/server.py` (JSON-RPC over stdio per the `mcp-builder` skill's Python guidance). Register file + skill + HITL + `read_workspace_metadata` tools. Pin `mcp` in `host/requirements.txt`. Wire one live Cowork session against it. Re-point the Phase 15/16/17.5 tests at MCP tool functions. New `start-uja-mcp.sh` / `start-uja-mcp.bat` launcher + `references/cowork-mcp-config-snippet.json`.
+Phases 22.5 and 23 are split across Sessions 10 and 11 to stage the Dispatch-session pattern (Session 10 = small cheap test; Session 11 = the larger shipping-target work). Briefs for both live on disk at `docs/session-10-brief.md` and `docs/session-11-brief.md`. Launch a Dispatch session for either via `bash scripts/dispatch-session.sh <N>` (emits a `claude://` deep link with the orchestrator-style prompt prefilled).
 
-2. **Mark deprecated tree.** Add `host/frontend/README.md` flagging it as deprecated reference. Docstring headers on `host/uja_host/main.py`, `api/chat.py`, `api/conversations.py` marking deprecation per ADR-002 D3. Demote `keystore.py` + `api/auth.py`.
+1. **Phase 22.5 — Deprecation marking (Session 10, ~30-45 min).** Per ADR-002 D3. Add `host/frontend/README.md` flagging it as deprecated reference. Docstring headers on `host/uja_host/main.py`, `api/chat.py`, `api/conversations.py`. Demote `keystore.py` + `api/auth.py`. Cheap test of the Dispatch-session pattern before Phase 23 commits to a longer session. No version bump. See `docs/session-10-brief.md`.
 
-3. **Phase 24 — Export pipeline (v0.2.2 target).** Implement `export_application(company_role)` MCP tool per ADR-002 D4. Deterministic zip bytes (sorted ordering, fixed compression, zeroed timestamps). Tests for manifest schema + determinism + sandbox-bounded writes.
+2. **Phase 23 — MCP server scaffold (Session 11, target v0.2.1, ~3-4 hr).** Stand up `host/uja_mcp/server.py` (JSON-RPC over stdio per the `mcp-builder` skill's Python guidance). Register file + skill + HITL + `read_workspace_metadata` tools. Pin `mcp` in `host/requirements.txt`. Re-point the Phase 15/16/17.5 tests at MCP tool functions. New `host/tests/test_mcp_server.py`. New `start-uja-mcp.sh` / `start-uja-mcp.bat` launcher + `references/cowork-mcp-config-snippet.json`. Tag `v0.2.1` end of session. See `docs/session-11-brief.md`.
 
-4. **Phase 25 — v2 site rebuild (v0.2.3 target).** Per ADR-002 D4. Static `index.html` + JS that fetches `exports/index.json` and `templates/index.json` and renders cards. Three sections: Application packages / Config templates / About. Canva MCP visual exploration first. `scripts/sync_to_public_v2.py` allowlist updated. Re-raise custom-domain question.
+3. **Phase 24 — Export pipeline (target v0.2.2).** Implement `export_application(company_role)` MCP tool per ADR-002 D4. Deterministic zip bytes (sorted ordering, fixed compression, zeroed timestamps). Tests for manifest schema + determinism + sandbox-bounded writes.
+
+4. **Phase 25 — v2 site rebuild (target v0.2.3).** Per ADR-002 D4. Static `index.html` + JS that fetches `exports/index.json` and `templates/index.json` and renders cards. Three sections: Application packages / Config templates / About. Canva MCP visual exploration first. `scripts/sync_to_public_v2.py` allowlist updated. Re-raise custom-domain question.
 
 5. **v0.4.0 workflow UI Canva MCP design spike (parallel to Phase 23).** Sims-style game UI references, sketch the structured workflow tracker, prototype one application's stage view. The tracker is a Cowork artifact (per ADR-002 D1) that calls back into the v0.2.x MCP server through `window.cowork.callMcpTool`.
 
@@ -308,6 +310,39 @@ These four principles govern HOW work happens in any session, not WHAT the proje
 - **Atomic** -- one logical change per commit, one branch per block-piece, `--no-ff` merge to main. Reverting any single piece should be possible without surgery on unrelated changes. Sessions 6, 7, and 8 follow this pattern (look at `git log` for the commit-by-commit shape).
 - **Deterministic** -- same inputs produce same outputs. No flaky tests. No timestamps in committed artifacts. Pinned dependency versions in `host/requirements.txt` and `host/frontend/package.json`. Tests use fixed fixtures, not wall-clock-dependent state.
 - **Evidence-based** -- every claim backed by a file path, a line number, a search result, or a web source. No fabrication. When debugging, "I think X is the cause" is replaced with "lines 67-77 of ChatTab.tsx show X, the backend log at timestamp Y confirms Z, therefore the cause is W."
+
+### Dispatch session pattern (Session 9 codification)
+
+Headless / hands-off sessions run via Claude Code Dispatch. The pattern keeps the orchestrator-style autonomy of "you are the planner, executor, evaluator, and quality gate" while working around Dispatch's isolation from the originating Cowork session's context.
+
+**Two-layer prompt:**
+
+1. **The brief lives on disk.** `docs/session-N-brief.md` is the substantive content — orientation file list, deliverable, blocks, working principles re-affirmed, success criteria, end-of-session deliverables, out-of-scope list. Version-controlled, reviewable in PRs, accessible to any surface (Dispatch / Code / desktop / web) because the Dispatch worktree includes it.
+2. **The launcher prompt is thin.** `scripts/dispatch-session.sh <N>` emits a `claude://` URL with a compact orchestrator-style prompt prefilled. The prompt points at the brief and tells the agent to execute it autonomously. Reusable for any session — the per-session work lives in the brief.
+
+**Why brief-on-disk + thin-prompt-from-script:**
+
+- Dispatch sessions are fully isolated from parent Cowork context (verified via the open GitHub issue documenting this). They have full repo file access via Git worktrees but no inherited memory.
+- Encoding the entire session brief into the URL itself is brittle (URL length limits, no version control, no PR review).
+- Brief-on-disk + thin-prompt = the brief carries substance; the URL stays small; the brief survives across sessions and surfaces.
+
+**Mechanics:**
+
+- `bash scripts/dispatch-session.sh 10` reads `docs/session-10-brief.md`, builds the orchestrator-style prompt, URL-encodes it, prints the `claude://` URL, and (on macOS) copies it to the clipboard. Add `--open` to launch it directly.
+- Click the URL → Claude Desktop opens with the prompt prefilled. Review it (per the link-safety rules), hit send. Dispatch routes to a Code session if the work is dev-shaped.
+- The Dispatch session reads its orientation files (CLAUDE.md, SPEC.md §14, the latest ADR, recent SESSION_LOG entries, then the brief) and executes.
+
+**Branch + merge discipline differs from interactive sessions:**
+
+- Dispatch session works on a feature branch and opens a PR. It does NOT push to `main` or tag releases — those belong to the originating Cowork session per the human-in-the-loop principle.
+- The Cowork session reviews the PR, merges with `--no-ff` (preserving the merge-commit pattern from Sessions 6-9), and cuts any tags.
+
+**When to dispatch vs run interactively:**
+
+- **Dispatch:** small atomic phases (Phase 22.5 / docs cleanup), heads-down implementation work with a clear deliverable + acceptance gate (Phase 23 / 24 / 25), parallelizable work (Phase 24 + 25 could run as two Dispatch sessions in parallel).
+- **Interactive Cowork:** anything that needs cross-doc reasoning, ADR drafting, decisions Milan wants to be in the room for, debugging that requires surfacing partial state mid-stream.
+
+The Dispatch pattern was codified in Session 9 after ADR-002 landed; first use was Session 10 (Phase 22.5).
 
 ### Credential handling pattern (Session 8 — load-bearing)
 
