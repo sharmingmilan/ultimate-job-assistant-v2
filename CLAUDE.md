@@ -311,6 +311,39 @@ These four principles govern HOW work happens in any session, not WHAT the proje
 - **Deterministic** -- same inputs produce same outputs. No flaky tests. No timestamps in committed artifacts. Pinned dependency versions in `host/requirements.txt` and `host/frontend/package.json`. Tests use fixed fixtures, not wall-clock-dependent state.
 - **Evidence-based** -- every claim backed by a file path, a line number, a search result, or a web source. No fabrication. When debugging, "I think X is the cause" is replaced with "lines 67-77 of ChatTab.tsx show X, the backend log at timestamp Y confirms Z, therefore the cause is W."
 
+### Dispatch session pattern (Session 9 codification)
+
+Headless / hands-off sessions run via Claude Code Dispatch. The pattern keeps the orchestrator-style autonomy of "you are the planner, executor, evaluator, and quality gate" while working around Dispatch's isolation from the originating Cowork session's context.
+
+**Two-layer prompt:**
+
+1. **The brief lives on disk.** `docs/session-N-brief.md` is the substantive content — orientation file list, deliverable, blocks, working principles re-affirmed, success criteria, end-of-session deliverables, out-of-scope list. Version-controlled, reviewable in PRs, accessible to any surface (Dispatch / Code / desktop / web) because the Dispatch worktree includes it.
+2. **The launcher prompt is thin.** `scripts/dispatch-session.sh <N>` emits a `claude://` URL with a compact orchestrator-style prompt prefilled. The prompt points at the brief and tells the agent to execute it autonomously. Reusable for any session — the per-session work lives in the brief.
+
+**Why brief-on-disk + thin-prompt-from-script:**
+
+- Dispatch sessions are fully isolated from parent Cowork context (verified via the open GitHub issue documenting this). They have full repo file access via Git worktrees but no inherited memory.
+- Encoding the entire session brief into the URL itself is brittle (URL length limits, no version control, no PR review).
+- Brief-on-disk + thin-prompt = the brief carries substance; the URL stays small; the brief survives across sessions and surfaces.
+
+**Mechanics:**
+
+- `bash scripts/dispatch-session.sh 10` reads `docs/session-10-brief.md`, builds the orchestrator-style prompt, URL-encodes it, prints the `claude://` URL, and (on macOS) copies it to the clipboard. Add `--open` to launch it directly.
+- Click the URL → Claude Desktop opens with the prompt prefilled. Review it (per the link-safety rules), hit send. Dispatch routes to a Code session if the work is dev-shaped.
+- The Dispatch session reads its orientation files (CLAUDE.md, SPEC.md §14, the latest ADR, recent SESSION_LOG entries, then the brief) and executes.
+
+**Branch + merge discipline differs from interactive sessions:**
+
+- Dispatch session works on a feature branch and opens a PR. It does NOT push to `main` or tag releases — those belong to the originating Cowork session per the human-in-the-loop principle.
+- The Cowork session reviews the PR, merges with `--no-ff` (preserving the merge-commit pattern from Sessions 6-9), and cuts any tags.
+
+**When to dispatch vs run interactively:**
+
+- **Dispatch:** small atomic phases (Phase 22.5 / docs cleanup), heads-down implementation work with a clear deliverable + acceptance gate (Phase 23 / 24 / 25), parallelizable work (Phase 24 + 25 could run as two Dispatch sessions in parallel).
+- **Interactive Cowork:** anything that needs cross-doc reasoning, ADR drafting, decisions Milan wants to be in the room for, debugging that requires surfacing partial state mid-stream.
+
+The Dispatch pattern was codified in Session 9 after ADR-002 landed; first use was Session 10 (Phase 22.5).
+
 ### Credential handling pattern (Session 8 — load-bearing)
 
 Any credential (PAT, API key, OAuth token) MUST be delivered safely. Two failure modes observed in Session 8:
