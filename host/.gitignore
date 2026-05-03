@@ -1,5 +1,6 @@
-# venv created by start-uja.sh
+# venv created by start-uja.sh / start-uja-mcp.sh
 .venv/
+.venv-mcp/
 venv/
 
 # Python
