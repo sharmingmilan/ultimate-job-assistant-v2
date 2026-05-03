@@ -13,9 +13,9 @@ A narrative skill that connects the dots between your career arc and the company
 
 ## Core Principles
 
-1. **Specific connections, not flattery.** Every speaking point must connect a concrete part of your background to a concrete part of what the company is doing. "I love Disney" is weak. "My regression analysis on IP bundling at Disney showed me how content and product interact — and now Disney's streaming team is building exactly the kind of experimentation infrastructure that makes that insight actionable" is strong.
+1. **Specific connections, not flattery.** Every speaking point must connect a concrete part of your background to a concrete part of what the company is doing. "I love [Company]" is weak. "My regression analysis on product bundling at [Past Employer] showed me how content and product interact, and now [Company]'s streaming team is building exactly the kind of experimentation infrastructure that makes that insight actionable" is strong.
 
-2. **User's voice, not a script.** The outputs are cheat sheets, not scripts. Milan glances at notes and talks candidly. The tone should be neutral and professional — give him the raw material and let him adapt it to his own voice.
+2. **User's voice, not a script.** The outputs are cheat sheets, not scripts. The user glances at notes and talks candidly during the interview. The tone should be neutral and professional — give them the raw material and let them adapt it to their own voice.
 
 3. **Grounded in research.** Every claim about the company must come from verified research (decoded-jd, research-brief, or new searches). No making up what a company values or is working on.
 
@@ -44,7 +44,7 @@ Before asking the user anything, do the analytical work:
 3. **Find the connections** — Map specific career moments to specific company priorities. Look for:
    - Direct experience overlaps (e.g., worked at the same company before, worked in the same industry)
    - Skill-to-need matches (e.g., built experimentation frameworks and they're investing in experimentation)
-   - Value alignment moments (e.g., pushed back on bad data at Apple and they value data integrity)
+   - Value alignment moments (e.g., pushed back on bad data at a past employer and the target company values data integrity)
    - Growth narratives (e.g., started in one area, grew into another, and this role is the natural next step)
    - Timing stories (e.g., why now? what makes this the right moment for both sides?)
 

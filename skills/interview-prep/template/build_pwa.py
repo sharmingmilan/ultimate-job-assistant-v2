@@ -128,7 +128,7 @@ Generated: {datetime.now(timezone.utc).isoformat()}
 ## What this is
 
 A study site for the {role} interview at {company}. Built by Ultimate Job Assistant
-on the same pedagogical model as the Netflix Interview Prep build.
+on the same pedagogical model documented in references/pedagogy.md.
 
 ## How to deploy (free, ~30 seconds)
 

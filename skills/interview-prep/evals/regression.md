@@ -1,6 +1,6 @@
-# Netflix Regression Eval
+# Regression Eval
 
-**Purpose:** Prove the new generic `interview-prep` skill produces a structurally-equivalent PWA when fed Netflix-shaped content. This is a structural regression — content quality is intentionally placeholder-grade. A real Netflix run authors hand-crafted worked examples through Phase D of the skill workflow.
+**Purpose:** Prove the new generic `interview-prep` skill produces a structurally-equivalent PWA when fed structurally-equivalent test content. This is a structural regression — content quality is intentionally placeholder-grade. A real production run authors hand-crafted worked examples through Phase D of the skill workflow.
 
 **Last run:** 2026-05-02 (Phase 5 of UJA v0.1.0 build)
 
@@ -10,7 +10,7 @@
 
 ## What the regression covers
 
-| Dimension | Netflix reference build | This regression run | Match? |
+| Dimension | Reference build (11 topics) | This regression run | Match? |
 |---|---|---|---|
 | Topics | 11 (10 SQL + 1 Python) | 11 (10 SQL + 1 Python) | ✅ |
 | Phases per topic | Came / Saw / Conquered | Came / Saw / Conquered | ✅ |
@@ -19,19 +19,19 @@
 | Real Questions tab | sourced entries | sourced entries (2 placeholder) | ✅ structurally |
 | Patterns tab | SQL + Python sub-sections | SQL + Python sub-sections | ✅ |
 | Citation footer | 12 references | 12 references | ✅ |
-| Bundle weight | ~344 KB (Netflix shipped) | ~119 KB (regression) | ✅ both under 400 KB |
+| Bundle weight | ~344 KB (full hand-authored content) | ~119 KB (regression) | ✅ both under 400 KB |
 
-The regression bundle is smaller than the Netflix shipped bundle because the
-regression content is placeholder-quality. A real Netflix run with hand-authored
+The regression bundle is smaller than a hand-authored production bundle because the
+regression content is placeholder-quality. A real production run with hand-authored
 walkthroughs, full schema panels, and 30+ sourced real questions would push the
-bundle weight closer to the Netflix-shipped figure.
+bundle weight closer to the production figure.
 
 ## What the regression does NOT cover
 
 - **Content quality.** The regression problem cards are intentionally placeholder.
   Quality is validated through the human-in-the-loop checkpoints in Phase D of
   the actual skill workflow.
-- **Visual fidelity.** No pixel comparison against the Netflix build. Visual
+- **Visual fidelity.** No pixel comparison against any reference build. Visual
   parity is not a goal; the Netflix build was bespoke and the new PWA is a
   generic template.
 - **PWA install on a real iOS device.** The smoke test is headless Chromium.
@@ -45,17 +45,17 @@ bundle weight closer to the Netflix-shipped figure.
 cd "Ultimate Job Assistant"
 
 # 1. Generate regression content
-python3 skills/interview-prep/evals/build_netflix_regression.py
-# → writes skills/interview-prep/evals/netflix-regression-content.json
+python3 skills/interview-prep/evals/build_regression.py
+# → writes skills/interview-prep/evals/regression-content.json
 
 # 2. Build the PWA
 python3 skills/interview-prep/template/build_pwa.py \
-  skills/interview-prep/evals/netflix-regression-content.json \
-  /tmp/uja-netflix-regression
+  skills/interview-prep/evals/regression-content.json \
+  /tmp/uja-regression
 
 # 3. Smoke test
-cp skills/interview-prep/template/smoke_test.cjs /tmp/uja-netflix-regression/
-cd /tmp/uja-netflix-regression
+cp skills/interview-prep/template/smoke_test.cjs /tmp/uja-regression/
+cd /tmp/uja-regression
 node smoke_test.cjs .
 # expect exit 0 with "ALL CHECKS PASS"
 ```
@@ -83,7 +83,7 @@ heavier check that's run on demand or before tagging a release.
 
 ## Provenance
 
-The original Netflix Interview Prep project's spec, project notes, and user-facing
-README live at `skills/interview-prep/references/netflix-example/`. This regression
+The original interview-prep design project's spec, project notes, and user-facing
+README. This regression
 mirrors the structural shape they describe in §3 (Topic List) and §6.4 (Acceptance
 Criteria).
