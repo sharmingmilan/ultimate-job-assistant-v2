@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "company": "Netflix",
+    "company": "Acme Corp",
     "role": "Data Analyst, Production Finance Operations and Innovation",
     "convention": "netflix-data-analyst-2026-04",
     "generated_at": "2026-05-02T20:31:32.718822+00:00",
@@ -21,7 +21,7 @@
       "worked": [
         {
           "difficulty": "easy",
-          "prompt": "Regression placeholder for topic Multi-Table Joins at easy difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "prompt": "Regression placeholder for topic Multi-Table Joins at easy difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real production run would replace this with a hand-authored worked example.",
           "schemas": [
             {
               "table": "payments",
@@ -67,7 +67,7 @@
         },
         {
           "difficulty": "medium",
-          "prompt": "Regression placeholder for topic Multi-Table Joins at medium difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "prompt": "Regression placeholder for topic Multi-Table Joins at medium difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real production run would replace this with a hand-authored worked example.",
           "schemas": [
             {
               "table": "payments",
@@ -113,7 +113,7 @@
         },
         {
           "difficulty": "hard",
-          "prompt": "Regression placeholder for topic Multi-Table Joins at hard difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "prompt": "Regression placeholder for topic Multi-Table Joins at hard difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real production run would replace this with a hand-authored worked example.",
           "schemas": [
             {
               "table": "payments",
@@ -442,7 +442,7 @@
       "worked": [
         {
           "difficulty": "easy",
-          "prompt": "Regression placeholder for topic Window Functions at easy difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "prompt": "Regression placeholder for topic Window Functions at easy difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real production run would replace this with a hand-authored worked example.",
           "schemas": [
             {
               "table": "payments",
@@ -488,7 +488,7 @@
         },
         {
           "difficulty": "medium",
-          "prompt": "Regression placeholder for topic Window Functions at medium difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "prompt": "Regression placeholder for topic Window Functions at medium difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real production run would replace this with a hand-authored worked example.",
           "schemas": [
             {
               "table": "payments",
@@ -534,7 +534,7 @@
         },
         {
           "difficulty": "hard",
-          "prompt": "Regression placeholder for topic Window Functions at hard difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "prompt": "Regression placeholder for topic Window Functions at hard difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real production run would replace this with a hand-authored worked example.",
           "schemas": [
             {
               "table": "payments",
@@ -863,7 +863,7 @@
       "worked": [
         {
           "difficulty": "easy",
-          "prompt": "Regression placeholder for topic CTEs and Query Structure at easy difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "prompt": "Regression placeholder for topic CTEs and Query Structure at easy difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real production run would replace this with a hand-authored worked example.",
           "schemas": [
             {
               "table": "payments",
@@ -909,7 +909,7 @@
         },
         {
           "difficulty": "medium",
-          "prompt": "Regression placeholder for topic CTEs and Query Structure at medium difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "prompt": "Regression placeholder for topic CTEs and Query Structure at medium difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real production run would replace this with a hand-authored worked example.",
           "schemas": [
             {
               "table": "payments",
@@ -955,7 +955,7 @@
         },
         {
           "difficulty": "hard",
-          "prompt": "Regression placeholder for topic CTEs and Query Structure at hard difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "prompt": "Regression placeholder for topic CTEs and Query Structure at hard difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real production run would replace this with a hand-authored worked example.",
           "schemas": [
             {
               "table": "payments",
@@ -1284,7 +1284,7 @@
       "worked": [
         {
           "difficulty": "easy",
-          "prompt": "Regression placeholder for topic Date Manipulation at easy difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "prompt": "Regression placeholder for topic Date Manipulation at easy difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real production run would replace this with a hand-authored worked example.",
           "schemas": [
             {
               "table": "payments",
@@ -1330,7 +1330,7 @@
         },
         {
           "difficulty": "medium",
-          "prompt": "Regression placeholder for topic Date Manipulation at medium difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "prompt": "Regression placeholder for topic Date Manipulation at medium difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real production run would replace this with a hand-authored worked example.",
           "schemas": [
             {
               "table": "payments",
@@ -1376,7 +1376,7 @@
         },
         {
           "difficulty": "hard",
-          "prompt": "Regression placeholder for topic Date Manipulation at hard difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "prompt": "Regression placeholder for topic Date Manipulation at hard difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real production run would replace this with a hand-authored worked example.",
           "schemas": [
             {
               "table": "payments",
@@ -1705,7 +1705,7 @@
       "worked": [
         {
           "difficulty": "easy",
-          "prompt": "Regression placeholder for topic Deduplication at easy difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "prompt": "Regression placeholder for topic Deduplication at easy difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real production run would replace this with a hand-authored worked example.",
           "schemas": [
             {
               "table": "payments",
@@ -1751,7 +1751,7 @@
         },
         {
           "difficulty": "medium",
-          "prompt": "Regression placeholder for topic Deduplication at medium difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "prompt": "Regression placeholder for topic Deduplication at medium difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real production run would replace this with a hand-authored worked example.",
           "schemas": [
             {
               "table": "payments",
@@ -1797,7 +1797,7 @@
         },
         {
           "difficulty": "hard",
-          "prompt": "Regression placeholder for topic Deduplication at hard difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "prompt": "Regression placeholder for topic Deduplication at hard difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real production run would replace this with a hand-authored worked example.",
           "schemas": [
             {
               "table": "payments",
@@ -2126,7 +2126,7 @@
       "worked": [
         {
           "difficulty": "easy",
-          "prompt": "Regression placeholder for topic CASE and Conditional Aggregation at easy difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "prompt": "Regression placeholder for topic CASE and Conditional Aggregation at easy difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real production run would replace this with a hand-authored worked example.",
           "schemas": [
             {
               "table": "payments",
@@ -2172,7 +2172,7 @@
         },
         {
           "difficulty": "medium",
-          "prompt": "Regression placeholder for topic CASE and Conditional Aggregation at medium difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "prompt": "Regression placeholder for topic CASE and Conditional Aggregation at medium difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real production run would replace this with a hand-authored worked example.",
           "schemas": [
             {
               "table": "payments",
@@ -2218,7 +2218,7 @@
         },
         {
           "difficulty": "hard",
-          "prompt": "Regression placeholder for topic CASE and Conditional Aggregation at hard difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "prompt": "Regression placeholder for topic CASE and Conditional Aggregation at hard difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real production run would replace this with a hand-authored worked example.",
           "schemas": [
             {
               "table": "payments",
@@ -2547,7 +2547,7 @@
       "worked": [
         {
           "difficulty": "easy",
-          "prompt": "Regression placeholder for topic NULL Handling at easy difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "prompt": "Regression placeholder for topic NULL Handling at easy difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real production run would replace this with a hand-authored worked example.",
           "schemas": [
             {
               "table": "payments",
@@ -2593,7 +2593,7 @@
         },
         {
           "difficulty": "medium",
-          "prompt": "Regression placeholder for topic NULL Handling at medium difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "prompt": "Regression placeholder for topic NULL Handling at medium difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real production run would replace this with a hand-authored worked example.",
           "schemas": [
             {
               "table": "payments",
@@ -2639,7 +2639,7 @@
         },
         {
           "difficulty": "hard",
-          "prompt": "Regression placeholder for topic NULL Handling at hard difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "prompt": "Regression placeholder for topic NULL Handling at hard difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real production run would replace this with a hand-authored worked example.",
           "schemas": [
             {
               "table": "payments",
@@ -2968,7 +2968,7 @@
       "worked": [
         {
           "difficulty": "easy",
-          "prompt": "Regression placeholder for topic FULL OUTER JOIN and Reconciliation at easy difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "prompt": "Regression placeholder for topic FULL OUTER JOIN and Reconciliation at easy difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real production run would replace this with a hand-authored worked example.",
           "schemas": [
             {
               "table": "payments",
@@ -3014,7 +3014,7 @@
         },
         {
           "difficulty": "medium",
-          "prompt": "Regression placeholder for topic FULL OUTER JOIN and Reconciliation at medium difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "prompt": "Regression placeholder for topic FULL OUTER JOIN and Reconciliation at medium difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real production run would replace this with a hand-authored worked example.",
           "schemas": [
             {
               "table": "payments",
@@ -3060,7 +3060,7 @@
         },
         {
           "difficulty": "hard",
-          "prompt": "Regression placeholder for topic FULL OUTER JOIN and Reconciliation at hard difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "prompt": "Regression placeholder for topic FULL OUTER JOIN and Reconciliation at hard difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real production run would replace this with a hand-authored worked example.",
           "schemas": [
             {
               "table": "payments",
@@ -3389,7 +3389,7 @@
       "worked": [
         {
           "difficulty": "easy",
-          "prompt": "Regression placeholder for topic Self-Joins at easy difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "prompt": "Regression placeholder for topic Self-Joins at easy difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real production run would replace this with a hand-authored worked example.",
           "schemas": [
             {
               "table": "payments",
@@ -3435,7 +3435,7 @@
         },
         {
           "difficulty": "medium",
-          "prompt": "Regression placeholder for topic Self-Joins at medium difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "prompt": "Regression placeholder for topic Self-Joins at medium difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real production run would replace this with a hand-authored worked example.",
           "schemas": [
             {
               "table": "payments",
@@ -3481,7 +3481,7 @@
         },
         {
           "difficulty": "hard",
-          "prompt": "Regression placeholder for topic Self-Joins at hard difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "prompt": "Regression placeholder for topic Self-Joins at hard difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real production run would replace this with a hand-authored worked example.",
           "schemas": [
             {
               "table": "payments",
@@ -3810,7 +3810,7 @@
       "worked": [
         {
           "difficulty": "easy",
-          "prompt": "Regression placeholder for topic Set Operations at easy difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "prompt": "Regression placeholder for topic Set Operations at easy difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real production run would replace this with a hand-authored worked example.",
           "schemas": [
             {
               "table": "payments",
@@ -3856,7 +3856,7 @@
         },
         {
           "difficulty": "medium",
-          "prompt": "Regression placeholder for topic Set Operations at medium difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "prompt": "Regression placeholder for topic Set Operations at medium difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real production run would replace this with a hand-authored worked example.",
           "schemas": [
             {
               "table": "payments",
@@ -3902,7 +3902,7 @@
         },
         {
           "difficulty": "hard",
-          "prompt": "Regression placeholder for topic Set Operations at hard difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "prompt": "Regression placeholder for topic Set Operations at hard difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real production run would replace this with a hand-authored worked example.",
           "schemas": [
             {
               "table": "payments",
@@ -4231,7 +4231,7 @@
       "worked": [
         {
           "difficulty": "easy",
-          "prompt": "Regression placeholder for topic Pandas - groupby, merge, rolling at easy difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "prompt": "Regression placeholder for topic Pandas - groupby, merge, rolling at easy difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real production run would replace this with a hand-authored worked example.",
           "schemas": [
             {
               "table": "payments",
@@ -4277,7 +4277,7 @@
         },
         {
           "difficulty": "medium",
-          "prompt": "Regression placeholder for topic Pandas - groupby, merge, rolling at medium difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "prompt": "Regression placeholder for topic Pandas - groupby, merge, rolling at medium difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real production run would replace this with a hand-authored worked example.",
           "schemas": [
             {
               "table": "payments",
@@ -4323,7 +4323,7 @@
         },
         {
           "difficulty": "hard",
-          "prompt": "Regression placeholder for topic Pandas - groupby, merge, rolling at hard difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real Netflix run would replace this with a hand-authored worked example.",
+          "prompt": "Regression placeholder for topic Pandas - groupby, merge, rolling at hard difficulty. Business motivation: this is a synthetic prompt for structural regression testing of the Ultimate Job Assistant interview-prep PWA template. A real production run would replace this with a hand-authored worked example.",
           "schemas": [
             {
               "table": "payments",

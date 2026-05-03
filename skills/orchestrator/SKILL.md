@@ -193,7 +193,7 @@ If no scorer ran, frame it generally:
 1. Propose an update to `tracker.md` with:
    - Status for each skill column (checkmark, score, or "skipped")
    - Key decisions in the Notes column
-   - Never auto-update tracker; always ask Milan first
+   - Never auto-update tracker; always ask the user first
 2. Propose doc freshness updates per the protocol in CLAUDE.md:
    - SESSION_LOG.md
    - CLAUDE.md (if any structural changes were made)
@@ -240,7 +240,7 @@ When the user starts a new application at a company that already has a research 
 
 The central `tracker.md` serves as the progress log. After each skill completes, propose updating the application's row in the tracker table. Each skill has its own column (Decoded JD, Score Before, Resume, Score After, Speaking Pts, Cover Letter, Portfolio, Networking). Mark with checkmarks, scores, or "skipped" as appropriate.
 
-**Never auto-update tracker status.** Always ask Milan before marking steps complete.
+**Never auto-update tracker status.** Always ask the user before marking steps complete.
 
 ## Relationship to Other Skills
 

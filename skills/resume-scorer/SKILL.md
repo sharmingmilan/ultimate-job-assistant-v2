@@ -134,18 +134,18 @@ After scoring, produce two types of suggestions:
 Specific changes to the resume that would improve the score. Each suggestion should:
 - Reference a specific bullet, section, or gap
 - Explain what to change and why
-- Estimate the score impact (e.g., "Adding experimentation language to Nike bullet 2 would move Values Alignment from Partial to Aligned on the 'experimentation mindset' theme")
+- Estimate the score impact (e.g., "Adding experimentation language to [Past Employer] bullet 2 would move Values Alignment from Partial to Aligned on the 'experimentation mindset' theme")
 
 Example:
-> - **Apple bullet 2** (KPI governance): Add the phrase "measurement framework" — the JD uses this exact term and your bullet describes exactly that but doesn't use the language.
-> - **Nike section**: Add the studio health score KPI story as a new bullet — this directly addresses the "measurement frameworks" theme which is currently a gap.
+> - **[Past Employer A] bullet 2** (KPI governance): Add the phrase "measurement framework" — the JD uses this exact term and your bullet describes exactly that but doesn't use the language.
+> - **[Past Employer B] section**: Add the operational health score KPI story as a new bullet — this directly addresses the "measurement frameworks" theme which is currently a gap.
 > - **Summary**: Include "experimentation" and "A/B testing" — these are must-have keywords currently missing from your summary.
 
 #### Supplementary Material Recommendations
 When gaps can't be fully closed by resume changes alone, recommend other materials:
 
 Example:
-> - **Cover letter** (via why-this-company skill): Address the return-to-Disney narrative. The resume can't explain "why here, why now" but a cover letter can.
+> - **Cover letter** (via why-this-company skill): Address the return-to-employer narrative. The resume can't explain "why here, why now" but a cover letter can.
 > - **Portfolio piece** (via portfolio-coach skill): An A/B test case study would concretely demonstrate experimentation skills that the resume only claims.
 
 Each recommendation names the skill that would produce it, creating a natural handoff in the orchestrator.
@@ -162,12 +162,12 @@ When both before and after scores exist, present a delta report:
 >
 > **What improved:**
 > - Added experimentation language across 3 bullets (+15 keyword, +20 values)
-> - Nike KPI framework bullet addressed measurement gap (+10 qualification)
-> - Summary reframed around Disney's priorities (+15 values)
+> - [Past Employer B] KPI framework bullet addressed measurement gap (+10 qualification)
+> - Summary reframed around the target company's priorities (+15 values)
 >
 > **Still open:**
 > - No direct A/B test case study (portfolio would close this)
-> - Return-to-Disney narrative not addressed in resume (cover letter territory)
+> - Return-to-employer narrative not addressed in resume (cover letter territory)
 
 ## Output Format
 
@@ -188,7 +188,7 @@ Save the full score report as markdown:
 
 | JD Keyword/Term | Found in Resume? | Where | Notes |
 |---|---|---|---|
-| SQL (advanced) | Yes | Apple, WF, Nike | Multiple mentions, clear depth |
+| SQL (advanced) | Yes | Past Employer A, B, C | Multiple mentions, clear depth |
 | A/B testing | No | — | Not mentioned anywhere |
 | ... | ... | ... | ... |
 
@@ -197,7 +197,7 @@ Save the full score report as markdown:
 | Requirement | Type | Rating | Evidence | Gap Action |
 |---|---|---|---|---|
 | 7+ years analytics | Must-have | Strong | 6+ years across 5 companies | Slight shortfall on YOE |
-| Experimentation design | Must-have | Partial | Dashboard A/B approach at Nike | Needs explicit framing |
+| Experimentation design | Must-have | Partial | Dashboard A/B approach at past employer | Needs explicit framing |
 | ... | ... | ... | ... | ... |
 
 ## Values Alignment (X%)
