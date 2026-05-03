@@ -210,11 +210,11 @@ A structured workflow tracker — Sims-style. Each job application is one persis
 1. **Canva MCP exploration** — pull design references for Sims-style game UIs and structured workflow trackers. Sketch 2-3 visual directions.
 2. **State model** — how does an "application" persist? Probably extends `tracker.md` with structured per-stage state instead of free-text.
 3. **Agent integration** — does the agent drive the stages, or does the user pick a stage and the agent assists? Probably the latter (user-driven), with the agent being callable per-stage.
-4. **Cowork vs local-app** — given Pivot C (Session 8), where does the workflow UI run? Cowork could surface this via MCP-served HTML artifacts; local-app could host it directly. TBD in ADR-002.
+4. **Cowork vs local-app** — ✅ resolved by ADR-002 D1 (Session 9): the workflow tracker runs as a Cowork artifact (interactive HTML) that calls back into the v0.2.x MCP server through `window.cowork.callMcpTool(name, args)`. No local UI server needed. The MCP server (host/uja_mcp/) owns the tool surface; the artifact owns the rendering.
 
 ### Why this is in roadmap, not v0.2.0
 
-v0.2.0 is paused for an architecture rethink (Pivots B + C in Session 8 SESSION_LOG). The chat UI we have works end-to-end (Phase 17.5 shipped); it's just not what we want long-term. v0.4.0 is the right target for the redesign — it gets a clean slate after the architecture decision lands in v0.2.0+.
+v0.2.0 ships (Session 9) as a maintenance release of the Phase 15-17.5 work; v0.2.x lands the Pure Cowork + thin MCP runtime per ADR-002. The chat UI is preserved as a deprecated reference (per ADR-002 D3). v0.4.0 is the right target for the workflow-tracker redesign — it sits on top of the v0.2.x MCP server (which owns the tool surface) and uses Cowork's artifact pipeline for rendering. Clean slate, but on a foundation that's already specified.
 
 ---
 
@@ -229,15 +229,16 @@ Reframes the v2 Netlify site from "marketing landing for the local web app downl
 - **Index page.** Lists all available application packages with company / role / date / status badges. No marketing copy.
 - **No download CTA for the local web app.** That direction is being reconsidered (Pivot C).
 
-### Open questions
+### Resolved by ADR-002 D4 (Session 9)
 
-- **Where does the zip get built?** Probably Cowork-side (run the UJA workflow → bundle outputs into a structured zip → upload). The site is just a static delivery layer.
-- **Static or generated?** Static (existing Netlify pattern) is simplest. The application-zip-build step is offline; the site just serves the result.
-- **Visual style** — Canva MCP exploration here too. Should match v0.4.0's structured-workflow aesthetic.
+- **Where does the zip get built?** ✅ Cowork emits it as a workflow step via the new `export_application(company_role)` MCP tool. The MCP server walks per-output-type folders, validates the minimum-viable set, writes a deterministic zip to `website/v2/exports/`, and updates `index.json`. Existing `auto-sync-to-public.yml` mirrors to deploy-source; Netlify rebuilds.
+- **Static or generated?** ✅ Static. `index.html` + JS that fetches `exports/index.json` and `templates/index.json` and renders cards.
+- **Zip structure?** ✅ `<company>-<role-slug>-<YYYY-MM>.zip` containing `manifest.json` (machine-readable) + `README.md` (human-readable) + `decoded-jd/` + `resume/` (DOCX + PDF) + `scores/` + `speaking-points/` + `cover-letter/` + `portfolio/` + `networking/`. Deterministic bytes: sorted ordering, fixed compression level, zeroed timestamps.
+- **Visual style** — Canva MCP exploration still required (spike, ahead of v0.2.3 build). Match v0.4.0's structured-workflow aesthetic. No marketing copy. No gradient buttons. No emoji. System font stack. Sky → pink gradient as accent only.
 
 ### Why this is in roadmap, not v0.2.0 ship
 
-Same reason as Track 7: v0.2.0 phase plan paused for ADR-002. Site rebuild lands as part of v0.2.x or v0.4.0 depending on how the architecture decision goes.
+ADR-002 D4 (Session 9) targets the v2 site rebuild at v0.2.3 — after the MCP server scaffold (v0.2.1) and the export pipeline (v0.2.2) are in place, since the site depends on both. Specified in SPEC §14 as Phase 25.
 
 ---
 
@@ -276,5 +277,10 @@ Things explicitly NOT planned, even with infinite time:
 | 2026-05-03 (Session 8) | **Pivot B: v2 site reframes to exportable-application-package delivery hub** | Marketing landing was wrong fit for inner-circle audience. Per-application exportable zip downloads (sendable to recruiters, archivable, shareable) + config templates only. URL-only access (existing search-invisible pattern). Track 8 added. "Exportable" is load-bearing — these zips exist to leave the site, not just sit on it. |
 | 2026-05-03 (Session 8) | **Pivot C: Anthropic-API-key + local-web-app architecture being reconsidered** | Workflow likely stays in Cowork (users have Claude desktop); local infrastructure exists for tooling not agent loop. Phase 17.5 HITL endpoints + sandbox + file API survive; chat-tab + agent-loop-in-host being deprecated. Resolution awaiting ADR-002 next session. |
 | 2026-05-03 (Session 8) | **v0.2.0 phase plan (Phases 18-21 + tag) paused pending ADR-002** | Pivots A/B/C above mean Phases 18-21 (distribution polish, comprehensive tests, docs refresh, merge gate) need to be redesigned, not just executed. Phase 17.5 (this session) is the last shipped work under the original v0.2.0 plan. |
+| 2026-05-03 (Session 9) | **ADR-002 lands: Pure Cowork + thin MCP architecture chosen** | Resolves Pivot C. Local FastAPI process becomes a JSON-RPC-over-stdio MCP server (no HTTP frontend, no per-user Anthropic API key, no port). Cowork drives the agent loop. v0.4.0 workflow tracker becomes a Cowork artifact that calls back into the MCP server. Sandbox / db / file_tools / skill_tools / skill_registry / HITL endpoints / 36-test suite all survive and re-shape into MCP tool functions. See `docs/ADR-002-architecture-rethink.md`. |
+| 2026-05-03 (Session 9) | **v0.2.0 ships as maintenance release; Phases 18-21 retired** | Per ADR-002 D2. Tag `v0.2.0` against current `main` to capture the Phase 15-17.5 work as a reachable artifact; release notes flag chat-style UX as deprecated. v0.2.x picks up the new architecture (Phases 23-25 in SPEC §14). |
+| 2026-05-03 (Session 9) | **Chat-tab frontend kept as deprecated reference** | Per ADR-002 D3 + Q3 clarification. `host/frontend/` stays on main with a README marking it deprecated and explaining its preserved purpose (HITL UX patterns demo). No active maintenance. v0.4.0 workflow tracker rebuilds the same patterns in a different visual frame. |
+| 2026-05-03 (Session 9) | **v0.3.0 (Tauri) parked; ADR-003 will reframe** | Per ADR-002 "Phasing impact." Cowork is itself the desktop app; wrapping a non-existent web app in Tauri is moot. Plausible reframings (polished MCP installer, headless export mode, or skip) deferred to ADR-003 after v0.2.x lands. Do not start Tauri work meanwhile. |
+| 2026-05-03 (Session 9) | **v2 site zip pipeline: Cowork emits via `export_application` MCP tool** | Per ADR-002 D4 + Q4 answer. When the v0.4.0 workflow tracker hits an export stage, Cowork calls `export_application(company_role)`; the MCP server walks per-output-type folders, validates minimum-viable set, writes deterministic zip to `website/v2/exports/`, updates `index.json`. Existing `auto-sync-to-public.yml` mirrors to deploy-source; Netlify rebuilds. Zip layout: `manifest.json` + `README.md` + per-output-type subfolders. Deterministic bytes (sorted, fixed compression, zeroed timestamps). |
 
 Append future decisions here as they're made.

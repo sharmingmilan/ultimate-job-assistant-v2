@@ -481,70 +481,54 @@ The decision was explicitly anticipated in the original spec ("decision can flip
 | 13 | Custom domain | Milan buys (~$12/yr); Claude walks Netlify "Add custom domain" + emits A/CNAME records | ⏳ deferred (gates the `v0.1.1` tag) |
 | (tag) | Tag `v0.1.1` | Tag after phase 13 ships | ⏳ awaiting Phase 13 |
 
-### v0.2.0 (Session 4 — in flight on `dev/v0.2.0`)
+### v0.2.0 (shipped 2026-05-03, Session 9 — maintenance release per ADR-002 D2)
 
-The self-hosted local web app — the second way to run UJA. Bring-your-own Anthropic API key; runs as `python3 -m uja` against the same project folder Cowork mode uses. Architecture decisions locked in `docs/ADR-001-v0.2.0-architecture.md`.
+The original v0.2.0 plan from ADR-001 — a self-hosted local web app with bring-your-own Anthropic API key — was paused mid-flight after Phase 17.5 shipped. ADR-002 (Session 9) resolved the pause: v0.2.0 ships as a maintenance release of the Phase 15-17.5 work; v0.2.x picks up the new Pure Cowork + thin MCP architecture from ADR-002 D1.
 
-**Quality bar:** v0.2.0 ships as a polished product, not an MVP. Empty states, loading states, error states, keyboard navigation, accessibility (WCAG AA), and performance budgets (< 1s first paint, < 200ms chat stream latency) are built into every UI phase, not a "polish pass" at the end. Distribution gets the same treatment — friendly launch-script messages, clear errors, clean shutdown. See ADR-001 "Quality bar" section.
-
-| Phase | Subject | Deliverable | Status |
-|---|---|---|---|
-| 14 | ADR + branch setup | `docs/ADR-001-v0.2.0-architecture.md` answers all 9 open architecture questions; `dev/v0.2.0` branch created off `main`; pre-push hook installed (server-side branch protection is Pro-gated on free private repos, replaced with local hook + discipline) | ✅ shipped (this commit) |
-| 15 | Backend scaffold | FastAPI host with project-root picker, `/api/chat` SSE-streaming endpoint, file-sandboxed tool endpoints (`read_file`, `write_file`, `edit_file`, `list_files`, `run_skill`, `propose_changes`, `ask_user`, `read_workspace_metadata`), SQLite persistence at `<root>/.uja/state.db`, OS keychain for API key | (next) |
-| 16 | Skill registry | Every `skills/[name]/SKILL.md` registered as an Anthropic tool. Run the existing Netflix end-to-end regression entirely through the web app. Structurally diff outputs against v0.1.0 snapshots | |
-| 17 | Frontend | React + Vite + Tailwind + shadcn/ui frontend with three primary tabs: **Chat** (chat pane + per-skill action panels), **Materials** (memory.md rich markdown editor with live preview, tracker.md table/kanban view, skill specs viewer, application archive — all round-trip to disk), **Settings** (API key, project root picker, default model, theme, shortcuts, auto-tracker preference, sign-off line, network bind override, notifications, clear-history, export, about). Multi-format previews via PDF.js / mammoth / marked. Bootstrapped with `anthropic-skills:web-artifacts-builder` patterns. Each major surface goes through an artifact-preview iteration loop in chat first. Every surface ships with empty / loading / error states, keyboard nav (`cmd+k`, `cmd+enter`, `esc`), WCAG AA contrast, screen-reader labels. First paint < 1s; chat stream latency < 200ms; PDF.js + mammoth + CodeMirror lazy-loaded only when their tab is opened | |
-| 18 | Distribution | Cross-platform `start-uja.sh` + `start-uja.bat` integrated into curated zip pipeline. Launch script presents friendly progress messages ("checking Python… ✓", "installing dependencies…", "starting server on port 8741", "opening your browser…"), clear error reporting if a step fails, and clean shutdown when the user closes the browser tab. QUICKSTART.md gets a 30-second launch recipe with screenshots | |
-| 19 | Comprehensive testing | Unit (tool definitions, message-loop reducer, sandbox boundary), integration (orchestrator on a fixture application; assert exact file outputs), E2E (Playwright through full chat flow + filesystem assertions), manual (Milan runs ONE real upcoming application end-to-end and writes a SESSION_LOG entry covering rough edges) | |
-| 20 | Docs refresh | Top-level CLAUDE.md gains a "Web App Mode" section; `references/zip-bundle/CLAUDE.md` gets a "First Session in Web App Mode" block parallel to the existing fresh-install onboarding; ONBOARDING.md grows a Path A (Cowork) vs Path B (web app) split; QUICKSTART.md gets a launch recipe; README.md surfaces both modes prominently; DESIGN_DOC.md gets a Skills-as-Tools section | |
-| 17.5 | HITL endpoints + frontend wiring | `POST /api/changes/{id}/approve\|reject` (apply edits via sandbox + db.resolve_pending_change, idempotent), `POST /api/questions/{id}/answer` (records + synthesizes user message), chat.py resume-mode (empty message body when conversation_id set), frontend wires real Approve/Reject/Send-answer + state machine + auto-resume. 15 unit tests, full suite 36/36 green. | ✅ shipped Session 8 (commits ca23577 c895709 3fdc40f, merge 8a68e85) |
-| 21 | Merge gate | Final review of `dev/v0.2.0`, run all tests once more on the merge candidate, squash-merge or merge-commit `dev/v0.2.0` into `main` only when Milan signs off. The merge IS the v0.2.0 publish moment | ⏸ PAUSED — see "Pause" section below |
-| (tag) | Tag `v0.2.0` | Tag after phase 21 merges | ⏸ PAUSED |
-
-### v0.2.0 plan PAUSED post-Session 8 — pending ADR-002
-
-Three strategic pivots locked in Session 8 (see SESSION_LOG.md Session 8 entry and ROADMAP.md Decision log) reshape what v0.2.0 should ship:
-
-- **Pivot A** — chat-style UI is wrong metaphor for job-application workflows; v0.4.0 will be a Sims-style structured workflow tracker. Chat becomes sidecar.
-- **Pivot B** — v2 site reframes from "marketing landing for the local web app" to "delivery hub for **exportable** application packages + config templates" (zips designed to leave the site — sendable to recruiters, archivable, shareable).
-- **Pivot C** — Anthropic-API-key + local-web-app architecture being reconsidered. Workflow likely stays in Cowork; local infrastructure exists for tooling not agent loop.
-
-Phases 18 (distribution), 19 (testing), 20 (docs refresh), 21 (merge gate), and the v0.2.0 tag are all paused. Block B/C/D from the Session 8 brief (v2 Netlify site, ONBOARDING-V2.md, in-app About tab) are paused — they all assume the deprecated chat-style UI is the primary surface.
-
-**ADR-002 is the next session's first deliverable.** It must answer:
-
-1. What architecture replaces "agent-loop-in-host"? Options: Cowork-driven via MCP server, or thin local-host serving HTML artifacts to Cowork, or pure Cowork with file-tool MCP, or none-of-the-above.
-2. Does v0.2.0 ship at all under the original meaning, or does it become a maintenance-release tag (just the bug fixes + HITL endpoints) followed by v0.2.x for the new direction?
-3. What does v0.2.0+'s file layout look like once chat-tab + agent-loop-in-host are deprecated? Which files survive, which become deprecated, which are net-new?
-4. How does Pivot B (site as delivery hub) interact with the architecture answer? Site probably stays static; the workflow runs elsewhere; the site just serves zips.
-
-**Reusable infrastructure that survives ALL pivots and remains in scope for v0.2.0+:**
-
-- FastAPI backend skeleton (`host/uja_host/`)
-- Sandbox helper (`sandbox.py`) and resolve_within_root pattern
-- File API (`api/files.py` — read tree, text, raw)
-- Persistence layer (`db.py` — append-only schema, conversations + messages + tool_invocations + pending_changes + pending_questions)
-- OS keychain wrapper (`keystore.py`)
-- propose_changes / ask_user primitives in `tools/skill_tools.py`
-- Phase 17.5 HITL endpoints (`api/changes.py`, `api/questions.py`)
-- Test fixtures pattern (TestClient + monkeypatched config + tmp_path-rooted SQLite) — 36 passing tests
-- Skills-as-Tools registry (`tools/skill_registry.py`)
-
-### v0.3.0 — Tauri double-click app (committed, post-v0.2.0)
-
-Per-OS native binaries (.dmg, .msi, .AppImage / .deb) wrapping the local-host architecture (whatever shape it takes after ADR-002). Bundles Python interpreter via pyoxidizer or briefcase so users install nothing.
+**Quality bar:** see ADR-001 "Quality bar" + ADR-002 "Quality bar" — same standard, applied to the new MCP + site surfaces.
 
 | Phase | Subject | Deliverable | Status |
 |---|---|---|---|
-| 23 | Tauri scaffold | Rust toolchain, `tauri.conf.json`, shell wrapping a webview pointing at the FastAPI process | committed |
-| 24 | Python bundling | pyoxidizer or briefcase bakes interpreter + host + venv into the .app/.exe | committed |
-| 25 | Per-OS build matrix | .dmg arm64+x86, .msi x64, .AppImage + .deb x64 via GitHub Actions | committed |
-| 26 | Code signing | macOS notarization (~$99/yr Apple Dev), Windows code-signing cert (~$200/yr); optional for first release — ship unsigned with right-click→Open caveat | committed |
-| 27 | v2 site → real download buttons | Replace any placeholder cards (per Pivot B those land as zip-portal entries; this phase swaps in real native installers) | committed |
-| 28 | Tag `v0.3.0` | All four platforms verified working | committed |
+| 14 | ADR + branch setup | `docs/ADR-001-v0.2.0-architecture.md` answers all 9 open architecture questions; `dev/v0.2.0` branch created off `main`; pre-push hook installed | ✅ shipped |
+| 15 | Backend scaffold | FastAPI host with project-root picker, `/api/chat` SSE-streaming endpoint, file-sandboxed tool endpoints (`read_file`, `write_file`, `edit_file`, `list_files`, `run_skill`, `propose_changes`, `ask_user`, `read_workspace_metadata`), SQLite persistence at `<root>/.uja/state.db`, OS keychain for API key | ✅ shipped Session 5 (commit `1259f59`) |
+| 16 | Skill registry | `propose_changes` / `ask_user` / `run_skill` real implementations + skill discovery + 20 unit tests + 3 live smoke skeletons | ✅ shipped Session 6 (merge `2c0fd74`) |
+| 17 | Frontend | React + Vite + Tailwind + shadcn/ui frontend with Chat / Materials / Settings tabs + Onboarding flow + brand sky→pink gradient. Two-step onboarding when project root unconfigured. Multi-format previews (md / docx / pdf). Files API. | ✅ shipped Session 7 (final main HEAD `c821f2d`) |
+| 17.5 | HITL endpoints + frontend wiring | `POST /api/changes/{id}/approve\|reject` (apply edits via sandbox + db.resolve_pending_change, idempotent), `POST /api/questions/{id}/answer` (records + synthesizes user message), `chat.py` resume-mode (empty message body when conversation_id set), frontend wires real Approve/Reject/Send-answer + state machine + auto-resume. 15 unit tests, full suite 36/36 green. Plus chat conversation-event race fix (commit `95b1ef5`). | ✅ shipped Session 8 (commits `ca23577` `c895709` `3fdc40f`, merge `8a68e85`) |
+| 18-21 | Distribution / testing / docs / merge gate (chat-style architecture) | Were intended to polish + ship the chat-style local web app | 🗑 RETIRED per ADR-002 D2 — chat-style UX deprecated; v0.2.x picks up new architecture |
+| 22 | Tag `v0.2.0` | Annotated tag against `main` post-ADR-002 merge: "v0.2.0 — Phase 15-17.5 (FastAPI host + HITL endpoints; chat-style UX deprecated, see ADR-002)" | ⏳ end of Session 9 |
 
-### v0.4.0 — Workflow UI rethink (committed, see ROADMAP Track 7)
+### v0.2.0 plan resolved by ADR-002 (2026-05-03, Session 9)
 
-Sims-style structured workflow tracker. Per-application stage view. Chat becomes sidecar. Canva MCP design exploration. Architecture details deferred until ADR-002 lands.
+The PAUSED block from Session 8 is resolved. See `docs/ADR-002-architecture-rethink.md` for the four decisions:
+
+- **D1** — Pure Cowork + thin MCP server replaces agent-loop-in-host. Local FastAPI process becomes a JSON-RPC-over-stdio MCP server. No HTTP frontend, no per-user Anthropic API key, no port.
+- **D2** — Tag `v0.2.0` against current `main` as a maintenance release. Release notes call out the chat-style UX as deprecated and point at ADR-002. v0.2.x picks up the new direction.
+- **D3** — Repository layout: sandbox / db / config / file_tools / skill_tools / skill_registry / HITL endpoints / test fixtures all SURVIVE and re-shape into MCP tool functions. keystore + auth are DEMOTED. chat.py + conversations.py + host/frontend/ are DEPRECATED-AS-REFERENCE (kept on main, marked, not maintained). New `host/uja_mcp/` package added in v0.2.1.
+- **D4** — v2 site reframes per Pivot B: static delivery hub for per-application zips + config templates. Deterministic zip layout with `manifest.json` + `README.md`. Cowork emits zips via the new `export_application` MCP tool; existing auto-sync mirrors to deploy-source; Netlify rebuilds.
+
+### v0.2.x — Pure Cowork + thin MCP runtime (committed by ADR-002)
+
+| Phase | Subject | Deliverable | Status |
+|---|---|---|---|
+| 23 | MCP server scaffold (target v0.2.1) | `host/uja_mcp/server.py` (JSON-RPC over stdio) + `host/uja_mcp/tools/{files,skills,hitl,export}.py` (thin facades over the surviving `host/uja_host/` modules). Register file + skill + HITL tools. Wire one live Cowork session against it. Re-point Phase 15/16/17.5 tests at MCP tool functions. New `start-uja-mcp.sh` / `start-uja-mcp.bat` launcher. New `references/cowork-mcp-config-snippet.json`. | committed |
+| 24 | Export pipeline (target v0.2.2) | `export_application(company_role)` MCP tool: walks per-output-type folders, validates minimum-viable set, writes deterministic zip to `website/v2/exports/`, updates `website/v2/exports/index.json`. Zip layout per ADR-002 D4 (manifest.json + README.md + decoded-jd/ + resume/ + scores/ + speaking-points/ + cover-letter/ + portfolio/ + networking/). Deterministic bytes (sorted ordering, fixed compression, zeroed timestamps). Tests for manifest schema, determinism, sandbox-bounded writes. | committed |
+| 25 | v2 site rebuild (target v0.2.3) | Per ADR-002 D4. Static `index.html` + JS that fetches `exports/index.json` and `templates/index.json` and renders cards. Three sections: Application packages / Config templates / About. Canva MCP visual exploration first, then build. `scripts/sync_to_public_v2.py` updated to allowlist `website/v2/exports/`. Custom domain re-raised. | committed |
+
+### v0.3.0 — PARKED pending ADR-003
+
+ADR-001 §14 originally committed v0.3.0 to a Tauri double-click app wrapping the local-host. With ADR-002 D1 chosen (Pure Cowork + thin MCP), Cowork is itself the desktop app — there is no "web app" left to wrap. The v0.3.0 plan is parked.
+
+**Plausible reframings (resolved by ADR-003 after v0.2.x lands):**
+
+- v0.3.0 = polished installer for the MCP server (one-click `pip install` + Cowork MCP-config registration), with code signing for the launcher binary
+- v0.3.0 = headless export-only mode for users who want to bundle applications without going through Cowork (CI-style; would resurrect the API-key path from "demoted" to "supported behind a flag")
+- v0.3.0 = skipped; jump to v0.4.0 (workflow tracker) directly
+
+**Do not start any Tauri work** until ADR-003 resolves this.
+
+### v0.4.0 — Workflow UI as Cowork artifact (per ADR-002 D1; see ROADMAP Track 7)
+
+Sims-style structured workflow tracker. Per-application stage view. Chat becomes sidecar. The tracker renders as a Cowork artifact — interactive HTML the workflow tracker emits that calls back into the v0.2.x MCP server through `window.cowork.callMcpTool(name, args)`. Architecture details deferred to a Canva MCP design spike (see ROADMAP Track 7).
 
 ---
 
