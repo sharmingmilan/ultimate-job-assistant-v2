@@ -242,6 +242,26 @@ ADR-002 D4 (Session 9) targets the v2 site rebuild at v0.2.3 — after the MCP s
 
 ---
 
+## Track 9 — v0.3.0 reframe (parked pending ADR-003) — moved here from SPEC §14 in Session 9
+
+ADR-001 §14 originally committed v0.3.0 to a Tauri double-click app wrapping the local-host. With ADR-002 D1 chosen (Pure Cowork + thin MCP, Session 9), Cowork is itself the desktop app — there is no "web app" left to wrap. The v0.3.0 plan is parked. Sat in SPEC §14 as a "PARKED" section briefly; moved here because SPEC §14 carries committed phases and ROADMAP is the right home for parked/future work.
+
+### Plausible reframings (to be resolved by ADR-003 after v0.2.x lands)
+
+- **v0.3.0 = polished MCP-server installer.** One-click `pip install` + Cowork MCP-config registration; code signing for the launcher binary on macOS (~$99/yr Apple Dev) and Windows (~$200/yr code-signing cert). Could ship unsigned with right-click→Open caveat on first release. Lowest-friction path for non-developer forkers.
+- **v0.3.0 = headless export-only mode.** A standalone CLI that bundles per-application zips without going through Cowork. Resurrects the OS-keychain API-key path from "demoted" to "supported behind a flag" (per ADR-002 D3). Useful for CI-style application-bundling pipelines, scheduled exports, or users who want the export pipeline without the rest of Cowork's surface.
+- **v0.3.0 = skipped.** Jump straight to v0.4.0 (workflow tracker). Defensible if v0.2.x's launcher is already polished enough that "v0.3.0 polish" doesn't earn a tag, and if no headless export demand surfaces.
+
+### When ADR-003 lands
+
+Likely after Phase 23-25 (v0.2.1 / v0.2.2 / v0.2.3) ships. ADR-003 needs the same treatment ADR-002 got: gut-preference questions to Milan first, recommendation pre-loaded, then a structured Decisions document. The "Do not start any Tauri work" guidance from ADR-002 stays in force until ADR-003 resolves the reframing.
+
+### Why this is in ROADMAP, not SPEC
+
+SPEC §14 carries committed phases — work where the deliverable, the target tag, and the acceptance criteria are all specified. Parked work (multiple plausible shapes, no committed direction) belongs in ROADMAP. Following the same convention as Track 7 (v0.4.0 workflow UI rethink) and Track 8 (v0.2.x site rebuild), which were committed to roadmap rather than SPEC at their decision-log moment.
+
+---
+
 ## Anti-roadmap
 
 Things explicitly NOT planned, even with infinite time:
@@ -282,5 +302,6 @@ Things explicitly NOT planned, even with infinite time:
 | 2026-05-03 (Session 9) | **Chat-tab frontend kept as deprecated reference** | Per ADR-002 D3 + Q3 clarification. `host/frontend/` stays on main with a README marking it deprecated and explaining its preserved purpose (HITL UX patterns demo). No active maintenance. v0.4.0 workflow tracker rebuilds the same patterns in a different visual frame. |
 | 2026-05-03 (Session 9) | **v0.3.0 (Tauri) parked; ADR-003 will reframe** | Per ADR-002 "Phasing impact." Cowork is itself the desktop app; wrapping a non-existent web app in Tauri is moot. Plausible reframings (polished MCP installer, headless export mode, or skip) deferred to ADR-003 after v0.2.x lands. Do not start Tauri work meanwhile. |
 | 2026-05-03 (Session 9) | **v2 site zip pipeline: Cowork emits via `export_application` MCP tool** | Per ADR-002 D4 + Q4 answer. When the v0.4.0 workflow tracker hits an export stage, Cowork calls `export_application(company_role)`; the MCP server walks per-output-type folders, validates minimum-viable set, writes deterministic zip to `website/v2/exports/`, updates `index.json`. Existing `auto-sync-to-public.yml` mirrors to deploy-source; Netlify rebuilds. Zip layout: `manifest.json` + `README.md` + per-output-type subfolders. Deterministic bytes (sorted, fixed compression, zeroed timestamps). |
+| 2026-05-03 (Session 9, post-wrap) | **v0.3.0 PARKED block moved from SPEC §14 to ROADMAP Track 9** | SPEC §14 carries committed phases; ROADMAP is the right home for parked/future work. SPEC now has a one-line pointer to Track 9. Mirrors how Tracks 7 + 8 (v0.4.0 + v0.2.x site) live in ROADMAP rather than SPEC at their decision-log moment. |
 
 Append future decisions here as they're made.

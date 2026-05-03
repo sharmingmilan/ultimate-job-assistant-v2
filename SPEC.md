@@ -514,17 +514,9 @@ The PAUSED block from Session 8 is resolved. See `docs/ADR-002-architecture-reth
 | 24 | Export pipeline (target v0.2.2) | `export_application(company_role)` MCP tool: walks per-output-type folders, validates minimum-viable set, writes deterministic zip to `website/v2/exports/`, updates `website/v2/exports/index.json`. Zip layout per ADR-002 D4 (manifest.json + README.md + decoded-jd/ + resume/ + scores/ + speaking-points/ + cover-letter/ + portfolio/ + networking/). Deterministic bytes (sorted ordering, fixed compression, zeroed timestamps). Tests for manifest schema, determinism, sandbox-bounded writes. | committed |
 | 25 | v2 site rebuild (target v0.2.3) | Per ADR-002 D4. Static `index.html` + JS that fetches `exports/index.json` and `templates/index.json` and renders cards. Three sections: Application packages / Config templates / About. Canva MCP visual exploration first, then build. `scripts/sync_to_public_v2.py` updated to allowlist `website/v2/exports/`. Custom domain re-raised. | committed |
 
-### v0.3.0 — PARKED pending ADR-003
+### v0.3.0 — moved to ROADMAP Track 9 (parked pending ADR-003)
 
-ADR-001 §14 originally committed v0.3.0 to a Tauri double-click app wrapping the local-host. With ADR-002 D1 chosen (Pure Cowork + thin MCP), Cowork is itself the desktop app — there is no "web app" left to wrap. The v0.3.0 plan is parked.
-
-**Plausible reframings (resolved by ADR-003 after v0.2.x lands):**
-
-- v0.3.0 = polished installer for the MCP server (one-click `pip install` + Cowork MCP-config registration), with code signing for the launcher binary
-- v0.3.0 = headless export-only mode for users who want to bundle applications without going through Cowork (CI-style; would resurrect the API-key path from "demoted" to "supported behind a flag")
-- v0.3.0 = skipped; jump to v0.4.0 (workflow tracker) directly
-
-**Do not start any Tauri work** until ADR-003 resolves this.
+The original Tauri-wrapped local-host plan no longer makes sense post-ADR-002 D1 (Cowork is itself the desktop app). The full parked-state context — including plausible reframings and the "do not start Tauri work" guidance — lives in `ROADMAP.md` Track 9. SPEC §14 carries only committed phases; v0.3.0 returns here when ADR-003 lands.
 
 ### v0.4.0 — Workflow UI as Cowork artifact (per ADR-002 D1; see ROADMAP Track 7)
 
