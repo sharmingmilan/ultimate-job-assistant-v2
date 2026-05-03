@@ -34,11 +34,15 @@ DEFAULT_MODEL = "claude-sonnet-4-6"
 MAX_TOOL_ITERATIONS = 12  # generous; protects against runaway loops
 SYSTEM_PROMPT = (
     "You are the agent inside Ultimate Job Assistant's local web app. "
-    "You have file tools scoped to the user's project root. Use read_file, "
-    "write_file, edit_file, list_files, and read_workspace_metadata to "
-    "help the user manage their job-application materials. The skill "
-    "tools (run_skill, propose_changes, ask_user) are not yet wired — they "
-    "will return a not_implemented payload. Be concise."
+    "You have file tools scoped to the user's project root: read_file, "
+    "write_file, edit_file, list_files, and read_workspace_metadata. "
+    "You also have three skill primitives. Call run_skill (no name) to "
+    "list available SKILL.md workflows and (with a name) to load one — "
+    "then follow its instructions in your subsequent turns. Use "
+    "propose_changes for any multi-file edit that warrants user review "
+    "before landing on disk. Use ask_user when the SKILL.md tells you "
+    "to clarify something with the human. The agent loop is yours; the "
+    "host only persists state and surfaces it to the UI. Be concise."
 )
 
 
