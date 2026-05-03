@@ -121,7 +121,12 @@ def copy_one(src: Path, dst: Path, dry_run: bool):
             shutil.copytree(src, dst, dirs_exist_ok=True)
         else:
             shutil.copy2(src, dst)
-    print(f"  {'DRY' if dry_run else 'CP '}: {src.relative_to(ROOT)} → {dst.name}")
+    # Print full src and dst paths (basename was misleading when copying to nested dst).
+    try:
+        rel_dst = dst.relative_to(dst.anchor) if dst.is_absolute() else dst
+    except ValueError:
+        rel_dst = dst
+    print(f"  {'DRY' if dry_run else 'CP '}: {src.relative_to(ROOT)} → {rel_dst}")
     return 1
 
 
@@ -146,7 +151,7 @@ def pii_scan(public_root: Path) -> bool:
         print("WARN: scripts/scan_pii.py not found; skipping PII scan.")
         return True
     proc = subprocess.run(
-        [sys.executable, str(scanner), "--strict", str(public_root)],
+        [sys.executable, str(scanner), "--strict", "--repo-root", str(public_root)],
         capture_output=True, text=True,
     )
     print(proc.stdout)
