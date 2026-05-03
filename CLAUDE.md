@@ -1,5 +1,5 @@
 # CLAUDE.md -- Ultimate Job Assistant
-# Last updated: 2026-05-02 (Session 4 of UJA — v0.2.0 architecture decisions + Session 3 cleanup)
+# Last updated: 2026-05-02 (Session 5 of UJA — Phase 15 backend scaffold + v2 repo separation prep)
 
 ---
 
@@ -236,7 +236,7 @@ When applying to a new role at a company that already has a `research/[company].
 
 ## Current Status & What's Next
 
-**Last session:** Session 4 of Ultimate Job Assistant (May 2, 2026) — v0.2.0 architecture decisions + Session 3 cleanup.
+**Last session:** Session 5 of Ultimate Job Assistant (May 2, 2026) — Phase 15 backend scaffold landed on `dev/v0.2.0`. v2 repo separation prep authored (V2_SETUP.md handoff doc, scripts/sync_to_public_v2.py, website/v2/ placeholder).
 
 **Completed in Job Assist (parent project):**
 - Waymo lifecycle Steps 8-10 (portfolio, networking, wrap-up). Full end-to-end test complete.
@@ -269,9 +269,18 @@ Self-hosted local web app where the user runs UJA in a browser against their own
 - **Sandbox:** backend reads/writes only the project-root folder picked at first launch. API key encrypted at rest via OS keychain (`keyring`). Server binds 127.0.0.1 only.
 - **Branch protection:** GitHub branch protection / rulesets are Pro-gated on free private repos. Replaced by a local pre-push hook (`references/git-hooks/pre-push`) that refuses direct pushes to `main`. Run `bash scripts/install-hooks.sh` after cloning canonical to install it.
 
+**Shipped in UJA Session 5 (2026-05-02 evening, on `dev/v0.2.0`):**
+- Phase 15 backend scaffold landed: `host/uja_host/` (sandbox, config, db, keystore, tools/, api/, main.py), `start-uja.sh`, `start-uja.bat`, pytest acceptance test, live_smoke.sh. 1,814 lines. Commit `1259f59`.
+- v2 repo separation prep landed: `V2_SETUP.md` (188-line handoff doc), `scripts/sync_to_public_v2.py`, `website/v2/index.html` + `robots.txt` + `netlify.toml`. Awaits Milan creating the new GitHub repos and wiring Netlify per V2_SETUP.md.
+
+**v2 repo + site separation (decided 2026-05-02 / Session 5):**
+- v0.1.x stays at `sharmingmilan/ultimate-job-assistant` (canonical) + `sharmingmilan/ultimate-job-assistant-public` (deploy-source) → `https://ultimatejobassist.netlify.app`. Untouched.
+- v0.2.0 gets its own pair: `sharmingmilan/ultimate-job-assistant-v2` (canonical, private) + `sharmingmilan/ultimate-job-assistant-v2-public` (deploy-source, private) → `https://ultimatejobassist-v2.netlify.app`. To be created by Milan in GitHub UI per V2_SETUP.md Step 1, populated by Claude in a follow-up session per Steps 3+5.
+- Long-term shape (one site or two) is parked. Decide post-Phase 17 when the React frontend exists and we can see what each site actually serves.
+
 **Next up:**
-- Phase 15: backend scaffold (FastAPI, project-root picker, `/api/chat` streaming endpoint, file-sandboxed tool endpoints) on `dev/v0.2.0`.
-- Phase 16: skill registry — every `skills/[name]/SKILL.md` registered as an Anthropic tool. Run the existing Netflix end-to-end regression entirely through the web app and structurally diff outputs against v0.1.0 snapshots.
+- v2 repo bring-up (manual): Milan executes V2_SETUP.md Steps 1, 2, 4, 6, 7. Claude executes Steps 3, 5 in a follow-up session given the new PATs.
+- Phase 16: skill registry — every `skills/[name]/SKILL.md` registered as an Anthropic tool. Run the existing Netflix end-to-end regression entirely through the web app and structurally diff outputs against v0.1.0 snapshots. On v2 canonical's `main` (or `dev/phase16` branch).
 - Phase 17: React + Vite + Tailwind + shadcn/ui frontend (chat pane, materials browser, multi-format preview).
 - Phase 18+: distribution, comprehensive tests, docs, merge gate, tag `v0.2.0`. See SPEC.md §14 for the full phase list.
 

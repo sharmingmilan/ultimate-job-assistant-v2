@@ -1,0 +1,23 @@
+# netlify.toml — Ultimate Job Assistant v0.2.0 deploy config.
+#
+# This file lives at the repo root of `ultimate-job-assistant-v2-public`.
+# It pins Netlify's deploy settings in code so the UI's Build & deploy panel
+# doesn't need to be touched. Edit Netlify settings here, not in the dashboard.
+
+[build]
+  base = "."
+  publish = "website"
+  command = ""
+
+# Cache the v0.2.0 zip but allow revalidation so a fresh sync is picked up
+# within ~5 minutes.
+[[headers]]
+  for = "/downloads/*"
+  [headers.values]
+    Cache-Control = "public, max-age=300, must-revalidate"
+
+# Reinforce noindex at the edge as well as in <meta> tags.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"

@@ -521,3 +521,23 @@ Per ADR-001 §D1–D8, built the local FastAPI host that powers the v0.2.0 web a
 - Skill stub returns `{"status": "not_implemented", "phase": "..."}` so Claude gets a clear signal during Phase 15 chat sessions instead of crashing.
 - Default model wired to `claude-sonnet-4-6` (per ADR D10's "cost-estimate hint per model").
 
+
+### Session 5 supplement: v2 repo separation prep
+
+After Phase 15 landed, Milan asked for a separate Netlify URL and a separate repo for v0.2.0 so the v0.1.x site isn't disrupted while v0.2.0 iterates. Inner-circle audience confirmed.
+
+**Authored on `dev/v0.2.0`:**
+
+- `V2_SETUP.md` — 188-line handoff doc. Step-by-step for Milan: create `ultimate-job-assistant-v2` + `ultimate-job-assistant-v2-public` private repos (Step 1), generate two fine-grained PATs (Step 2), Claude pushes initial state from current `dev/v0.2.0` (Step 3), Milan adds `PUBLIC_REPO_TOKEN` secret (Step 4), Claude runs first sync (Step 5), Milan wires Netlify (Step 6), Milan installs pre-push hook (Step 7), auto-sync workflow deferred to post-Phase-16 (Step 8).
+- `scripts/sync_to_public_v2.py` — minimal adaptation of `sync_to_public.py`. ALLOWLIST adds `host/`, `start-uja.sh`, `start-uja.bat`, `V2_SETUP.md`, `docs/ADR-001-v0.2.0-architecture.md`. EXCLUDE_DST identical to v1. Re-uses `scripts/scan_pii.py` STRICT mode. Compiles cleanly.
+- `website/v2/index.html` + `robots.txt` + `netlify.toml` — placeholder for v2 site. Build-status checklist showing Phase 14 + 15 ✓ and Phases 16–22 pending. Links to v0.1.x site for users who need the toolkit today. Same Tailwind CDN stack as v1 for visual continuity. noindex + Disallow / posture preserved.
+
+**Decision recorded:**
+SPEC.md §13.12 — v0.2.0 gets its own canonical + deploy-source pair. Both private. v1 stays at `ultimatejobassist.netlify.app`; v2 will live at `ultimatejobassist-v2.netlify.app`.
+
+**Long-term parked:**
+Whether to run two sites permanently or eventually retire one. Decide post-Phase 17.
+
+**Next session:**
+Milan completes V2_SETUP.md Steps 1, 2, 4, 6, 7. Hand Claude the two PATs to execute Steps 3 and 5. Once the v2 site is live, Phase 16 (skill registry) starts on the new canonical.
+

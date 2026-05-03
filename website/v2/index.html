@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>Ultimate Job Assist — v0.2.0 (preview)</title>
+  <meta name="description" content="v0.2.0 of Ultimate Job Assistant: a local web app you run on your own computer with your own Anthropic API key. In active development." />
+  <meta name="theme-color" content="#0f172a" />
+  <link rel="icon" href="../assets/favicon.svg" />
+
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; }
+    .gradient-text { background: linear-gradient(120deg, #38bdf8 0%, #f472b6 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .check { color: #22c55e; }
+    .pending { color: #94a3b8; }
+    .blocked { color: #f59e0b; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-200 antialiased min-h-screen flex flex-col">
+
+<header class="border-b border-slate-800">
+  <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+    <a href="./" class="flex items-center gap-2">
+      <span class="inline-block w-7 h-7 rounded bg-gradient-to-br from-sky-400 to-pink-400"></span>
+      <span class="font-bold tracking-tight">Ultimate Job Assist</span>
+      <span class="text-xs bg-slate-800 text-slate-400 px-2 py-0.5 rounded ml-1">v0.2.0 preview</span>
+    </a>
+    <nav class="flex items-center gap-5 text-sm text-slate-400">
+      <a href="https://ultimatejobassist.netlify.app" class="hover:text-sky-300">v0.1.x site</a>
+    </nav>
+  </div>
+</header>
+
+<main class="flex-1 flex items-center">
+  <section class="max-w-3xl mx-auto px-6 py-16">
+    <h1 class="text-4xl md:text-5xl font-bold leading-tight tracking-tight text-center">
+      <span class="gradient-text">v0.2.0</span> is in the oven.
+    </h1>
+    <p class="mt-6 text-lg text-slate-400 max-w-xl mx-auto text-center">
+      A local web app you run on your own computer. Bring your own Anthropic API key. Same skills as v0.1.x, with a real UI for browsing and previewing every artifact you generate.
+    </p>
+
+    <div class="mt-12 bg-slate-900 border border-slate-800 rounded-lg p-6 text-sm">
+      <h2 class="text-base font-semibold mb-4 text-slate-200">Build status</h2>
+      <ul class="space-y-2 text-slate-400">
+        <li><span class="check">&#10003;</span> Phase 14 — architecture decisions (ADR-001)</li>
+        <li><span class="check">&#10003;</span> Phase 15 — backend scaffold (FastAPI host, sandboxed tools, SQLite, OS keychain)</li>
+        <li><span class="pending">&#9711;</span> Phase 16 — skill registry (run_skill, propose_changes, ask_user)</li>
+        <li><span class="pending">&#9711;</span> Phase 17 — React + Vite + Tailwind + shadcn/ui frontend</li>
+        <li><span class="pending">&#9711;</span> Phase 18 — distribution polish (start-uja.sh, curated zip)</li>
+        <li><span class="pending">&#9711;</span> Phase 19 — comprehensive testing</li>
+        <li><span class="pending">&#9711;</span> Phase 20 — docs refresh</li>
+        <li><span class="pending">&#9711;</span> Phase 21 — merge gate</li>
+        <li><span class="pending">&#9711;</span> Phase 22 — tag v0.2.0</li>
+      </ul>
+    </div>
+
+    <div class="mt-8 text-center text-slate-500 text-sm">
+      Need the v0.1.x toolkit today?
+      <a href="https://ultimatejobassist.netlify.app" class="text-sky-400 hover:text-sky-300 underline">It's at the v0.1.x site.</a>
+    </div>
+  </section>
+</main>
+
+<footer class="border-t border-slate-800">
+  <div class="max-w-5xl mx-auto px-6 py-6 text-xs text-slate-500 flex flex-wrap items-center justify-between gap-3">
+    <p>Ultimate Job Assist &middot; v0.2.0 preview &middot; Inner-circle build</p>
+    <p>No tracking. No analytics. No SaaS.</p>
+  </div>
+</footer>
+
+</body>
+</html>
