@@ -5,7 +5,7 @@ description: "Research-driven interview prep skill that builds a deployable sing
 
 # Interview Prep
 
-A research-driven, human-in-the-loop skill that converts a decoded JD plus company research into a deployable single-file Progressive Web App for one specific interview. Modeled on the proven Netflix Interview Prep build (see `references/netflix-example/`) and grounded in evidence-based learning science (worked examples → fading → retrieval, plus interleaving and spacing).
+A research-driven, human-in-the-loop skill that converts a decoded JD plus company research into a deployable single-file Progressive Web App for one specific interview. Grounded in evidence-based learning science (worked examples → fading → retrieval, plus interleaving and spacing).
 
 > **Read this first if you are about to invoke or modify this skill.** The full design rationale (why these phases, why these citations, why a static PWA and not a dynamic app) lives in `../../SPEC.md` §5–§6. This SKILL.md tells you *how to run the skill operationally*.
 
@@ -52,7 +52,7 @@ The skill intentionally does NOT teach a topic from first principles. It assumes
 
 ## Workflow
 
-The skill runs in six phases (A through F). Each phase has a deliverable saved to disk and a checkpoint where Claude self-audits and presents progress to the user. Per Milan's approval cadence (SPEC §13.5), Claude proceeds automatically when self-audit is fully green and stops on any warning or failure.
+The skill runs in six phases (A through F). Each phase has a deliverable saved to disk and a checkpoint where Claude self-audits and presents progress to the user. Per the project's approval cadence, Claude proceeds automatically when self-audit is fully green and stops on any warning or failure.
 
 ### Phase A: Gather Inputs
 
@@ -315,7 +315,7 @@ interview-prep/[company]-[role-slug]-[YYYY-MM]-pwa/
 
 ## Content Authoring Rules (Mandatory)
 
-These rules govern every problem Claude authors. They map directly to the same rules used in the Netflix Interview Prep build (see `references/netflix-example/SPECS.md` §6).
+These rules govern every problem Claude authors.
 
 ### Every worked example must:
 
@@ -347,7 +347,7 @@ Glassdoor anecdotes need a date and rough role title. Blind threads need URLs. T
 
 ## Pedagogical Foundation (Citations)
 
-The skill enforces the same evidence-backed strategies the Netflix Interview Prep build used:
+The skill enforces these evidence-backed strategies:
 
 | Principle | Source | Where it manifests in the PWA |
 |---|---|---|
@@ -422,4 +422,4 @@ The `[convention]-pwa/` folder is git-ignored (per project `.gitignore`) because
 
 ---
 
-*See SPEC.md §5–§6 for the higher-level rationale. See `references/netflix-example/` for the reference build that this skill is modeled on.*
+*See SPEC.md §5–§6 for the higher-level rationale.*

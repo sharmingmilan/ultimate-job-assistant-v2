@@ -11,7 +11,7 @@ references/
 ├── scripts/            ← PDF generation scripts (reportlab)
 │   ├── generate-speaking-points-pdf.py
 │   └── generate-cover-letter-pdf.py
-├── examples/           ← Completed outputs from the Waymo lifecycle test (pre-restructure naming)
+├── examples/           ← Completed outputs from a sample lifecycle test (kept as quality benchmarks)
 │   ├── company-context-waymo.md       (historical, now replaced by research/[company].md)
 │   ├── role-context-waymo-bi-analyst.md (historical, now replaced by tracker.md)
 │   ├── research-brief-waymo.md

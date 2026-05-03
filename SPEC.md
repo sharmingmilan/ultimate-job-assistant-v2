@@ -85,11 +85,10 @@ Single user (Milan). Polished, version-controlled, CI/CD-checked. No backend, no
     │       │   └── icon-512.png
     │       ├── content-schema.json
     │       ├── references/
-    │       │   ├── netflix-example/
     │       │   ├── pedagogy.md
     │       │   └── source-attribution-rules.md
     │       └── evals/
-    │           └── netflix-regression.md
+    │           └── regression.md
     │
     ├── references/                            ← carried over
     ├── base-resumes/                          ← carried over

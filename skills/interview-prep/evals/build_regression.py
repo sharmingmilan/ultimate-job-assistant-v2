@@ -1,22 +1,22 @@
 #!/usr/bin/env python3
 """
-Build a regression content.json modeled on the Netflix Interview Prep project.
+Build a regression content.json for the interview-prep skill template.
 
 This script is a STRUCTURAL regression — it generates a content.json that
-covers all 11 topics from the original Netflix build at the same shape
+covers a representative 11-topic shape that exercises every code path
 (11 topics x 3 phases x 3 difficulties = 99 problem cards), then the build
 script renders a PWA. The smoke test confirms the renderer handles full
-Netflix-scale content without errors or budget overrun.
+production-scale content without errors or budget overrun.
 
-The CONTENT here is intentionally placeholder-quality. A real Netflix run
+The CONTENT here is intentionally placeholder-quality. A real production run
 would replace this with hand-authored worked examples (the original took
 multiple sessions to author). The point of this regression is to prove the
 TEMPLATE does not break at scale, not to ship study-quality content.
 
 Usage:
-    python3 skills/interview-prep/evals/build_netflix_regression.py [output_path]
+    python3 skills/interview-prep/evals/build_regression.py [output_path]
 
-Default output: skills/interview-prep/evals/netflix-regression-content.json
+Default output: skills/interview-prep/evals/regression-content.json
 """
 import json
 import sys
@@ -59,7 +59,7 @@ def make_worked(topic_id, topic_title, difficulty):
             f"Regression placeholder for topic {topic_title} at {difficulty} difficulty. "
             f"Business motivation: this is a synthetic prompt for structural regression "
             f"testing of the Ultimate Job Assistant interview-prep PWA template. "
-            f"A real Netflix run would replace this with a hand-authored worked example."
+            f"A real production run would replace this with a hand-authored worked example."
         ),
         "schemas": [make_schema_panel(topic_id, difficulty)],
         "solution": (
@@ -168,10 +168,10 @@ def build_real_questions():
 
 
 def main():
-    out = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(__file__).parent / "netflix-regression-content.json"
+    out = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(__file__).parent / "regression-content.json"
     content = {
         "metadata": {
-            "company": "Netflix",
+            "company": "Acme Corp",
             "role": "Data Analyst, Production Finance Operations and Innovation",
             "convention": "netflix-data-analyst-2026-04",
             "generated_at": datetime.now(timezone.utc).isoformat(),

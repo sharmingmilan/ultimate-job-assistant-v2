@@ -17,7 +17,7 @@ Synthetic worked examples and retrieval problems can:
 
 - ✅ Use domain vocabulary the company actually uses ("ATL/BTL crew costs," "north-star metric," "1099 vendor") **provided** that vocabulary is sourced from the company's real materials (tech blog, careers page, JD, public earnings calls)
 - ✅ Pose realistic business scenarios in the company's industry (vendor concentration risk for a streaming service, retention curves for a social product)
-- ✅ Use a **target SQL dialect** the company is known to use (Presto/Trino for Netflix, BigQuery for Google, Snowflake for Pinterest) **provided** the dialect choice is sourced
+- ✅ Use a **target SQL dialect** the company is known to use (e.g., Presto/Trino for streaming-media, BigQuery for some search companies, Snowflake for some SaaS) **provided** the dialect choice is sourced
 - ✅ Cite the **schema panel data as fictional but representative**
 
 Synthetic content **MUST NOT**:
