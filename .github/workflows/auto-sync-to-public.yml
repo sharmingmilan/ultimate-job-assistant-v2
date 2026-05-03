@@ -1,19 +1,20 @@
 name: Auto-sync to public companion
 
 # Mirrors the canonical (private) repo to the deploy-source repo
-# (ultimate-job-assistant-public) on every push to main. The destination is
+# (ultimate-job-assistant-v2-public) on every push to main. The destination is
 # what Netlify reads via OAuth, so a successful push here lights up the live
 # site within ~30 seconds of build/cache TTL.
 #
 # Pipeline:
 #   1. Checkout canonical (this repo).
 #   2. Clone the deploy-source repo into ./public-clone using PUBLIC_REPO_TOKEN.
-#   3. Run scripts/sync_to_public.py --to ./public-clone with STRICT PII gate.
+#   3. Run scripts/sync_to_public_v2.py --dst ./public-clone with STRICT PII gate.
 #   4. If anything changed in ./public-clone, commit + push it.
 #
 # Requirements:
-#   - Repo secret PUBLIC_REPO_TOKEN: a classic PAT scoped to `repo` on
-#     sharmingmilan/ultimate-job-assistant-public. 1-year expiry recommended.
+#   - Repo secret PUBLIC_REPO_TOKEN: PAT B from V2_SETUP.md Step 4 —
+#     a fine-grained PAT scoped to sharmingmilan/ultimate-job-assistant-v2-public
+#     with Contents: Read and write. 1-year expiry recommended.
 #
 # Failure modes:
 #   - PII scanner blocks (exit 1): workflow fails. Inspect the run, fix the
@@ -58,19 +59,19 @@ jobs:
           set -euo pipefail
           if [ -z "${PUBLIC_REPO_TOKEN:-}" ]; then
             echo "::error::PUBLIC_REPO_TOKEN secret is not set."
-            echo "Create a classic PAT with 'repo' scope on"
-            echo "sharmingmilan/ultimate-job-assistant-public and add it as"
+            echo "Create a fine-grained PAT (V2_SETUP.md Step 4) scoped to"
+            echo "sharmingmilan/ultimate-job-assistant-v2-public and add it as"
             echo "a repository secret named PUBLIC_REPO_TOKEN."
             exit 2
           fi
           git clone \
-            "https://x-access-token:${PUBLIC_REPO_TOKEN}@github.com/sharmingmilan/ultimate-job-assistant-public.git" \
+            "https://x-access-token:${PUBLIC_REPO_TOKEN}@github.com/sharmingmilan/ultimate-job-assistant-v2-public.git" \
             ./public-clone
 
       - name: Run sync (allowlist + STRICT PII + curated zip build)
         run: |
           set -euo pipefail
-          python3 scripts/sync_to_public.py --to ./public-clone
+          python3 scripts/sync_to_public_v2.py --dst ./public-clone
 
       - name: Commit + push if anything changed
         working-directory: ./public-clone
