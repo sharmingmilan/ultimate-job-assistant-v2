@@ -834,3 +834,84 @@ None new. Phase 22.5 didn't touch behavior; the existing footguns from Sessions 
 The "Current Status & What's Next" block is refreshed to reflect Phase 22.5 shipped + Phase 23 as the new top item in "Next up." No new working-principles or pattern additions — Session 9's Dispatch-pattern doc covered this session by construction.
 
 ---
+
+## Session: 2026-05-03 (UJA Session 11) — Phase 23 MCP server scaffold + v0.2.1 ships
+
+### What Happened
+
+Second Dispatch session for the project, and the largest-by-scope dev session since Phase 17.5. Brief on disk at `docs/session-11-brief.md`; launched via `bash scripts/dispatch-session.sh 11`. Six atomic commits across one feature branch (`phase23/mcp-server`), one PR (#3), one `--no-ff` merge to `main` at `e634252`, one annotated tag `v0.2.1` (SHA `307e56a`) on the merge commit. Branch deleted local + remote post-merge. Pattern from Session 10 held end-to-end at the larger scope.
+
+The deliverable: `host/uja_mcp/` exists, the JSON-RPC-over-stdio entry point boots, 12 tools register against the ADR-002 D1 surface, the existing test suite is re-pointed at MCP tool functions (no longer at FastAPI `TestClient` routes), launchers + Cowork-config snippet ship, and the live-smoke checklist is queued for Milan to run against a real Cowork session.
+
+### Shipped — code
+
+One feature branch (`phase23/mcp-server`), six atomic commits, one merge, one tag:
+
+- `96b752d` — Block 1: pin `mcp>=1.27,<2.0` in `host/requirements.txt`; create `host/uja_mcp/__init__.py` + `host/uja_mcp/tools/__init__.py` skeleton; add `host/.venv-mcp/` to `.gitignore`. No behavior.
+
+- `60e557a` — Block 2: tool facades. `host/uja_mcp/tools/files.py` (5 tools), `tools/skills.py` (2 tools — `run_skill` from Phase 16 split into `list_skills` + `read_skill` per ADR-002 D1), `tools/hitl.py` (5 tools). Pure Python functions; no FastMCP imports yet, so tests can call them directly. Logic stays in `host/uja_host/`; this layer adapts the call shape and converts `HTTPException` → `ToolError`.
+
+- `f800855` — Block 3: `host/uja_mcp/server.py` (255 lines). FastMCP instance, all 12 tools registered, stdio loop, stderr-only logging (stdio reserved for JSON-RPC), `UJA_MCP_LOG_LEVEL` env var. `build_server()` factored out so Block 4 can drive `list_tools` / `call_tool` against the same registration without process state. Smoke-verified locally: `python -m uja_mcp.server </dev/null` boots, logs `uja_mcp v0.2.0-dev starting (transport=stdio)` + project root, exits 0 on EOF.
+
+- `c1c854f` — Block 4: tests re-pointed. Phase 15 / 16 / 17.5 suites move from `TestClient` to direct MCP-tool calls (same fixture pattern: monkeypatched `host_config.get_project_root` + `tmp_path`-rooted SQLite). New `host/tests/test_mcp_server.py` covers `tools/list`, `tools/call`, `is_error=true` protocol contract. Result: **50 passed, 3 skipped** (was 36/3 pre-Phase-23).
+
+- `14ce82e` — Block 5: launchers. `start-uja-mcp.sh` (macOS/Linux, smoke-tested locally) + `start-uja-mcp.bat` (Windows mirror) + `references/cowork-mcp-config-snippet.json` (canonical template with `{{PYTHON_EXECUTABLE}}` / `{{HOST_DIR}}` / `{{PROJECT_ROOT}}` placeholders). Informational, not a process launcher — Cowork owns the MCP server's lifecycle.
+
+- `c6d653b` — Block 6: `host/tests/live_smoke_phase23.md` (179 lines). Six checks Milan runs against a real Cowork session: `tools/list` shows 12 tools, `read_workspace_metadata`, `read_file`, `ask_user`, `answer_question` (with sqlite3 fallback verify), full `propose_changes` + `approve_changes` round-trip. Each check has a failure-mode note for self-diagnosis.
+
+PR #3 merged with `--no-ff` (`merge_method=merge`, the proven `git credential fill` → REST API path; `gh` CLI still broken). Annotated tag `v0.2.1` cut on the merge commit `e634252`, tag SHA `307e56a`, pushed to origin. Feature branch deleted local + remote.
+
+### Test result
+
+`pytest`: **50 passed, 3 skipped** on merged main. Up from 36 / 3 pre-Phase-23. The +14 split into:
+- ~6 net-new in `test_mcp_server.py` (protocol-level: `tools/list`, `tools/call`, error contract).
+- The remaining +8 fall out of the Phase 15 acceptance re-target — the chat-loop SSE round-trip dropped, replaced by per-file-tool round-trips that are individually addressable.
+
+### Brief success criteria → outcomes (from `docs/session-11-brief.md`)
+
+1. `host/uja_mcp/{__init__.py, server.py, tools/{__init__.py, files.py, skills.py, hitl.py}}` exist per Block 2-3 specs → ✅ all eight files in the merged diff.
+2. `mcp` pinned in `host/requirements.txt` → ✅ `mcp>=1.27,<2.0`.
+3. `python -m uja_mcp.server` launches cleanly (clean exit on Ctrl-C / stdin close) → ✅ smoke-verified in Block 3 commit.
+4. `pytest -q` reports 36+ passing, 0 failed → ✅ 50 passed.
+5. `start-uja-mcp.sh` runs cleanly on a fresh checkout → ✅ smoke-tested macOS in Block 5.
+6. `references/cowork-mcp-config-snippet.json` exists with the right Cowork shape → ✅ Block 5.
+7. `host/tests/live_smoke_phase23.md` exists with user-facing checklist → ✅ Block 6, 179 lines.
+8. ADR-002 D1's tool surface fully covered (12 tools registered; `export_application` deferred to Phase 24) → ✅ all 12: `read_file`, `write_file`, `edit_file`, `list_files`, `read_workspace_metadata`, `list_skills`, `read_skill`, `propose_changes`, `approve_changes`, `reject_changes`, `ask_user`, `answer_question`. `export_application` flagged as Phase 24 in `tools/__init__.py` and `server.py` docstrings.
+9. Deprecated tree (`host/uja_host/api/chat.py`, `api/conversations.py`, `host/frontend/`) unchanged from Session 10 → ✅ confirmed via merge diff (none of those paths appear).
+10. PRs open + tag cut by Cowork session after merge → ✅ PR #3 merged, `v0.2.1` tagged by Cowork.
+
+### Process notes worth preserving
+
+- **Three judgment calls flagged at end-of-session.** Each is documented inline in the relevant commit so a future reader doesn't re-litigate them:
+
+  1. **Two deprecated chat-route tests dropped during the Block 4 re-target.** They were exercising the FastAPI chat-loop SSE round-trip that ADR-002 D1 retires; nothing equivalent exists in the MCP runtime path. Coverage of the underlying file/HITL/skill primitives is preserved (and expanded) by the rest of the re-targeted suite. Rationale: porting them would have required keeping the chat-loop alive in the test harness, which contradicts D1.
+
+  2. **`api/changes.py` + `api/questions.py` business logic re-implemented in `uja_mcp/tools/hitl.py` rather than refactored into shared pure functions.** The deprecated FastAPI routes stay as-is in the deprecated tree per ADR-002 D3 (kept as reference, not maintained); the MCP layer carries its own copy that raises `ToolError` instead of `HTTPException`. Trade-off: small code duplication in service of D3's "deprecated tree is reference, don't refactor it." If Phase 24 or later wants the shared-pure-function refactor, the obvious move is to extract from `uja_mcp/tools/hitl.py` (the live path) and let the deprecated copy diverge. From the Block 2 commit message: "the deprecated FastAPI routes stay as-is in the deprecated tree per ADR-002 D3; this module owns the MCP-side equivalent."
+
+  3. **MCP server does not fail-fast on missing project root.** It logs a warning, starts the stdio loop, and surfaces `ToolError` per call when a tool needs the root. Rationale: starting Cowork → registering the MCP server → configuring the project root through the agent (via `read_workspace_metadata` → user prompt → write to `~/.uja/config.json`) is the intended onboarding, and a fail-fast would break that flow. The `ask_user` tool stays callable even without a root, so the agent can drive setup interactively. Block 3 commit message: "A missing root logs a warning but does not fail startup; tools surface ToolError when invoked so the agent can prompt for setup."
+
+- **Second Dispatch session, pattern still holding.** Session 10 was the first run (Phase 22.5, ~30 min, annotation-only). Session 11 was the second run (Phase 23, ~3-4 hr, six atomic commits, real architecture work). The brief-on-disk + thin-prompt-from-script roundtripped cleanly at the larger scope; no orchestration overhead from Cowork side until PR review. Two data points beats one — the pattern looks safe for Phase 24 (similar shape, smaller scope).
+
+- **Atomic discipline held across all six commits.** Each Block landed as one logical commit with no scope creep. Reverting any single block is a one-command operation. Block 4 (the test re-target) is the one that would have been tempting to split further; the Dispatch session kept it atomic.
+
+- **PAT pattern preserved.** Same approach as Sessions 8-10: PAT lives in `.session-secrets/`, never in chat, stripped from origin URL after operations. Used `git credential fill` → REST API for PR creation + merge (the `gh` CLI is still broken on this machine).
+
+### Deferred to next session
+
+1. **Phase 24 — Export pipeline (target v0.2.2, Session 12).** Implement `export_application(company_role)` MCP tool per ADR-002 D4. Walks per-output-type folders, validates minimum-viable set, writes deterministic zip to `website/v2/exports/`, updates `index.json`. Deterministic zip bytes (sorted ordering, fixed compression, zeroed timestamps). Tests for manifest schema, determinism, sandbox-bounded writes. The `build_server()` factoring from Block 3 means Phase 24 tests can drive `tools/call` for `export_application` against the same registration pattern without process state. Brief draft TBD; will follow the same Dispatch shape as Sessions 10-11.
+
+2. **Live smoke-test the v0.2.1 build.** Run `host/tests/live_smoke_phase23.md` against a real Cowork session: register the MCP server via the snippet from `start-uja-mcp.sh`, walk the six checks, report. This is the genuine acceptance gate — the test suite proves the tool-function contract, but only a live Cowork session proves the JSON-RPC stdio framing.
+
+3. **v0.4.0 workflow UI Canva MCP design spike** — still parallelizable per Session 9's note. Carries forward unchanged.
+
+### Known issues + footguns surfaced this session
+
+- The `mcp` SDK is pinned `>=1.27,<2.0`. If a 2.x major arrives during v0.2.x, it will be a deliberate revisit, not an automatic upgrade. The pin is in `host/requirements.txt`.
+- `host/.venv-mcp/` lives alongside the legacy `host/.venv/` (FastAPI deprecated tree). Both are in `.gitignore`; the launchers point exclusively at `.venv-mcp/`. Cleanup of the legacy venv is left for whenever the deprecated tree gets removed (post-v0.2.x).
+- The "warn-not-fail on missing project root" decision means a misconfigured Cowork registration looks like 12 tools that all return `ToolError`. The smoke checklist's first step (`tools/list` + `read_workspace_metadata`) is designed to surface this immediately.
+
+### CLAUDE.md additions this session
+
+The "Current Status & What's Next" block is refreshed to reflect Phase 23 shipped + `v0.2.1` tagged + Phase 24 as the new top item in "Next up." No new working-principles or pattern additions — Session 9's Dispatch-pattern doc and Session 8's working-principles section continue to cover this session by construction.
+
+---
