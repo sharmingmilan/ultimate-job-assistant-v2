@@ -1,5 +1,5 @@
 # SESSION_LOG.md -- Job Assist
-# Last updated: 2026-05-02 (added UJA Session 7 entry)
+# Last updated: 2026-05-03 (added UJA Session 8 entry)
 
 ---
 
@@ -628,3 +628,96 @@ Milan completes V2_SETUP.md Steps 1, 2, 4, 6, 7. Hand Claude the two PATs to exe
 - **V2 auto-sync workflow.** Now justified — the v2 site has something worth shipping. Adapt `.github/workflows/auto-sync-to-public.yml` from v1; PAT B already exists per V2_SETUP Step 4.
 - **Token rotation reminder.** The PAT A used this session appeared in chat history. Same posture as Session 6 — Milan should rotate it before the next session.
 
+
+
+---
+
+## Session: 2026-05-03 (UJA Session 8) — Phase 17.5 ships + chat race fix + strategic pivots locked
+
+### What Happened
+
+Started as Block A from the Session 8 brief: wire change-set approve/reject + question answer to close the human-in-the-loop. Detoured into a chat-tab regression diagnosis (load-history useEffect was wiping in-flight asstRow on every conversation event), shipped that as a 1-commit fix, then resumed Block A. By the end Milan made two strategic pivots that reshape v0.2.0+ scope.
+
+### Shipped — code
+
+**1. Chat conversation-event race fix** (`phase17_5/fix-conversation-race`, merge `d4ae9c0`).
+
+Symptom: sending a message in a new conversation produced no visible agent response. User message rendered, "Stop Claude" pill appeared for several seconds, then vanished. Backend logs (16+ successful Anthropic API calls per send across three test conversations) showed the agent loop running normally. Frontend was silently dropping every event after the first `conversation` event.
+
+Root cause: chat.py yields a `conversation` SSE event as the first frame of every stream. handleEvent's onConv callback called setActiveId(cid), which triggered ChatTab's load-history useEffect. That effect fetched `/api/conversations/{id}` and called `setRows(messagesToRows(messages))` — but at that moment the DB only contained the user message, so the in-flight asstRow was wiped. Every subsequent `text`/`tool_use`/`tool_result` event then arrived at handleEvent's `setRows((prev) => prev.map(...))` with no matching asstRowId in prev, so all events silently dropped.
+
+Fix: track which conversation the in-flight stream owns via a `streamingConvIdRef`. Set it in onConv before calling setActiveId, clear it in send()'s finally. The load-history useEffect skips its fetch when `streamingConvIdRef.current === activeId`. 8 lines added to ChatTab.tsx; commit `95b1ef5`. Verified live by Milan: chat now renders agent responses end-to-end.
+
+Diagnostic methodology worth preserving: ran a single-shot diagnostic via Claude in Chrome agent (using a structured XML prompt with safety invariants) against http://127.0.0.1:8765 to capture DevTools network + console state. Initial run missed the network log because the inspector was armed post-send; the visual + composer-state observations alone were enough to triangulate the bug (combined with the backend logs Milan pasted from his UJA Terminal, which proved the agent loop was working server-side).
+
+**2. Block A — Phase 17.5 HITL endpoints + frontend wiring + tests** (`phase17_5/hitl-endpoints`, merge `8a68e85`). Three atomic commits:
+
+- `ca23577` — backend: `host/uja_host/api/changes.py` (POST /{id}/approve applies edits via sandbox.resolve_within_root + Path.write_text + db.resolve_pending_change(id, "applied"); POST /{id}/reject marks 'rejected', no disk side effects), `host/uja_host/api/questions.py` (POST /{id}/answer records via db.answer_pending_question + synthesizes a plain-text user message into the conversation so the agent picks up the answer on the next /api/chat invocation), chat.py resume-mode (relaxed message field to allow empty body when conversation_id is set; user-append step skipped when empty), routers wired in main.py.
+
+- `c895709` — frontend: api.ts gains approveChange / rejectChange / answerQuestion methods. ChatTab.tsx: refactored send() to extract streamTurn(text) helper that accepts empty text; new resumeStream() calls streamTurn("") to re-trigger /api/chat after an approve/reject/answer. Built useMemo toolResultByUseId across all rows so PendingChangeSet/PendingQuestion can correlate their owning tool_use to the matching tool_result and pull change_set_id / question_id from its content payload. Replaced PendingChangeSet's disabled buttons with real Approve/Reject onClick handlers + state machine (pending → submitting → applied/rejected/error) + paths_written count badge. Replaced PendingQuestion's disabled Textarea with real inline answer entry: multi-choice options become real submit buttons; free-form questions get a Textarea with cmd+enter to send. Same state machine, same auto-resume after action. Threaded toolResultByUseId + onResume down through ChatRowView -> BlockView -> ToolUseCard -> PendingChangeSet/Question (verbose but explicit; can be tightened to a context provider in a follow-up).
+
+- `3fdc40f` — 15 unit tests (host/tests/test_phase17_5.py): approve happy path + sandbox boundary + 404/409 idempotency, reject (no disk writes + idempotency), answer (records + synthesizes user msg + body validation), chat resume mode (empty body allowed only when conversation_id set). Full suite green: 36/36.
+
+### Verified live (Milan)
+
+- New conversation chat: types → streams response (race fix worked).
+- Agent calls run_skill, list_files, ask_user — all render in-app correctly.
+- ask_user card now shows real Textarea + "Send answer" button + cmd+enter hint (compared to disabled placeholder pre-Block-A).
+- Backend restart was required to pick up the new /api/changes and /api/questions endpoints (StaticFiles only auto-picks-up frontend dist/, not Python modules). Captured for ONBOARDING-V2.md.
+- Hit Anthropic RateLimitError mid-conversation (8+ tool iterations × 16 API calls across three test conversations exhausted the per-minute quota). Transient, not a UJA bug — agent loop could be made more conservative in a future iteration.
+
+### Strategic pivots locked this session — reshape v0.2.0+ scope
+
+**Pivot A: chat-style UI is the wrong metaphor for job-application workflows.**
+
+Milan's words: "this isn't working for me. we'll have to design a new ui with new chat interface. thinking like a sims type game. but that'll be in roadmap." The right shape is closer to a structured workflow tracker — discrete decisions, visible state, undo, branching, per-application stage view. Chat becomes a sidecar for "talk to the agent" but not the primary surface. v0.4.0 added to ROADMAP. Canva MCP suggested for design/style exploration.
+
+**Pivot B: v2 Netlify site reframes from "marketing landing" to "application package + config delivery hub."**
+
+Milan's words: "now i just want the website be a place to take whole packaged application zips for and configs" and "the application files i need to apply for a job should end up being built there." Subsequently corrected: **"exportable"** (not "packaged"). The website is no longer about distributing the local web app — it's a delivery layer for completed **exportable application packages** (one zip per company-role containing decoded JD, targeted resume, cover letter, score, speaking points, etc.) plus config templates for forkers. The workflow that builds these zips runs elsewhere; the site is the export/share layer.
+
+**Pivot C: Anthropic-API-key + local-web-app architecture is being reconsidered.**
+
+Milan's words: "i don't want to use anthropic key. since web will be what i described there is no need." This effectively says the v0.2.0 self-hosted-local-agent direction is being deprecated in favor of: workflow stays in Cowork (where users already have Claude access via desktop subscription), local infrastructure exists only for tooling (file ops, sandbox, persistence). The host backend + sandbox + file API + HITL endpoints are reusable as Cowork-callable surfaces; the chat tab + agent loop are the parts being deprecated.
+
+**Net effect on the phase plan:** Phases 18 (distribution polish), 19 (comprehensive testing), 20 (docs refresh), 21 (merge gate), and the v0.2.0 tag are all paused. Block B (v2 Netlify site as "marketing landing") is paused. Block C (ONBOARDING-V2.md for the local web app) is paused. Block D (in-app About tab for the chat-style frontend) is paused. The chat-style UI we built in Phase 17 + 17.5 is preserved as-is (works end-to-end); it's just no longer the primary surface we're aiming at for v0.2.0 ship.
+
+**What's NOT being thrown out:** the FastAPI backend, sandbox helper, file API, persistence layer, OS-keychain key store, propose_changes/ask_user primitives, the HITL approve/reject/answer endpoints, the test suite (36 passing tests). These are infrastructure that the next architecture sits on top of.
+
+### Deferred to next session
+
+1. **Architecture decision for v0.2.0+** based on Pivot C. Probably: write a new ADR-002 documenting the "Cowork-as-brain + local-host-as-tooling" or "MCP server" or "package-builder" direction (TBD). Update SPEC §14's v0.2.0 phase plan accordingly. Decide what ships under the v0.2.0 tag and what becomes v0.2.x / v0.3.0 / v0.4.0.
+
+2. **v2 site rebuild per Pivot B.** Static landing + per-application **exportable** zip download index + config templates section. No marketing copy. No "download the local web app" CTA. Probably 1-2 day rebuild from scratch with Canva MCP for visual style.
+
+3. **v0.4.0 workflow UI design exploration.** Use Canva MCP to find Sims-style game UI references; sketch the structured workflow tracker; prototype one application's stage view; gather feedback.
+
+### Reusable infrastructure shipped this session that survives all pivots
+
+- HTTP-level HITL pattern (POST /api/changes/{id}/approve|reject + POST /api/questions/{id}/answer with synthesized-user-message-into-conversation) — works regardless of what UI sits on top
+- Test fixtures pattern (fastapi.testclient.TestClient + monkeypatched host_config.get_project_root + tmp_path-rooted SQLite) — Phase 17.5 test file is now the cleanest example for future endpoint tests
+- TEST-V2-NOW.md (workspace-root quickstart for booting the v0.2.0 build locally) — supersedes the gap that made Milan unable to test Session 7's ship
+- .session8-secrets pattern for safely-delivered PATs (move to file via Terminal command instead of pasting in chat) — should land permanently in CLAUDE.md as the standard pattern for any session that needs a credential
+- Test-workspace pattern (`cp -R ~/code/uja-v2 ~/code/uja-test-workspace`) so the agent has a sandbox to write into without polluting Milan's real v1 workspace
+
+### Known issues + footguns surfaced this session
+
+1. **Backend restart required after pulling code that touches host/uja_host/.** The Python module cache means a running uvicorn process won't pick up new endpoints. Frontend-only changes just need `npm run build` + browser refresh. Captured here so ONBOARDING-V2.md (when it's written) has this prominently.
+
+2. **PAT exposure twice this session.** Milan pasted both a GitHub PAT and an Anthropic key directly into chat at different points; both were rotated immediately. The .session8-secrets file pattern was established to prevent recurrence. The Terminal `cat` pattern is also unsafe for secrets (becomes scrollback that pastes back when copying any nearby Terminal output) — `pbcopy` is the safer pattern, captured in TEST-V2-NOW.md.
+
+3. **Anthropic per-minute rate limit reachable on tier-1 accounts during a single end-to-end test.** Agent loop's MAX_TOOL_ITERATIONS=12 + multiple tool dispatches per iteration can burn through the quota in 60-90 seconds. Two mitigations possible: tighter system prompt to discourage exploration, or an explicit account upgrade path documented in onboarding.
+
+4. **memory.md and tracker.md are committed to v2 canonical** (intentional per the v1 GitHub-separation pattern — they live on the private canonical repo and never sync to deploy-source). The cp -R test-workspace pattern brings Milan's real personal data into the test workspace. Verified the agent's writes go to the test-workspace copy, not the canonical clone, so this is safe but worth noting.
+
+### CLAUDE.md additions Milan asked for early in the session
+
+Add an explicit "Working Principles" section codifying:
+- **Human-in-the-loop**: ask clarifying questions before non-trivial work; never assume scope
+- **Atomic**: one logical change per commit, one branch per block-piece, --no-ff merges
+- **Deterministic**: same inputs → same outputs; no flaky tests, no timestamps in committed artifacts, pinned dependency versions
+- **Evidence-based**: every claim backed by a file path / line / search result / web source — no fabrication
+
+Landed in this commit's CLAUDE.md update.
+
+---

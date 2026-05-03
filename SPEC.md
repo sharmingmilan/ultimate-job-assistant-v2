@@ -496,8 +496,55 @@ The self-hosted local web app — the second way to run UJA. Bring-your-own Anth
 | 18 | Distribution | Cross-platform `start-uja.sh` + `start-uja.bat` integrated into curated zip pipeline. Launch script presents friendly progress messages ("checking Python… ✓", "installing dependencies…", "starting server on port 8741", "opening your browser…"), clear error reporting if a step fails, and clean shutdown when the user closes the browser tab. QUICKSTART.md gets a 30-second launch recipe with screenshots | |
 | 19 | Comprehensive testing | Unit (tool definitions, message-loop reducer, sandbox boundary), integration (orchestrator on a fixture application; assert exact file outputs), E2E (Playwright through full chat flow + filesystem assertions), manual (Milan runs ONE real upcoming application end-to-end and writes a SESSION_LOG entry covering rough edges) | |
 | 20 | Docs refresh | Top-level CLAUDE.md gains a "Web App Mode" section; `references/zip-bundle/CLAUDE.md` gets a "First Session in Web App Mode" block parallel to the existing fresh-install onboarding; ONBOARDING.md grows a Path A (Cowork) vs Path B (web app) split; QUICKSTART.md gets a launch recipe; README.md surfaces both modes prominently; DESIGN_DOC.md gets a Skills-as-Tools section | |
-| 21 | Merge gate | Final review of `dev/v0.2.0`, run all tests once more on the merge candidate, squash-merge or merge-commit `dev/v0.2.0` into `main` only when Milan signs off. The merge IS the v0.2.0 publish moment | |
-| (tag) | Tag `v0.2.0` | Tag after phase 21 merges | |
+| 17.5 | HITL endpoints + frontend wiring | `POST /api/changes/{id}/approve\|reject` (apply edits via sandbox + db.resolve_pending_change, idempotent), `POST /api/questions/{id}/answer` (records + synthesizes user message), chat.py resume-mode (empty message body when conversation_id set), frontend wires real Approve/Reject/Send-answer + state machine + auto-resume. 15 unit tests, full suite 36/36 green. | ✅ shipped Session 8 (commits ca23577 c895709 3fdc40f, merge 8a68e85) |
+| 21 | Merge gate | Final review of `dev/v0.2.0`, run all tests once more on the merge candidate, squash-merge or merge-commit `dev/v0.2.0` into `main` only when Milan signs off. The merge IS the v0.2.0 publish moment | ⏸ PAUSED — see "Pause" section below |
+| (tag) | Tag `v0.2.0` | Tag after phase 21 merges | ⏸ PAUSED |
+
+### v0.2.0 plan PAUSED post-Session 8 — pending ADR-002
+
+Three strategic pivots locked in Session 8 (see SESSION_LOG.md Session 8 entry and ROADMAP.md Decision log) reshape what v0.2.0 should ship:
+
+- **Pivot A** — chat-style UI is wrong metaphor for job-application workflows; v0.4.0 will be a Sims-style structured workflow tracker. Chat becomes sidecar.
+- **Pivot B** — v2 site reframes from "marketing landing for the local web app" to "delivery hub for **exportable** application packages + config templates" (zips designed to leave the site — sendable to recruiters, archivable, shareable).
+- **Pivot C** — Anthropic-API-key + local-web-app architecture being reconsidered. Workflow likely stays in Cowork; local infrastructure exists for tooling not agent loop.
+
+Phases 18 (distribution), 19 (testing), 20 (docs refresh), 21 (merge gate), and the v0.2.0 tag are all paused. Block B/C/D from the Session 8 brief (v2 Netlify site, ONBOARDING-V2.md, in-app About tab) are paused — they all assume the deprecated chat-style UI is the primary surface.
+
+**ADR-002 is the next session's first deliverable.** It must answer:
+
+1. What architecture replaces "agent-loop-in-host"? Options: Cowork-driven via MCP server, or thin local-host serving HTML artifacts to Cowork, or pure Cowork with file-tool MCP, or none-of-the-above.
+2. Does v0.2.0 ship at all under the original meaning, or does it become a maintenance-release tag (just the bug fixes + HITL endpoints) followed by v0.2.x for the new direction?
+3. What does v0.2.0+'s file layout look like once chat-tab + agent-loop-in-host are deprecated? Which files survive, which become deprecated, which are net-new?
+4. How does Pivot B (site as delivery hub) interact with the architecture answer? Site probably stays static; the workflow runs elsewhere; the site just serves zips.
+
+**Reusable infrastructure that survives ALL pivots and remains in scope for v0.2.0+:**
+
+- FastAPI backend skeleton (`host/uja_host/`)
+- Sandbox helper (`sandbox.py`) and resolve_within_root pattern
+- File API (`api/files.py` — read tree, text, raw)
+- Persistence layer (`db.py` — append-only schema, conversations + messages + tool_invocations + pending_changes + pending_questions)
+- OS keychain wrapper (`keystore.py`)
+- propose_changes / ask_user primitives in `tools/skill_tools.py`
+- Phase 17.5 HITL endpoints (`api/changes.py`, `api/questions.py`)
+- Test fixtures pattern (TestClient + monkeypatched config + tmp_path-rooted SQLite) — 36 passing tests
+- Skills-as-Tools registry (`tools/skill_registry.py`)
+
+### v0.3.0 — Tauri double-click app (committed, post-v0.2.0)
+
+Per-OS native binaries (.dmg, .msi, .AppImage / .deb) wrapping the local-host architecture (whatever shape it takes after ADR-002). Bundles Python interpreter via pyoxidizer or briefcase so users install nothing.
+
+| Phase | Subject | Deliverable | Status |
+|---|---|---|---|
+| 23 | Tauri scaffold | Rust toolchain, `tauri.conf.json`, shell wrapping a webview pointing at the FastAPI process | committed |
+| 24 | Python bundling | pyoxidizer or briefcase bakes interpreter + host + venv into the .app/.exe | committed |
+| 25 | Per-OS build matrix | .dmg arm64+x86, .msi x64, .AppImage + .deb x64 via GitHub Actions | committed |
+| 26 | Code signing | macOS notarization (~$99/yr Apple Dev), Windows code-signing cert (~$200/yr); optional for first release — ship unsigned with right-click→Open caveat | committed |
+| 27 | v2 site → real download buttons | Replace any placeholder cards (per Pivot B those land as zip-portal entries; this phase swaps in real native installers) | committed |
+| 28 | Tag `v0.3.0` | All four platforms verified working | committed |
+
+### v0.4.0 — Workflow UI rethink (committed, see ROADMAP Track 7)
+
+Sims-style structured workflow tracker. Per-application stage view. Chat becomes sidecar. Canva MCP design exploration. Architecture details deferred until ADR-002 lands.
 
 ---
 
