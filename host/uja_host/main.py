@@ -1,6 +1,11 @@
-"""FastAPI app + uvicorn entrypoint for the UJA local web host.
+"""DEPRECATED per ADR-002 D3.
 
-Usage:
+This FastAPI app + uvicorn entrypoint shipped the chat-style local web
+host (Phases 15-17.5, v0.2.0). It is preserved as a working reference,
+not maintained; new work targets host/uja_mcp/server.py (added in
+v0.2.1). The MCP server replaces this entrypoint as the v0.2.x runtime.
+
+Usage (legacy, for reference only):
     python -m uja_host.main [--project-root PATH] [--bind HOST] [--port PORT]
 
 Defaults: 127.0.0.1:0 (random ephemeral port). Project root is read from
