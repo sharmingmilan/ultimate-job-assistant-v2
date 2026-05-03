@@ -10,10 +10,11 @@ Each module in this package wraps a slice of `host/uja_host/`:
   hitl.py   — propose_changes / approve_changes / reject_changes / ask_user /
               answer_question. Wraps host/uja_host/tools/skill_tools.py +
               host/uja_host/api/changes.py + host/uja_host/api/questions.py.
+  export.py — export_application. Walks per-output-type folders, writes a
+              deterministic zip to website/v2/exports/, updates
+              exports/index.json. ADR-002 D4. Net-new in Phase 24; no
+              FastAPI predecessor.
 
 Functions are pure Python (no MCP framework imports) so tests can call
 them directly. server.py registers each one with FastMCP via add_tool().
-
-Note: `export_application` is Phase 24 (target v0.2.2); not implemented
-here. The placeholder lives in tools/export.py once Phase 24 lands.
 """
