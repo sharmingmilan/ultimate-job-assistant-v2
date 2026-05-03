@@ -20,7 +20,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from uja_host import __version__, config as host_config
-from uja_host.api import auth, chat, config as config_api, conversations, files as files_api
+from uja_host.api import auth, chat, changes, config as config_api, conversations, files as files_api, questions
 
 
 def create_app() -> FastAPI:
@@ -50,6 +50,8 @@ def create_app() -> FastAPI:
     app.include_router(conversations.router)
     app.include_router(chat.router)
     app.include_router(files_api.router)
+    app.include_router(changes.router)        # Phase 17.5: change-set approve/reject
+    app.include_router(questions.router)      # Phase 17.5: pending-question answer
 
     @app.get("/api/health", tags=["meta"])
     def health():

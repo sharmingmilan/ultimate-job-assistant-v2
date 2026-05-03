@@ -48,7 +48,12 @@ SYSTEM_PROMPT = (
 
 class ChatRequest(BaseModel):
     conversation_id: str | None = None
-    message: str = Field(..., min_length=1)
+    # Empty message is valid: it signals "resume the loop using existing
+    # conversation history" (used by Phase 17.5 after a change-set approval
+    # or a question answer has appended a synthesized user message via the
+    # /api/changes or /api/questions endpoints). For first-message-of-turn
+    # the frontend always sends non-empty text.
+    message: str = Field(default="", max_length=200000)
     model: str | None = None
 
 
@@ -85,9 +90,19 @@ def post_chat(body: ChatRequest):
                 raise HTTPException(status_code=404, detail="conversation_id not found")
             conv_id = body.conversation_id
         else:
+            # Empty message is only valid when continuing an existing
+            # conversation (resume mode); reject new conversations with no text.
+            if not body.message.strip():
+                raise HTTPException(
+                    status_code=400,
+                    detail="message is required when starting a new conversation",
+                )
             conv_id = create_conversation(conn, title=body.message[:60])
-        # Persist user turn
-        append_message(conn, conv_id, "user", body.message)
+        # Persist user turn ONLY when there's a fresh message; resume-mode
+        # invocations rely on a synthesized user message already appended by
+        # /api/changes or /api/questions before /api/chat was called.
+        if body.message.strip():
+            append_message(conn, conv_id, "user", body.message)
 
     def event_stream() -> Iterator[bytes]:
         try:
