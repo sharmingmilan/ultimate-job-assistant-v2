@@ -1,0 +1,73 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222 47% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    --primary: 199 89% 48%;          /* sky-500 family — picks up the logo's left stop */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
+
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+    --accent: 330 81% 95%;
+    --accent-foreground: 330 81% 30%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 215 16% 88%;
+    --input: 215 16% 88%;
+    --ring: 199 89% 48%;
+    --radius: 0.625rem;
+  }
+
+  .dark {
+    --background: 222 47% 7%;
+    --foreground: 210 40% 96%;
+
+    --card: 222 47% 9%;
+    --card-foreground: 210 40% 96%;
+    --popover: 222 47% 9%;
+    --popover-foreground: 210 40% 96%;
+
+    --primary: 199 89% 56%;
+    --primary-foreground: 222 47% 11%;
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 210 40% 96%;
+
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 330 60% 25%;
+    --accent-foreground: 330 80% 88%;
+
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 210 40% 96%;
+
+    --border: 217 33% 22%;
+    --input: 217 33% 22%;
+    --ring: 199 89% 56%;
+  }
+}
+
+@layer base {
+  * { @apply border-border; }
+  html, body, #root { @apply h-full; }
+  body { @apply bg-background text-foreground antialiased; font-feature-settings: "cv02","cv03","cv04","cv11"; }
+  /* Visible focus rings — WCAG AA */
+  :focus-visible { @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background; }
+}
+
+/* Reusable diff styles for pending change-set rendering */
+.diff-add { @apply bg-emerald-50 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-200; }
+.diff-del { @apply bg-rose-50 dark:bg-rose-950/40 text-rose-900 dark:text-rose-200 line-through opacity-80; }
+.diff-meta { @apply text-muted-foreground text-xs; }
