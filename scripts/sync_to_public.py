@@ -45,7 +45,13 @@ from pathlib import Path
 ALLOWLIST = [
     # Project docs (sanitized)
     ("ONBOARDING.md", "ONBOARDING.md"),
-    ("ROADMAP.md", "ROADMAP.md"),
+    # ROADMAP.md is INTENTIONALLY OMITTED from the allowlist. It is a
+    # canonical-only doc — it captures SaaS-pivot speculation, repo-strategy
+    # decisions, and other internal thinking that has no business living in
+    # the deploy-source repo (even though that repo is private). EXCLUDE_DST
+    # below also explicitly prunes ROADMAP.md from the destination so any
+    # historical copy gets removed on the next sync. ZIP_DROP_PATHS keeps
+    # the user-facing zip ROADMAP-free as defense in depth.
 
     # All skill code (these are generic; scanner verifies)
     ("skills/decoded-jd/SKILL.md", "skills/decoded-jd/SKILL.md"),
@@ -94,6 +100,10 @@ ALLOWLIST = [
 # Files we DELIBERATELY exclude even if they're inside an allowlisted directory.
 # These are paths within the destination that we never sync.
 EXCLUDE_DST = {
+    # ROADMAP.md is canonical-only (see ALLOWLIST comment above). On the
+    # first sync after this change, any pre-existing copy in the deploy-source
+    # repo will be deleted by prune_excluded(). Idempotent on subsequent runs.
+    "ROADMAP.md",
     # The Job-Assist eval-fixture docx contains a redacted resume; even the
     # redacted version is candidate-shaped enough that we skip it from public.
     "skills/resume-targeter/evals",
