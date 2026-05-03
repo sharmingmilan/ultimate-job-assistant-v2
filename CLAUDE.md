@@ -274,13 +274,15 @@ Supersedes ADR-001 §D1, D2, D3, D6, D8, D10. Preserves §D4, D5, D7, D9.
 
 **Next up (in priority order):**
 
-1. **Phase 23 — MCP server scaffold (v0.2.1 target).** Stand up `host/uja_mcp/server.py` (JSON-RPC over stdio per the `mcp-builder` skill's Python guidance). Register file + skill + HITL + `read_workspace_metadata` tools. Pin `mcp` in `host/requirements.txt`. Wire one live Cowork session against it. Re-point the Phase 15/16/17.5 tests at MCP tool functions. New `start-uja-mcp.sh` / `start-uja-mcp.bat` launcher + `references/cowork-mcp-config-snippet.json`.
+Phases 22.5 and 23 are split across Sessions 10 and 11 to stage the Dispatch-session pattern (Session 10 = small cheap test; Session 11 = the larger shipping-target work). Briefs for both live on disk at `docs/session-10-brief.md` and `docs/session-11-brief.md`. Launch a Dispatch session for either via `bash scripts/dispatch-session.sh <N>` (emits a `claude://` deep link with the orchestrator-style prompt prefilled).
 
-2. **Mark deprecated tree.** Add `host/frontend/README.md` flagging it as deprecated reference. Docstring headers on `host/uja_host/main.py`, `api/chat.py`, `api/conversations.py` marking deprecation per ADR-002 D3. Demote `keystore.py` + `api/auth.py`.
+1. **Phase 22.5 — Deprecation marking (Session 10, ~30-45 min).** Per ADR-002 D3. Add `host/frontend/README.md` flagging it as deprecated reference. Docstring headers on `host/uja_host/main.py`, `api/chat.py`, `api/conversations.py`. Demote `keystore.py` + `api/auth.py`. Cheap test of the Dispatch-session pattern before Phase 23 commits to a longer session. No version bump. See `docs/session-10-brief.md`.
 
-3. **Phase 24 — Export pipeline (v0.2.2 target).** Implement `export_application(company_role)` MCP tool per ADR-002 D4. Deterministic zip bytes (sorted ordering, fixed compression, zeroed timestamps). Tests for manifest schema + determinism + sandbox-bounded writes.
+2. **Phase 23 — MCP server scaffold (Session 11, target v0.2.1, ~3-4 hr).** Stand up `host/uja_mcp/server.py` (JSON-RPC over stdio per the `mcp-builder` skill's Python guidance). Register file + skill + HITL + `read_workspace_metadata` tools. Pin `mcp` in `host/requirements.txt`. Re-point the Phase 15/16/17.5 tests at MCP tool functions. New `host/tests/test_mcp_server.py`. New `start-uja-mcp.sh` / `start-uja-mcp.bat` launcher + `references/cowork-mcp-config-snippet.json`. Tag `v0.2.1` end of session. See `docs/session-11-brief.md`.
 
-4. **Phase 25 — v2 site rebuild (v0.2.3 target).** Per ADR-002 D4. Static `index.html` + JS that fetches `exports/index.json` and `templates/index.json` and renders cards. Three sections: Application packages / Config templates / About. Canva MCP visual exploration first. `scripts/sync_to_public_v2.py` allowlist updated. Re-raise custom-domain question.
+3. **Phase 24 — Export pipeline (target v0.2.2).** Implement `export_application(company_role)` MCP tool per ADR-002 D4. Deterministic zip bytes (sorted ordering, fixed compression, zeroed timestamps). Tests for manifest schema + determinism + sandbox-bounded writes.
+
+4. **Phase 25 — v2 site rebuild (target v0.2.3).** Per ADR-002 D4. Static `index.html` + JS that fetches `exports/index.json` and `templates/index.json` and renders cards. Three sections: Application packages / Config templates / About. Canva MCP visual exploration first. `scripts/sync_to_public_v2.py` allowlist updated. Re-raise custom-domain question.
 
 5. **v0.4.0 workflow UI Canva MCP design spike (parallel to Phase 23).** Sims-style game UI references, sketch the structured workflow tracker, prototype one application's stage view. The tracker is a Cowork artifact (per ADR-002 D1) that calls back into the v0.2.x MCP server through `window.cowork.callMcpTool`.
 
