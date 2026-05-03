@@ -11,7 +11,7 @@
  * the in-flight request.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { Plus, MessageSquare, Loader2, Send, AlertCircle, Wrench, ChevronRight, ChevronDown } from "lucide-react"
+import { Plus, MessageSquare, Loader2, Send, AlertCircle, Wrench, ChevronRight, ChevronDown, Check, X } from "lucide-react"
 import { api, ApiError, streamChat } from "@/lib/api"
 import type { ChatEvent, ConversationSummary, MessageRow } from "@/lib/api"
 import { cn } from "@/lib/utils"
@@ -91,6 +91,20 @@ export function ChatTab() {
   // Cleanup any in-flight stream on unmount.
   useEffect(() => () => abortRef.current?.abort(), [])
 
+  // Build a tool_use_id -> tool_result lookup across ALL rows so the inline
+  // PendingChangeSet / PendingQuestion cards can find the change_set_id /
+  // question_id from the matching tool_result block (which carries the row's
+  // backend-generated IDs in its content payload).
+  const toolResultByUseId = useMemo(() => {
+    const map = new Map<string, RenderedBlock>()
+    for (const r of rows) {
+      for (const b of r.blocks) {
+        if (b.type === "tool_result" && b.id) map.set(b.id, b)
+      }
+    }
+    return map
+  }, [rows])
+
   const startNew = () => {
     abortRef.current?.abort()
     setActiveId(null)
@@ -99,20 +113,34 @@ export function ChatTab() {
     setInput("")
   }
 
-  async function send() {
-    const text = input.trim()
-    if (!text || streaming) return
-    setInput("")
-    setStreamErr(null)
+  /** Core streaming routine shared by send() and resumeStream(). When `text`
+   *  is empty no userRow is added — this is the "resume after approve/answer"
+   *  path where /api/changes or /api/questions has already appended a
+   *  synthesized user message to the conversation history server-side. */
+  async function streamTurn(text: string) {
+    if (streaming) return
 
-    const userRow: ChatRow = { id: crypto.randomUUID(), role: "user", blocks: [{ type: "text", text }] }
-    const asstRowId = crypto.randomUUID()
-    const asstRow: ChatRow = { id: asstRowId, role: "assistant", blocks: [], pending: true }
-    setRows((prev) => [...prev, userRow, asstRow])
+    if (text) {
+      const userRow: ChatRow = { id: crypto.randomUUID(), role: "user", blocks: [{ type: "text", text }] }
+      const asstRowId = crypto.randomUUID()
+      const asstRow: ChatRow = { id: asstRowId, role: "assistant", blocks: [], pending: true }
+      setRows((prev) => [...prev, userRow, asstRow])
+      await runStream(text, asstRowId)
+    } else {
+      // Resume: just an asstRow, no userRow. The composer's user input
+      // (if any) is preserved.
+      const asstRowId = crypto.randomUUID()
+      const asstRow: ChatRow = { id: asstRowId, role: "assistant", blocks: [], pending: true }
+      setRows((prev) => [...prev, asstRow])
+      await runStream("", asstRowId)
+    }
+  }
 
+  async function runStream(text: string, asstRowId: string) {
     const ac = new AbortController()
     abortRef.current = ac
     setStreaming(true)
+    setStreamErr(null)
 
     let assignedConvId = activeId
 
@@ -144,6 +172,21 @@ export function ChatTab() {
       // If we just created a brand-new conversation, make sure the sidebar shows it.
       if (assignedConvId && assignedConvId !== activeId) loadConvs()
     }
+  }
+
+  async function send() {
+    const text = input.trim()
+    if (!text || streaming) return
+    setInput("")
+    await streamTurn(text)
+  }
+
+  /** Re-trigger /api/chat with empty body. Used by PendingChangeSet /
+   *  PendingQuestion after the user approves / rejects / answers — the
+   *  backend has already appended a synthesized user message; this kicks
+   *  the agent loop into producing the next assistant turn. */
+  async function resumeStream() {
+    await streamTurn("")
   }
 
   function handleEvent(ev: ChatEvent, asstRowId: string, onConv: (id: string) => void) {
@@ -236,7 +279,14 @@ export function ChatTab() {
             <EmptyChat />
           ) : (
             <div className="max-w-3xl mx-auto px-4 md:px-6 py-6 space-y-6">
-              {rows.map((r) => <ChatRowView key={r.id} row={r} />)}
+              {rows.map((r) => (
+                <ChatRowView
+                  key={r.id}
+                  row={r}
+                  toolResultByUseId={toolResultByUseId}
+                  onResume={resumeStream}
+                />
+              ))}
             </div>
           )}
           {streamErr && (
@@ -323,7 +373,13 @@ function SidebarSkeleton() {
   )
 }
 
-function ChatRowView({ row }: { row: ChatRow }) {
+function ChatRowView({
+  row, toolResultByUseId, onResume,
+}: {
+  row: ChatRow
+  toolResultByUseId: Map<string, RenderedBlock>
+  onResume: () => void
+}) {
   return (
     <article className={cn("flex gap-3", row.role === "user" ? "justify-end" : "")}>
       {row.role === "assistant" && (
@@ -339,21 +395,37 @@ function ChatRowView({ row }: { row: ChatRow }) {
             <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" aria-hidden /> Thinking…
           </span>
         )}
-        {row.blocks.map((b, i) => <BlockView key={i} block={b} />)}
+        {row.blocks.map((b, i) => (
+          <BlockView
+            key={i}
+            block={b}
+            toolResultByUseId={toolResultByUseId}
+            onResume={onResume}
+          />
+        ))}
       </div>
     </article>
   )
 }
 
-function BlockView({ block }: { block: RenderedBlock }) {
+function BlockView({
+  block, toolResultByUseId, onResume,
+}: {
+  block: RenderedBlock
+  toolResultByUseId: Map<string, RenderedBlock>
+  onResume: () => void
+}) {
   if (block.type === "text") {
     return <p className="text-[15px] leading-relaxed whitespace-pre-wrap">{block.text}</p>
   }
   if (block.type === "tool_use") {
+    const matchingResult = block.id ? toolResultByUseId.get(block.id) : undefined
     return (
       <ToolUseCard
         name={block.name ?? "(unknown)"}
         input={block.input}
+        toolResult={matchingResult}
+        onResume={onResume}
         // Render the change-set / question card if this is one of the
         // human-in-the-loop primitives.
         special={
@@ -375,8 +447,14 @@ function BlockView({ block }: { block: RenderedBlock }) {
 }
 
 function ToolUseCard({
-  name, input, special,
-}: { name: string; input: unknown; special?: "change_set" | "question" }) {
+  name, input, special, toolResult, onResume,
+}: {
+  name: string
+  input: unknown
+  special?: "change_set" | "question"
+  toolResult?: RenderedBlock
+  onResume: () => void
+}) {
   const [open, setOpen] = useState(special !== undefined)
   return (
     <div className="text-sm border rounded-md bg-card">
@@ -394,9 +472,9 @@ function ToolUseCard({
       {open && (
         <div className="px-3 pb-3 border-t">
           {special === "change_set" ? (
-            <PendingChangeSet input={input} />
+            <PendingChangeSet input={input} toolResult={toolResult} onResume={onResume} />
           ) : special === "question" ? (
-            <PendingQuestion input={input} />
+            <PendingQuestion input={input} toolResult={toolResult} onResume={onResume} />
           ) : (
             <pre className="mt-2 text-[12px] font-mono whitespace-pre-wrap text-muted-foreground overflow-auto max-h-64">
               {safeJson(input)}
@@ -431,9 +509,57 @@ function ToolResultCard({ name, isError, content }: { name: string; isError: boo
   )
 }
 
-function PendingChangeSet({ input }: { input: unknown }) {
+function PendingChangeSet({
+  input, toolResult, onResume,
+}: {
+  input: unknown
+  toolResult?: RenderedBlock
+  onResume: () => void
+}) {
   const obj = (input ?? {}) as { changes?: Array<{ path: string; before?: string; after?: string; delete?: boolean }>; summary?: string }
   const changes = obj.changes ?? []
+
+  // Pull the change_set_id from the matching tool_result content.
+  const meta = parseToolResultMeta(toolResult)
+  const changeSetId = typeof meta?.change_set_id === "string" ? meta.change_set_id : undefined
+  const initialStatus = typeof meta?.status === "string" ? meta.status : "pending"
+
+  // resolution: "pending" | "submitting" | "applied" | "rejected" | "error"
+  const [state, setState] = useState<"pending" | "submitting" | "applied" | "rejected" | "error">(
+    initialStatus === "applied" ? "applied" :
+    initialStatus === "rejected" ? "rejected" :
+    "pending",
+  )
+  const [errorMsg, setErrorMsg] = useState<string | null>(null)
+  const [pathsWritten, setPathsWritten] = useState<Array<{ path: string; action: string }> | null>(null)
+
+  async function approve() {
+    if (!changeSetId || state !== "pending") return
+    setState("submitting"); setErrorMsg(null)
+    try {
+      const r = await api.approveChange(changeSetId)
+      setPathsWritten(r.paths_written)
+      setState("applied")
+      onResume()
+    } catch (e) {
+      setState("error")
+      setErrorMsg(e instanceof ApiError ? String(e.detail) : e instanceof Error ? e.message : String(e))
+    }
+  }
+
+  async function reject() {
+    if (!changeSetId || state !== "pending") return
+    setState("submitting"); setErrorMsg(null)
+    try {
+      await api.rejectChange(changeSetId)
+      setState("rejected")
+      onResume()
+    } catch (e) {
+      setState("error")
+      setErrorMsg(e instanceof ApiError ? String(e.detail) : e instanceof Error ? e.message : String(e))
+    }
+  }
+
   return (
     <div className="mt-2 space-y-2">
       {obj.summary && <p className="text-sm text-muted-foreground">{obj.summary}</p>}
@@ -455,38 +581,153 @@ function PendingChangeSet({ input }: { input: unknown }) {
           </li>
         ))}
       </ul>
-      <div className="flex justify-end gap-2 pt-1">
-        <Button variant="outline" size="sm" disabled>
-          Reject
-        </Button>
-        <Button size="sm" disabled title="Approval endpoint ships in Phase 17.5">
-          Approve all
-        </Button>
-      </div>
-      <p className="text-[11px] text-muted-foreground text-right">
-        Approval endpoint wires up in Phase 17.5; the change-set is saved as pending in the meantime.
-      </p>
+      {state === "pending" && (
+        <div className="flex justify-end gap-2 pt-1">
+          <Button variant="outline" size="sm" onClick={reject} disabled={!changeSetId}>
+            Reject
+          </Button>
+          <Button size="sm" onClick={approve} disabled={!changeSetId}>
+            Approve all
+          </Button>
+        </div>
+      )}
+      {state === "submitting" && (
+        <div className="flex items-center justify-end gap-2 pt-1 text-xs text-muted-foreground">
+          <Loader2 className="w-3.5 h-3.5 animate-spin" aria-hidden /> Applying…
+        </div>
+      )}
+      {state === "applied" && (
+        <div className="flex items-center justify-end gap-1 pt-1 text-xs text-emerald-600 dark:text-emerald-400" role="status">
+          <Check className="w-3.5 h-3.5" aria-hidden />
+          Applied
+          {pathsWritten && pathsWritten.length > 0 && (
+            <span className="ml-1 text-muted-foreground">({pathsWritten.length} {pathsWritten.length === 1 ? "file" : "files"})</span>
+          )}
+        </div>
+      )}
+      {state === "rejected" && (
+        <div className="flex items-center justify-end gap-1 pt-1 text-xs text-muted-foreground" role="status">
+          <X className="w-3.5 h-3.5" aria-hidden /> Rejected
+        </div>
+      )}
+      {state === "error" && (
+        <div className="flex items-center justify-end gap-1 pt-1 text-xs text-destructive" role="alert">
+          <AlertCircle className="w-3.5 h-3.5" aria-hidden /> {errorMsg ?? "Failed"}
+        </div>
+      )}
+      {!changeSetId && state === "pending" && (
+        <p className="text-[11px] text-muted-foreground text-right">
+          Waiting for the matching tool_result to surface change_set_id…
+        </p>
+      )}
     </div>
   )
 }
 
-function PendingQuestion({ input }: { input: unknown }) {
+function PendingQuestion({
+  input, toolResult, onResume,
+}: {
+  input: unknown
+  toolResult?: RenderedBlock
+  onResume: () => void
+}) {
   const obj = (input ?? {}) as { question?: string; options?: string[] }
+  const meta = parseToolResultMeta(toolResult)
+  const questionId = typeof meta?.question_id === "string" ? meta.question_id : undefined
+  const initialStatus = typeof meta?.status === "string" ? meta.status : "pending"
+
+  const [state, setState] = useState<"pending" | "submitting" | "answered" | "error">(
+    initialStatus === "answered" ? "answered" : "pending",
+  )
+  const [answer, setAnswer] = useState("")
+  const [errorMsg, setErrorMsg] = useState<string | null>(null)
+  const [submittedAnswer, setSubmittedAnswer] = useState<string | null>(null)
+
+  async function submitAnswer(value: string) {
+    if (!questionId || !value.trim() || state !== "pending") return
+    setState("submitting"); setErrorMsg(null)
+    try {
+      await api.answerQuestion(questionId, value.trim())
+      setSubmittedAnswer(value.trim())
+      setState("answered")
+      onResume()
+    } catch (e) {
+      setState("error")
+      setErrorMsg(e instanceof ApiError ? String(e.detail) : e instanceof Error ? e.message : String(e))
+    }
+  }
+
   return (
     <div className="mt-2 space-y-2">
       <p className="text-sm">{obj.question ?? "(no question text)"}</p>
-      {obj.options && obj.options.length > 0 ? (
+
+      {state === "pending" && obj.options && obj.options.length > 0 ? (
         <div className="flex flex-wrap gap-2">
           {obj.options.map((opt, i) => (
-            <Button key={i} size="sm" variant="outline" disabled>{opt}</Button>
+            <Button
+              key={i}
+              size="sm"
+              variant="outline"
+              onClick={() => submitAnswer(opt)}
+              disabled={!questionId}
+            >
+              {opt}
+            </Button>
           ))}
         </div>
-      ) : (
-        <Textarea rows={2} placeholder="Type your answer in the composer below and press send." disabled />
+      ) : state === "pending" ? (
+        <div className="space-y-2">
+          <Textarea
+            rows={2}
+            placeholder="Type your answer here…"
+            value={answer}
+            onChange={(e) => setAnswer(e.target.value)}
+            onKeyDown={(e) => {
+              if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+                e.preventDefault(); submitAnswer(answer)
+              }
+            }}
+            disabled={!questionId}
+            aria-label="Your answer"
+          />
+          <div className="flex justify-end">
+            <Button size="sm" onClick={() => submitAnswer(answer)} disabled={!questionId || !answer.trim()}>
+              <Send className="w-3.5 h-3.5 mr-1" aria-hidden /> Send answer
+            </Button>
+          </div>
+          <p className="text-[11px] text-muted-foreground">
+            Press <kbd className="font-mono">⌘↩</kbd> to send.
+          </p>
+        </div>
+      ) : null}
+
+      {state === "submitting" && (
+        <div className="flex items-center justify-end gap-2 pt-1 text-xs text-muted-foreground">
+          <Loader2 className="w-3.5 h-3.5 animate-spin" aria-hidden /> Sending…
+        </div>
       )}
-      <p className="text-[11px] text-muted-foreground">
-        Question persists in <span className="font-mono">pending_questions</span> until you reply in the composer.
-      </p>
+      {state === "answered" && (
+        <div className="space-y-1 pt-1" role="status">
+          <div className="flex items-center justify-end gap-1 text-xs text-emerald-600 dark:text-emerald-400">
+            <Check className="w-3.5 h-3.5" aria-hidden /> Answered
+          </div>
+          {submittedAnswer && (
+            <p className="text-xs text-muted-foreground border-l-2 border-muted pl-2 italic">
+              "{submittedAnswer}"
+            </p>
+          )}
+        </div>
+      )}
+      {state === "error" && (
+        <div className="flex items-center justify-end gap-1 pt-1 text-xs text-destructive" role="alert">
+          <AlertCircle className="w-3.5 h-3.5" aria-hidden /> {errorMsg ?? "Failed"}
+        </div>
+      )}
+      {!questionId && state === "pending" && (
+        <p className="text-[11px] text-muted-foreground">
+          Waiting for the matching tool_result to surface question_id…
+        </p>
+      )}
     </div>
   )
 }
@@ -530,6 +771,19 @@ function safeJson(v: unknown): string {
   } catch {
     return String(v)
   }
+}
+
+/** Pull the parsed JSON metadata out of a matching tool_result block.
+ *  Streaming events deliver `content` as a parsed object; rehydrated DB rows
+ *  deliver it as a JSON string. Handle both. Returns null on parse failure. */
+function parseToolResultMeta(tr: RenderedBlock | undefined): Record<string, unknown> | null {
+  if (!tr) return null
+  const c = tr.content
+  if (c && typeof c === "object") return c as Record<string, unknown>
+  if (typeof c === "string") {
+    try { return JSON.parse(c) as Record<string, unknown> } catch { return null }
+  }
+  return null
 }
 
 function formatRelative(iso: string): string {
