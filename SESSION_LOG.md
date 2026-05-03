@@ -541,3 +541,43 @@ Whether to run two sites permanently or eventually retire one. Decide post-Phase
 **Next session:**
 Milan completes V2_SETUP.md Steps 1, 2, 4, 6, 7. Hand Claude the two PATs to execute Steps 3 and 5. Once the v2 site is live, Phase 16 (skill registry) starts on the new canonical.
 
+
+---
+
+## Session: 2026-05-02 (UJA Session 6 — same-day continuation) — Phase 16 ships + canonical-aware pre-push hook
+
+### What Got Done
+
+- **Phase 16 — skill registry, real implementations.** Replaced `host/uja_host/tools/skill_stubs.py` with three real tools in `skill_tools.py`, plus a discovery module `skill_registry.py` that walks `<project_root>/skills/*/SKILL.md` and parses YAML frontmatter (name + description). The host's tool catalog stays at 8 entries.
+  - `run_skill` (Skills-as-Tools per ADR-001 §D1): no `name` → returns the catalog of available skills; with `name` → returns the full SKILL.md content + the inputs Claude passed. Claude follows the SKILL.md instructions in subsequent turns. The host does NOT interpret the skill — the agent loop stays in Claude. Same SKILL.md files Cowork mode reads — single source of truth.
+  - `propose_changes`: accepts a list of `{path, before?, after, delete?}` edits, sandbox-bounded against the project root. Persists as a `pending_changes` row (schema v2). Returns the change_set_id; nothing lands on disk until the user approves via the UI (Phase 17) or a future `/api/changes/<id>/approve` endpoint. Back-compat: legacy unified-diff string still accepted via `diff` kwarg, surfaced as a single `raw_diff` entry.
+  - `ask_user`: persists a `pending_questions` row, returns the question_id, instructs the model to wait for the next user turn before assuming an answer.
+  - SQLite schema v2 migration in `db.py` — adds `pending_changes` + `pending_questions` tables with appropriate indexes and CHECK constraints. Forward-only and idempotent per ADR D7. Repository helpers (create / get / list / resolve, create / get / list / answer) added alongside.
+  - `tools/__init__.py` tool descriptions rewritten — no more "returns not_implemented" placeholders. `run_skill.name` moved from required to optional so catalog mode works. Registry mappings repointed from `skill_stubs` → `skill_tools`.
+  - `api/chat.py` SYSTEM_PROMPT rewritten to teach the model how to call the three new primitives (catalog mode for `run_skill`, approval semantics for `propose_changes`, no-invent contract for `ask_user`).
+- **Phase 16 — tests.** 20 unit tests in `host/tests/test_phase16_skill_registry.py` covering skill discovery (frontmatter parsing, missing/empty cases, hidden-dir skip), `run_skill` (catalog, load, unknown-skill error, dispatcher error surfacing), `propose_changes` (persistence, no-op-on-disk guarantee, sandbox violation, resolve lifecycle, legacy diff back-compat, empty-list rejection), `ask_user` (persistence, answer round-trip, empty/bad-input rejection). 3 live integration smoke skeletons in `tests/integration/test_phase16_smoke.py` — skipped unless `UJA_RUN_LIVE_TESTS=1`. Documents the Phase 16 acceptance gate (Netflix regression through `/api/chat` with a real API key) that Milan runs locally with the host booted. Existing Phase 15 acceptance test still passes (21 passed, 3 skipped).
+- **Cleanup — canonical-aware pre-push hook.** `references/git-hooks/pre-push` now detects whether the remote URL is v1 or v2 canonical and prints the appropriate rationale block: v1 cites the live auto-sync flow ("publishes within ~30 seconds"), v2 cites PR discipline + the V2_SETUP.md Step 8 deferred auto-sync, unknown remotes get a generic message. Tested locally against simulated stdin for all three branches.
+- **Cleanup — V2_SETUP.md PAT footgun.** Added a callout to Step 2 documenting that GitHub's fine-grained PAT edit page silently defaults the "Repository access" radio back to "All repositories" when you click into an existing token — which silently widens scope on save. Verification step: re-select "Only select repositories" on every edit; verify the scope list post-save.
+
+### Key Decisions
+
+- **Skills-as-Tools = host returns SKILL.md content, Claude follows it.** Per ADR-001 §D1 we resisted the temptation to compile each SKILL.md into its own Anthropic tool definition. The 8-tool catalog stays fixed; `run_skill` carries the name as input. This keeps the agent loop in Claude (Cowork mode reads SKILL.md the same way) and avoids the catalog inflating every time a new skill ships.
+- **`run_skill.name` is optional, not required.** Catalog discovery folds into the same tool — model calls `run_skill()` with no args to enumerate, then `run_skill(name="orchestrator")` to load. Cleaner than a separate `list_skills` tool that would push the catalog past 8.
+- **Phase 17 frontend scaffold deferred.** Considered including the Vite + Tailwind + shadcn/ui scaffold this session; declined because rushing the frontend compromises the polish bar locked in ADR (empty/loading/error states, keyboard nav, WCAG AA, < 1s first paint). Better to build the frontend with the time it deserves in a focused next session.
+- **Live acceptance gate stays out of CI for now.** The Netflix regression through `/api/chat` exists as a stub in `tests/integration/test_phase16_smoke.py` and is gated on `UJA_RUN_LIVE_TESTS=1`. Milan runs it locally when the host boots cleanly with his keychain-stored API key. Once the frontend exists and the loop is stable, this graduates to a proper end-to-end test.
+
+### What Got Pushed Where (this session)
+
+- Feature branch `phase16/skill-registry` pushed to v2 canonical with 4 atomic commits:
+  - `91d51c2` — Pre-push hook: detect v1 vs v2 canonical for accurate warning
+  - `5670c15` — V2_SETUP.md: warn about PAT 'All repositories' edit footgun
+  - `e84f1db` — Phase 16: real run_skill / propose_changes / ask_user
+  - `a2c8502` — Phase 16: unit tests + live regression skeleton
+- `--no-ff` merge into main as `2c0fd74`. v2 deploy-source NOT auto-synced (V2_SETUP Step 8 still deferred); the v2 site stays on the placeholder until either Phase 17 lands or auto-sync is wired.
+
+### Outstanding for the next session
+
+- **Phase 16 live verification.** Boot the host (`./start-uja.sh`), set the Anthropic API key in the OS keychain, point at the Ultimate Job Assistant project root, and POST `/api/chat` with a message that triggers `run_skill('orchestrator')` against an existing role. Check the SSE stream surfaces `tool_use` for run_skill and the model continues with file tools per the SKILL.md contract.
+- **Phase 17 — React + Vite + Tailwind + shadcn/ui.** Per ADR §D3 + §D10. Three tabs (Chat, Materials, Settings) with the polish-bar contract: empty/loading/error states, `cmd+k` / `cmd+enter` / `esc`, WCAG AA. Bigger scope; budget a focused session.
+- **V2 auto-sync workflow.** V2_SETUP.md Step 8 deferred this. Adapt v1's `.github/workflows/auto-sync-to-public.yml` once Phase 16 + 17 stabilize — no point auto-publishing a half-finished UI.
+

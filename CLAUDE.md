@@ -259,7 +259,7 @@ When applying to a new role at a company that already has a `research/[company].
 **Deferred (gates the v0.1.1 tag):**
 - Phase 13: custom domain. Awaiting Milan to purchase (`ujassist.app` or `ultimatejobassistant.com`, ~$12/yr). When it lands, walk through Netlify "Add custom domain" + DNS records, then tag `v0.1.1`.
 
-**In flight (UJA v0.2.0 — Session 4, on `dev/v0.2.0` branch):**
+**In flight (UJA v0.2.0 — Session 6, on v2 canonical's `main`):**
 Self-hosted local web app where the user runs UJA in a browser against their own Anthropic API key. Architecture decisions locked in Session 4 (see `docs/ADR-001-v0.2.0-architecture.md` and SPEC.md §14):
 - **Skill execution:** Skills-as-Tools. SKILL.md files stay as the source of truth. Host registers a fixed tool catalog with the Anthropic API; the agent loop stays inside Claude. Cowork mode and web-app mode become two surfaces over the same skills.
 - **Backend:** Python + FastAPI (reuses existing `scripts/` unchanged).
@@ -267,22 +267,29 @@ Self-hosted local web app where the user runs UJA in a browser against their own
 - **Distribution:** curated-zip extension with `start-uja.sh` + `start-uja.bat`. Prereq: Python 3.11+.
 - **Persistence:** SQLite at the project root, schema-versioned, append-only.
 - **Sandbox:** backend reads/writes only the project-root folder picked at first launch. API key encrypted at rest via OS keychain (`keyring`). Server binds 127.0.0.1 only.
-- **Branch protection:** GitHub branch protection / rulesets are Pro-gated on free private repos. Replaced by a local pre-push hook (`references/git-hooks/pre-push`) that refuses direct pushes to `main`. Run `bash scripts/install-hooks.sh` after cloning canonical to install it.
+- **Branch protection:** GitHub branch protection / rulesets are Pro-gated on free private repos. Replaced by a local pre-push hook (`references/git-hooks/pre-push`) that refuses direct pushes to `main`. Run `bash scripts/install-hooks.sh` after cloning canonical to install it. Hook detects v1 vs v2 canonical so the warning text matches the canonical you're pushing to.
 
 **Shipped in UJA Session 5 (2026-05-02 evening, on `dev/v0.2.0`):**
 - Phase 15 backend scaffold landed: `host/uja_host/` (sandbox, config, db, keystore, tools/, api/, main.py), `start-uja.sh`, `start-uja.bat`, pytest acceptance test, live_smoke.sh. 1,814 lines. Commit `1259f59`.
-- v2 repo separation prep landed: `V2_SETUP.md` (188-line handoff doc), `scripts/sync_to_public_v2.py`, `website/v2/index.html` + `robots.txt` + `netlify.toml`. Awaits Milan creating the new GitHub repos and wiring Netlify per V2_SETUP.md.
+- v2 repo separation prep landed: `V2_SETUP.md` (188-line handoff doc), `scripts/sync_to_public_v2.py`, `website/v2/index.html` + `robots.txt` + `netlify.toml`.
+- v2 repos created and live: canonical `sharmingmilan/ultimate-job-assistant-v2`, deploy-source `sharmingmilan/ultimate-job-assistant-v2-public`, both private, site at https://ultimatejobassist-v2.netlify.app.
+
+**Shipped in UJA Session 6 (2026-05-02 same-day continuation, on v2 canonical's `main`):**
+- Phase 16 — skill registry. Replaced `host/uja_host/tools/skill_stubs.py` with three real implementations in `skill_tools.py`: `run_skill` (catalog + load mode following Skills-as-Tools per ADR D1), `propose_changes` (persisted pending change-sets, sandbox-bounded, no-op on disk until approved), `ask_user` (persisted pending questions). New `skill_registry.py` discovery module walks `skills/*/SKILL.md` and parses YAML frontmatter. SQLite schema v2 migration adds `pending_changes` + `pending_questions` tables with repository helpers. Tool catalog stays at 8 entries; `run_skill.name` moved from required to optional so catalog mode works. `api/chat.py` SYSTEM_PROMPT rewritten to teach the model the new primitives.
+- Phase 16 — tests. 20 unit tests in `host/tests/test_phase16_skill_registry.py` cover discovery, the three tools, sandbox boundaries, and dispatcher error surfacing. 3 live integration smoke skeletons in `tests/integration/test_phase16_smoke.py` gated on `UJA_RUN_LIVE_TESTS=1`. Existing Phase 15 acceptance test still passes (21 passed, 3 skipped).
+- Cleanup — pre-push hook now detects v1 vs v2 canonical for accurate warning text. V2_SETUP.md Step 2 has a footgun callout for the GitHub fine-grained PAT "All repositories" radio defaulting on edit.
+- Commits on v2 canonical `main`: `91d51c2` (hook), `5670c15` (V2_SETUP), `e84f1db` (skill_tools), `a2c8502` (tests), `2c0fd74` (`--no-ff` merge of `phase16/skill-registry`).
 
 **v2 repo + site separation (decided 2026-05-02 / Session 5):**
 - v0.1.x stays at `sharmingmilan/ultimate-job-assistant` (canonical) + `sharmingmilan/ultimate-job-assistant-public` (deploy-source) → `https://ultimatejobassist.netlify.app`. Untouched.
-- v0.2.0 gets its own pair: `sharmingmilan/ultimate-job-assistant-v2` (canonical, private) + `sharmingmilan/ultimate-job-assistant-v2-public` (deploy-source, private) → `https://ultimatejobassist-v2.netlify.app`. To be created by Milan in GitHub UI per V2_SETUP.md Step 1, populated by Claude in a follow-up session per Steps 3+5.
-- Long-term shape (one site or two) is parked. Decide post-Phase 17 when the React frontend exists and we can see what each site actually serves.
+- v0.2.0 lives at `sharmingmilan/ultimate-job-assistant-v2` (canonical, private) + `sharmingmilan/ultimate-job-assistant-v2-public` (deploy-source, private) → `https://ultimatejobassist-v2.netlify.app`.
+- Long-term shape (one site or two) is parked. Decide post-Phase 17 when the React frontend exists.
 
 **Next up:**
-- v2 repo bring-up (manual): Milan executes V2_SETUP.md Steps 1, 2, 4, 6, 7. Claude executes Steps 3, 5 in a follow-up session given the new PATs.
-- Phase 16: skill registry — every `skills/[name]/SKILL.md` registered as an Anthropic tool. Run the existing Netflix end-to-end regression entirely through the web app and structurally diff outputs against v0.1.0 snapshots. On v2 canonical's `main` (or `dev/phase16` branch).
-- Phase 17: React + Vite + Tailwind + shadcn/ui frontend (chat pane, materials browser, multi-format preview).
-- Phase 18+: distribution, comprehensive tests, docs, merge gate, tag `v0.2.0`. See SPEC.md §14 for the full phase list.
+- Phase 16 live verification (Milan-side): boot the host with `./start-uja.sh`, set the Anthropic API key in the OS keychain, point at the project root, POST `/api/chat` with a message that triggers `run_skill('orchestrator')`, and confirm the SSE stream surfaces `tool_use` for run_skill and the model continues with file tools per the SKILL.md contract. Or run the integration smokes with `UJA_RUN_LIVE_TESTS=1` once they're filled in.
+- Phase 17 — React + Vite + Tailwind + shadcn/ui frontend (`host/frontend/`). Per ADR §D3 + §D10. Three tabs (Chat, Materials, Settings) with the polish-bar contract: empty/loading/error states, `cmd+k` / `cmd+enter` / `esc`, WCAG AA, < 1s first paint, < 200ms chat stream latency. Bigger scope; budget a focused session.
+- V2 auto-sync workflow (V2_SETUP.md Step 8 deferred). Adapt v1's `.github/workflows/auto-sync-to-public.yml` once Phase 16 + 17 stabilize.
+- Phase 18+: distribution polish, comprehensive tests, docs refresh, merge gate, tag `v0.2.0`. See SPEC.md §14 for the full phase list.
 
 ---
 
