@@ -1,4 +1,12 @@
-"""API key management. The actual key never leaves the OS keychain."""
+"""Demoted per ADR-002 D3.
+
+API-key write endpoint. Kept for a possible future headless export mode
+per ADR-002 §Phasing impact. Not registered on the default MCP tool
+surface in v0.2.x; surfaces a 410 Gone if hit through the legacy
+FastAPI surface.
+
+API key management. The actual key never leaves the OS keychain.
+"""
 
 from __future__ import annotations
 

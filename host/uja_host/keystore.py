@@ -1,4 +1,12 @@
-"""OS keychain wrapper for the Anthropic API key.
+"""Demoted per ADR-002 D3.
+
+OS keychain wrapper. No longer load-bearing in v0.2.x (Pivot C — Cowork
+holds the user's auth, not a per-user Anthropic API key). Kept in case a
+future tool needs a credential store (e.g. headless export mode per
+ADR-002 §Phasing impact / v0.3.0 reframings). Not part of the default
+MCP tool surface.
+
+OS keychain wrapper for the Anthropic API key.
 
 Per ADR-001 §D8:
 - Service name:  com.ultimatejobassistant.uja

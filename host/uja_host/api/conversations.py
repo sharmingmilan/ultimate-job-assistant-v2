@@ -1,4 +1,12 @@
-"""Conversation read endpoints (history, list, single)."""
+"""DEPRECATED per ADR-002 D3.
+
+Conversation history is no longer a host-side concern in v0.2.x; the
+agent loop runs in Cowork and persistence semantics shift to the MCP
+server (host/uja_mcp/, added in v0.2.1). This module is preserved as a
+working reference, not maintained.
+
+Conversation read endpoints (history, list, single).
+"""
 
 from __future__ import annotations
 

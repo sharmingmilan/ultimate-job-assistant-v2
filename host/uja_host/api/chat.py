@@ -1,4 +1,11 @@
-"""POST /api/chat — streaming Claude chat with the host tool catalog.
+"""DEPRECATED per ADR-002 D3.
+
+The agent loop now lives in Cowork (Pivot C). The MCP server
+(host/uja_mcp/, added in v0.2.1) exposes tools; Cowork drives the loop.
+This module is preserved as a working reference for the SSE streaming +
+Anthropic message-loop reducer logic, not maintained.
+
+POST /api/chat — streaming Claude chat with the host tool catalog.
 
 Implements the agent loop in a single request: the user posts one
 message, the server loops Anthropic API calls + tool execution until
