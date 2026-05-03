@@ -2,8 +2,9 @@
 
 API-key write endpoint. Kept for a possible future headless export mode
 per ADR-002 §Phasing impact. Not registered on the default MCP tool
-surface in v0.2.x; surfaces a 410 Gone if hit through the legacy
-FastAPI surface.
+surface in v0.2.x. The legacy FastAPI surface still serves these routes
+unchanged today; a future v0.2.x change is expected to make them return
+410 Gone, but that gate is not yet implemented.
 
 API key management. The actual key never leaves the OS keychain.
 """
