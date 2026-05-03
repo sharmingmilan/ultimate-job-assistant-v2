@@ -22,14 +22,13 @@ surfaces as a structured error so the agent can prompt for setup.
 Logging goes to stderr (stdio is reserved for the JSON-RPC protocol).
 Log level is configurable via `UJA_MCP_LOG_LEVEL` (default INFO).
 
-Tool surface (ADR-002 D1):
+Tool surface (ADR-002 D1 + Phase 24):
 
   Files:    read_file, write_file, edit_file, list_files, read_workspace_metadata
   Skills:   list_skills, read_skill
   HITL:     propose_changes, approve_changes, reject_changes,
             ask_user, answer_question
-
-`export_application` is Phase 24 (target v0.2.2); not registered here.
+  Export:   export_application (Phase 24, ADR-002 D4)
 """
 
 from __future__ import annotations
@@ -43,7 +42,7 @@ from mcp.server.fastmcp import FastMCP
 from mcp.types import ToolAnnotations
 
 from uja_host import __version__, config as host_config
-from uja_mcp.tools import files, hitl, skills
+from uja_mcp.tools import export, files, hitl, skills
 
 log = logging.getLogger("uja_mcp")
 
@@ -222,6 +221,24 @@ def build_server() -> FastMCP:
         name="answer_question",
         annotations=ToolAnnotations(
             title="Answer Pending Question",
+            readOnlyHint=False,
+            destructiveHint=False,
+            idempotentHint=True,
+            openWorldHint=False,
+        ),
+    )
+
+    # ----- Export pipeline (Phase 24, ADR-002 D4) -----
+    # Writes a deterministic zip + a row in website/v2/exports/index.json.
+    # `idempotentHint=True` reflects the determinism contract: a re-run
+    # against the same on-disk state and the same status produces
+    # byte-identical zip output and an in-place index update (not a
+    # duplicate row).
+    mcp.add_tool(
+        export.export_application,
+        name="export_application",
+        annotations=ToolAnnotations(
+            title="Export Application Package",
             readOnlyHint=False,
             destructiveHint=False,
             idempotentHint=True,

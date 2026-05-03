@@ -90,6 +90,8 @@ EXPECTED_TOOL_NAMES = {
     # HITL (5)
     "propose_changes", "approve_changes", "reject_changes",
     "ask_user", "answer_question",
+    # Export (1) — Phase 24
+    "export_application",
 }
 
 
@@ -101,7 +103,7 @@ async def test_list_tools_registers_full_d1_surface(server: FastMCP):
         f"missing: {EXPECTED_TOOL_NAMES - names}; "
         f"extra: {names - EXPECTED_TOOL_NAMES}"
     )
-    assert len(tools) == 12, "ADR-002 D1 specifies 12 tools (export deferred to Phase 24)"
+    assert len(tools) == 13, "ADR-002 D1 (12) + Phase 24 export_application (1)"
 
 
 @pytest.mark.anyio
@@ -244,6 +246,91 @@ async def test_hitl_round_trip_propose_then_approve(
     a_parsed = json.loads(a_payload.content[0].text)
     assert a_parsed["status"] == "applied"
     assert (project_root / "PROPOSED.md").read_text() == "draft"
+
+
+# ---------------------------------------------------------------------------
+# Phase 24 — export_application protocol round trip
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.anyio
+async def test_call_export_application_happy_path_through_protocol(
+    server: FastMCP, project_root: Path
+):
+    """End-to-end protocol-level happy path for export_application.
+
+    Drives a `tools/call` against a fully-populated fixture project and
+    asserts:
+      - isError=False
+      - response payload includes manifest, zip_path, sha256, index_entry
+      - the zip lands at <root>/website/v2/exports/<id>.zip
+      - re-running yields byte-identical zip output (R1 contract).
+    """
+    app_id = "netflix-data-analyst-2026-04"
+
+    # Seed the minimum-viable fixtures.
+    (project_root / "decoded-jds").mkdir(parents=True, exist_ok=True)
+    (project_root / "decoded-jds" / f"{app_id}.md").write_text(
+        "# Decoded JD\n\nbody\n", encoding="utf-8"
+    )
+    (project_root / "resumes").mkdir(parents=True, exist_ok=True)
+    (project_root / "resumes" / f"{app_id}.docx").write_bytes(
+        b"PK\x03\x04protocol-fixture\x00"
+    )
+
+    result = await _call_tool_via_protocol(
+        server,
+        "export_application",
+        {"company_role": app_id, "status": "submitted"},
+    )
+    payload = result.root
+    assert payload.isError is False, payload.content
+    parsed = json.loads(payload.content[0].text)
+
+    # Manifest reflects the inputs.
+    assert parsed["company_role"] == app_id
+    assert parsed["zip_path"] == f"website/v2/exports/{app_id}.zip"
+    assert parsed["manifest"]["company"] == "netflix"
+    assert parsed["manifest"]["role_slug"] == "data-analyst"
+    assert parsed["manifest"]["status"] == "submitted"
+    assert "generated_at" not in parsed["manifest"]  # R1
+    assert parsed["index_entry"]["filename"] == f"{app_id}.zip"
+    assert parsed["index_entry"]["status"] == "submitted"
+
+    # The zip exists and matches the returned sha256.
+    zip_on_disk = project_root / "website" / "v2" / "exports" / f"{app_id}.zip"
+    assert zip_on_disk.exists()
+    import hashlib as _h
+    sha_first = _h.sha256(zip_on_disk.read_bytes()).hexdigest()
+    assert parsed["sha256"] == sha_first
+
+    # Re-run via the protocol layer; bytes must be identical (R1).
+    result2 = await _call_tool_via_protocol(
+        server,
+        "export_application",
+        {"company_role": app_id, "status": "submitted"},
+    )
+    assert result2.root.isError is False
+    sha_second = _h.sha256(zip_on_disk.read_bytes()).hexdigest()
+    assert sha_first == sha_second, (
+        "re-running export_application with the same inputs must produce "
+        "byte-identical zip output (Session 12 brief R1 contract)"
+    )
+
+
+@pytest.mark.anyio
+async def test_call_export_application_missing_required_file_is_error(
+    server: FastMCP, project_root: Path
+):
+    """Missing decoded JD or resume DOCX surfaces as isError=True."""
+    result = await _call_tool_via_protocol(
+        server,
+        "export_application",
+        {"company_role": "netflix-data-analyst-2026-04"},
+    )
+    payload = result.root
+    assert payload.isError is True
+    assert "decoded-jds" in payload.content[0].text
 
 
 # ---------------------------------------------------------------------------
