@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "uja": {
+      "command": "{{PYTHON_EXECUTABLE}}",
+      "args": ["-m", "uja_mcp.server"],
+      "cwd": "{{HOST_DIR}}",
+      "env": {
+        "UJA_PROJECT_ROOT": "{{PROJECT_ROOT}}",
+        "UJA_MCP_LOG_LEVEL": "INFO"
+      }
+    }
+  }
+}

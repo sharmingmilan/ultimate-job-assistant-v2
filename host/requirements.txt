@@ -1,6 +1,13 @@
-# Ultimate Job Assistant — local web host (v0.2.0)
+# Ultimate Job Assistant — local host (v0.2.x).
 # Python 3.11+ per ADR-001 §D6.
 
+# v0.2.x runtime (Phase 23+): MCP server scaffold per ADR-002 D1.
+# host/uja_mcp/server.py uses FastMCP from this SDK.
+mcp>=1.27,<2.0
+
+# Deprecated FastAPI host (Phases 15-17.5; v0.2.0). Kept as a working
+# reference per ADR-002 D3 — see host/uja_host/main.py docstring. Tests
+# in host/tests/ still import these for the surviving non-route logic.
 fastapi>=0.115,<0.120
 uvicorn[standard]>=0.30,<0.40
 anthropic>=0.40,<1.0
