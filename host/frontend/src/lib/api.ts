@@ -85,6 +85,30 @@ export const api = {
     fetch(`/api/conversations/${encodeURIComponent(id)}`).then(r =>
       jsonOrThrow<{ conversation: ConversationSummary; messages: MessageRow[] }>(r),
     ),
+
+  // Phase 17.5 — close the human-in-the-loop.
+  approveChange: (id: string) =>
+    fetch(`/api/changes/${encodeURIComponent(id)}/approve`, { method: "POST" }).then(r =>
+      jsonOrThrow<{
+        change_id: string
+        status: string
+        conversation_id: string
+        paths_written: Array<{ path: string; action: string }>
+        count: number
+      }>(r),
+    ),
+  rejectChange: (id: string) =>
+    fetch(`/api/changes/${encodeURIComponent(id)}/reject`, { method: "POST" }).then(r =>
+      jsonOrThrow<{ change_id: string; status: string; conversation_id: string }>(r),
+    ),
+  answerQuestion: (id: string, answer: string) =>
+    fetch(`/api/questions/${encodeURIComponent(id)}/answer`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ answer }),
+    }).then(r =>
+      jsonOrThrow<{ question_id: string; status: string; conversation_id: string }>(r),
+    ),
 }
 
 /* ------------------------------------------------------------------ *
