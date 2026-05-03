@@ -1,5 +1,5 @@
 # CLAUDE.md -- Ultimate Job Assistant
-# Last updated: 2026-05-03 (Session 10 — Phase 22.5 deprecation marking ships; first Dispatch session)
+# Last updated: 2026-05-03 (Session 11 — Phase 23 MCP server scaffold ships; v0.2.1 tagged)
 
 ---
 
@@ -236,7 +236,7 @@ When applying to a new role at a company that already has a `research/[company].
 
 ## Current Status & What's Next
 
-**Last session:** Session 10 of Ultimate Job Assistant (May 3, 2026) — Phase 22.5 deprecation marking shipped per ADR-002 D3 (PR #1, merged at `6849f2a`, no version bump). First Dispatch-session run; pattern validated end-to-end including a defect-catch on the brief's auth.py docstring language.
+**Last session:** Session 11 of Ultimate Job Assistant (May 3, 2026) — Phase 23 MCP server scaffold shipped per ADR-002 D1 (PR #3, merged at `e634252`, annotated tag `v0.2.1` on the merge commit, tag SHA `307e56a`). Six atomic commits across one feature branch. Tests went from 36 / 3 skipped to **50 passed, 3 skipped**. Second Dispatch session for the project; pattern continues to hold at the larger scope.
 
 **Completed in Job Assist (parent project):**
 - Waymo lifecycle Steps 8-10 (portfolio, networking, wrap-up). Full end-to-end test complete.
@@ -273,28 +273,36 @@ See `docs/ADR-002-architecture-rethink.md`. Four decisions:
 Supersedes ADR-001 §D1, D2, D3, D6, D8, D10. Preserves §D4, D5, D7, D9.
 
 **Shipped in UJA Phase 22.5 (Session 10, 2026-05-03, no version bump):**
-- Per ADR-002 D3. Five deprecation stickers in one atomic commit (`a4db69d`) + one soften commit (`f68ecfb`), merged at `6849f2a`:
-  - `host/frontend/README.md` (new, 43 lines) — flags the Phase 17/17.5 React tree as deprecated reference; preserves it for the HITL UX patterns v0.4.0 will re-express.
-  - `host/uja_host/main.py`, `api/chat.py`, `api/conversations.py` — deprecated docstrings; point at `host/uja_mcp/server.py` (Phase 23).
-  - `host/uja_host/keystore.py`, `api/auth.py` — demoted docstrings; kept for possible future headless-export use.
-- No behavior change. Tests: 36 passed, 3 skipped (unchanged).
-- First Dispatch session for the project. Pattern worked; brief-on-disk + thin-prompt-from-script roundtripped cleanly.
+- Per ADR-002 D3. Five deprecation stickers + one soften commit, merged at `6849f2a`. `host/frontend/README.md` (new), deprecated docstrings on `host/uja_host/main.py` / `api/chat.py` / `api/conversations.py`, demoted docstrings on `keystore.py` / `api/auth.py`. No behavior change. Tests: 36 passed, 3 skipped (unchanged). First Dispatch session for the project.
+
+**Shipped in UJA v0.2.1 (Session 11, 2026-05-03, tagged on merge commit `e634252`, tag SHA `307e56a`):**
+- Per ADR-002 D1. Phase 23 MCP server scaffold. Six atomic commits in PR #3 (`96b752d` → `c6d653b`):
+  - `host/uja_mcp/` package: `server.py` (255 lines, FastMCP-based, JSON-RPC over stdio) + `tools/files.py` + `tools/skills.py` + `tools/hitl.py`. Twelve tools registered: `read_file`, `write_file`, `edit_file`, `list_files`, `read_workspace_metadata`, `list_skills`, `read_skill`, `propose_changes`, `approve_changes`, `reject_changes`, `ask_user`, `answer_question`. (`export_application` deferred to Phase 24 with comments in `tools/__init__.py` + `server.py`.)
+  - `mcp>=1.27,<2.0` pinned in `host/requirements.txt`.
+  - Phase 15 / 16 / 17.5 tests re-pointed from FastAPI `TestClient` at MCP tool functions; same fixture pattern. New `host/tests/test_mcp_server.py` covers `tools/list`, `tools/call`, `is_error=true` contract.
+  - `start-uja-mcp.sh` (macOS/Linux) + `start-uja-mcp.bat` (Windows) launchers — informational, emit ready-to-paste Cowork MCP-config snippet with paths prefilled. Cowork owns the server's lifecycle.
+  - `references/cowork-mcp-config-snippet.json` — canonical template.
+  - `host/tests/live_smoke_phase23.md` — six-check user-run smoke test for the live Cowork registration.
+- **Tests: 50 passed, 3 skipped** (was 36 / 3 pre-Phase-23).
+- The deprecated tree (`api/chat.py`, `api/conversations.py`, `host/frontend/`) is unchanged from Session 10 per ADR-002 D3.
+- Three judgment calls flagged in the Session 11 SESSION_LOG entry: (1) two deprecated chat-route tests dropped during the re-target; (2) `api/changes.py` + `api/questions.py` business logic re-implemented in `uja_mcp/tools/hitl.py` rather than refactored into shared pure functions (D3 says don't refactor the deprecated tree); (3) MCP server warns instead of fail-fast on missing project root, surfacing `ToolError` per call so the agent can drive setup interactively.
+- Second Dispatch session for the project. Pattern continued to hold at ~3-4 hr / six-commit scope.
 
 **Next up (in priority order):**
 
-Phase 23 ships next under the same Dispatch pattern. Brief lives on disk at `docs/session-11-brief.md`. Launch via `bash scripts/dispatch-session.sh 11` (emits a `claude://` deep link with the orchestrator-style prompt prefilled).
+Phase 24 ships next under the same Dispatch pattern. Brief TBD on disk at `docs/session-12-brief.md`; launch via `bash scripts/dispatch-session.sh 12`.
 
-1. **Phase 23 — MCP server scaffold (Session 11, target v0.2.1, ~3-4 hr).** Stand up `host/uja_mcp/server.py` (JSON-RPC over stdio per the `mcp-builder` skill's Python guidance). Register file + skill + HITL + `read_workspace_metadata` tools. Pin `mcp` in `host/requirements.txt`. Re-point the Phase 15/16/17.5 tests at MCP tool functions. New `host/tests/test_mcp_server.py`. New `start-uja-mcp.sh` / `start-uja-mcp.bat` launcher + `references/cowork-mcp-config-snippet.json`. Tag `v0.2.1` end of session. See `docs/session-11-brief.md`.
+1. **Phase 24 — Export pipeline (Session 12, target v0.2.2).** Implement `export_application(company_role)` MCP tool per ADR-002 D4. Walks per-output-type folders, validates minimum-viable set, writes deterministic zip to `website/v2/exports/`, updates `index.json`. Deterministic bytes (sorted ordering, fixed compression, zeroed timestamps). Tests for manifest schema, determinism, sandbox-bounded writes. The `build_server()` factoring from Block 3 of Phase 23 means Phase 24 tests can drive `tools/call` for `export_application` against the same registration pattern without process state.
 
-2. **Phase 24 — Export pipeline (target v0.2.2).** Implement `export_application(company_role)` MCP tool per ADR-002 D4. Deterministic zip bytes (sorted ordering, fixed compression, zeroed timestamps). Tests for manifest schema + determinism + sandbox-bounded writes.
+2. **Live smoke-test the v0.2.1 build.** Run `host/tests/live_smoke_phase23.md` against a real Cowork session — register the MCP server via the snippet from `start-uja-mcp.sh`, walk the six checks. The genuine acceptance gate; the test suite proves the tool-function contract, only a live Cowork session proves the JSON-RPC stdio framing.
 
 3. **Phase 25 — v2 site rebuild (target v0.2.3).** Per ADR-002 D4. Static `index.html` + JS that fetches `exports/index.json` and `templates/index.json` and renders cards. Three sections: Application packages / Config templates / About. Canva MCP visual exploration first. `scripts/sync_to_public_v2.py` allowlist updated. Re-raise custom-domain question.
 
-4. **v0.4.0 workflow UI Canva MCP design spike (parallel to Phase 23).** Sims-style game UI references, sketch the structured workflow tracker, prototype one application's stage view. The tracker is a Cowork artifact (per ADR-002 D1) that calls back into the v0.2.x MCP server through `window.cowork.callMcpTool`.
+4. **v0.4.0 workflow UI Canva MCP design spike (parallel to Phase 24).** Sims-style game UI references, sketch the structured workflow tracker, prototype one application's stage view. The tracker is a Cowork artifact (per ADR-002 D1) that calls back into the v0.2.x MCP server through `window.cowork.callMcpTool`.
 
 **v0.3.0 — PARKED.** Cowork is itself the desktop app; wrapping a non-existent web app in Tauri is moot. Plausible reframings (polished MCP installer, headless export mode, or skip) deferred to ADR-003 after v0.2.x lands. Do not start any Tauri work.
 
-**What's preserved from earlier sessions and survives ADR-002:** the FastAPI backend skeleton, sandbox helper, file API, persistence layer (SQLite schema v2), OS-keychain key store (demoted but kept), `propose_changes`/`ask_user` primitives, the HITL approve/reject/answer endpoints, the Skills-as-Tools registry, the test suite (36 passing tests), the test fixtures pattern (TestClient + monkeypatched config + tmp_path-rooted SQLite). These are infrastructure the next architecture sits on top of.
+**What's preserved from earlier sessions and survives ADR-002:** the FastAPI backend skeleton (deprecated, kept as reference), sandbox helper, file API, persistence layer (SQLite schema v2), OS-keychain key store (demoted but kept), `propose_changes`/`ask_user` primitives, the HITL approve/reject/answer logic (re-implemented in `uja_mcp/tools/hitl.py` per D3, FastAPI copy intentionally untouched), the Skills-as-Tools registry, and the test suite (50 passing tests as of v0.2.1, up from 36 pre-Phase-23). The MCP layer in `host/uja_mcp/` is a thin facade over this surviving infrastructure.
 
 ---
 
