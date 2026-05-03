@@ -1,5 +1,5 @@
 # CLAUDE.md -- Ultimate Job Assistant
-# Last updated: 2026-05-02 (Session 1 of UJA — forked from Job Assist Session 9)
+# Last updated: 2026-05-02 (Session 4 of UJA — v0.2.0 architecture decisions + Session 3 cleanup)
 
 ---
 
@@ -236,7 +236,7 @@ When applying to a new role at a company that already has a `research/[company].
 
 ## Current Status & What's Next
 
-**Last session:** Session 1 of Ultimate Job Assistant (May 2, 2026) — forked from Job Assist Session 9
+**Last session:** Session 4 of Ultimate Job Assistant (May 2, 2026) — v0.2.0 architecture decisions + Session 3 cleanup.
 
 **Completed in Job Assist (parent project):**
 - Waymo lifecycle Steps 8-10 (portfolio, networking, wrap-up). Full end-to-end test complete.
@@ -244,22 +244,36 @@ When applying to a new role at a company that already has a `research/[company].
 - Folder structure consolidation, output-type restructure, all SKILL.md output paths updated
 
 **Shipped in UJA v0.1.0 (2026-05-02, tagged):**
-- Phases 0–7 complete. Two GitHub repos exist on github.com/sharmingmilan: `ultimate-job-assistant` (private) and `ultimate-job-assistant-public` (currently public).
-- Site live at https://sharmingmilan.github.io/ultimate-job-assistant-public/
-- `noindex` + `robots.txt: Disallow /` added post-v0.1.0; site is search-invisible.
-- Landing page simplified to a download-first design (single "Download the latest" CTA).
+- Phases 0–7 complete. Both repos on github.com/sharmingmilan: `ultimate-job-assistant` (canonical, private) and `ultimate-job-assistant-public` (deploy-source, also private as of Session 3).
+- Live site at https://ultimatejobassist.netlify.app — Netlify free tier, reads the deploy-source repo via OAuth.
+- `noindex` + `robots.txt: Disallow /` keep the site search-invisible.
+- Landing page is download-first: single "Download the latest" CTA + HEAD-fetch JS for size/date.
 
-**In progress (UJA v0.1.1 — see SPEC.md §14 for full phase list):**
-- Phase 8: Add zip generation to `scripts/sync_to_public.py` (regenerates `website/downloads/ultimate-job-assistant.zip` on every sync).
-- Phase 9: Migrate hosting from GitHub Pages → Netlify (free tier, reads private repos via OAuth).
-- Phase 10: Flip `ultimate-job-assistant-public` to private. The "public" in the name becomes historical — both repos are private; Netlify reads the deploy-source repo via OAuth.
-- Phase 11: GitHub Action on canonical private repo for auto-sync on every push to main.
-- Phase 12: Wire custom domain to Netlify (Milan buys ~$12/yr, Claude does DNS).
-- Tag `v0.1.1` after Phase 12 ships.
+**Shipped in UJA v0.1.1 (Session 3, 2026-05-02 — UNTAGGED, awaiting Phase 13):**
+- Phase 8: zip generation in `scripts/sync_to_public.py` — `build_zip()` curates `website/downloads/ultimate-job-assistant.zip` on every sync (drops maintainer-only paths, injects `references/zip-bundle/` user templates, verifies `ZIP_REQUIRED_MEMBERS`).
+- Phase 9: initial sync after zip-build — both repos pushed.
+- Phase 10: hosting migrated GitHub Pages → Netlify.
+- Phase 11: deploy-source repo flipped to private (Netlify OAuth retains access).
+- Phase 12: auto-sync GitHub Action `auto-sync-to-public.yml` shipped end-to-end. Triggers on every push to canonical `main`. Uses fine-grained PAT (`PUBLIC_REPO_TOKEN`, Contents: Read+write, scoped only to deploy-source). Round-trip latency push → live zip ≈ 30 s. ONBOARDING.md Step 7 documents the setup for forkers.
 
-**Next up after v0.1.1:**
-- First real run of `interview-prep` against an actual upcoming application.
-- See ROADMAP.md for longer-term tracks (SaaS pivot, in-browser code execution, real spaced repetition).
+**Deferred (gates the v0.1.1 tag):**
+- Phase 13: custom domain. Awaiting Milan to purchase (`ujassist.app` or `ultimatejobassistant.com`, ~$12/yr). When it lands, walk through Netlify "Add custom domain" + DNS records, then tag `v0.1.1`.
+
+**In flight (UJA v0.2.0 — Session 4, on `dev/v0.2.0` branch):**
+Self-hosted local web app where the user runs UJA in a browser against their own Anthropic API key. Architecture decisions locked in Session 4 (see `docs/ADR-001-v0.2.0-architecture.md` and SPEC.md §14):
+- **Skill execution:** Skills-as-Tools. SKILL.md files stay as the source of truth. Host registers a fixed tool catalog with the Anthropic API; the agent loop stays inside Claude. Cowork mode and web-app mode become two surfaces over the same skills.
+- **Backend:** Python + FastAPI (reuses existing `scripts/` unchanged).
+- **Frontend:** React + Vite + Tailwind + shadcn/ui (using the `anthropic-skills:web-artifacts-builder` patterns).
+- **Distribution:** curated-zip extension with `start-uja.sh` + `start-uja.bat`. Prereq: Python 3.11+.
+- **Persistence:** SQLite at the project root, schema-versioned, append-only.
+- **Sandbox:** backend reads/writes only the project-root folder picked at first launch. API key encrypted at rest via OS keychain (`keyring`). Server binds 127.0.0.1 only.
+- **Branch protection:** GitHub branch protection / rulesets are Pro-gated on free private repos. Replaced by a local pre-push hook (`references/git-hooks/pre-push`) that refuses direct pushes to `main`. Run `bash scripts/install-hooks.sh` after cloning canonical to install it.
+
+**Next up:**
+- Phase 15: backend scaffold (FastAPI, project-root picker, `/api/chat` streaming endpoint, file-sandboxed tool endpoints) on `dev/v0.2.0`.
+- Phase 16: skill registry — every `skills/[name]/SKILL.md` registered as an Anthropic tool. Run the existing Netflix end-to-end regression entirely through the web app and structurally diff outputs against v0.1.0 snapshots.
+- Phase 17: React + Vite + Tailwind + shadcn/ui frontend (chat pane, materials browser, multi-format preview).
+- Phase 18+: distribution, comprehensive tests, docs, merge gate, tag `v0.2.0`. See SPEC.md §14 for the full phase list.
 
 ---
 

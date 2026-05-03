@@ -1,5 +1,5 @@
 # SESSION_LOG.md -- Job Assist
-# Last updated: 2026-04-10
+# Last updated: 2026-05-02 (added UJA Session 3 entry)
 
 ---
 
@@ -378,3 +378,46 @@ After the v0.1.1 doc commit, added a starter resume template for public users:
 - SPEC §13 decisions list now includes item 9 documenting the template.
 
 This unblocks the v0.1.1 zip-distribution model: when someone downloads `ultimate-job-assistant.zip` from the website, they immediately have a fillable resume template alongside the skill code.
+
+---
+
+## Session: 2026-05-02 (UJA Session 3 — same-day continuation) — v0.1.1 Phases 8–12 + curated zip + auto-sync
+
+### What Got Done
+
+- **Phase 8 — zip generation in `scripts/sync_to_public.py`.** Added `build_zip()` that produces a CURATED zip at `website/downloads/ultimate-job-assistant.zip` rather than a snapshot of either repo. The function walks the deploy-source tree, drops maintainer-only paths via `ZIP_DROP_PATHS` (scripts, .github, netlify.toml, website source itself, ROADMAP, .DS_Store), injects user-facing templates from `references/zip-bundle/` (CLAUDE.md, QUICKSTART.md, memory.md.template, tracker.md.template, .gitignore) at top-level archive paths, creates `.gitkeep` entries from `references/zip-bundle/placeholder-folders.txt`, and verifies `ZIP_REQUIRED_MEMBERS` exist before promoting the temp zip into place. Atomic rename + mtime stamp so the live site can show the freshness via HEAD request.
+- **Phase 9 — initial sync after zip-build.** Both repos pushed. The first generated zip contained the curated user starter kit including the bracketed base-resume template (`references/templates/base-resume-template.docx`).
+- **Phase 10 — hosting migrated GitHub Pages → Netlify.** Connected Netlify (free tier) to the deploy-source repo via GitHub OAuth. `netlify.toml` committed at the repo root pinning the publish dir + headers so the Netlify UI doesn't have to be touched. URL went from `sharmingmilan.github.io/ultimate-job-assistant-public/` to `ultimatejobassist.netlify.app`. GitHub Pages disabled for the deploy-source repo.
+- **Phase 11 — deploy-source repo flipped to private.** Set via the GitHub API (`PATCH /repos/.../private`). Anonymous API hits return 404; Netlify still serves 200 because OAuth retains access through the visibility flip.
+- **Phase 12 — auto-sync GitHub Action.** Authored `.github/workflows/auto-sync-to-public.yml` that triggers on every push to `main` of the canonical private repo. Pipeline: checkout canonical → set up Python → clone deploy-source repo using `PUBLIC_REPO_TOKEN` → run `scripts/sync_to_public.py --to ./public-clone` (allowlist + STRICT PII gate + curated zip build) → commit and push if anything changed. Initial classic PAT created during workflow setup ran into permission issues; replaced with a fine-grained PAT scoped only to the deploy-source repo with Contents: Read and write. Three successful workflow_dispatch runs + one successful push-event run verified end-to-end. Round-trip latency push → live zip ≈ 30 s.
+- **`ONBOARDING.md` Step 7 added.** Public-user-facing walkthrough of the auto-sync setup so future fork-and-publish users can replicate the two-tier publish setup. Covers fine-grained PAT creation (with the exact permissions table), the `PUBLIC_REPO_TOKEN` secret, and the diagnostic walk-through if the workflow fails.
+- **Curated zip architecture documented.** The zip is NOT a snapshot of either repo — it's built by `build_zip()` against `ZIP_INJECT_FILES`, `ZIP_DROP_PATHS`, and `ZIP_REQUIRED_MEMBERS`. `references/zip-bundle/CLAUDE.md` carries the user-facing CLAUDE with a "First Session Behavior — Detect Fresh Install And Onboard" block that walks new users through `memory.md.template` → resume drop-in → `tracker.md` initialization → optional first application.
+- **Website rebrand.** Public surface text rebranded from "Ultimate Job Assistant" to "Ultimate Job Assist" on the website (titles, header, footer). Internal docs (CLAUDE, SPEC, ROADMAP) intentionally still say "Ultimate Job Assistant" — only the public-facing surface was rebranded.
+
+### Key Decisions
+
+- **Curated zip over snapshot.** `ZIP_DROP_PATHS` actively suppresses maintainer-only paths from the user starter kit. `ZIP_INJECT_FILES` actively injects user-facing templates. `ZIP_REQUIRED_MEMBERS` aborts the build if any of those expected paths is missing — guards against accidental over-curation. If anything in the zip layout changes, update `ZIP_INJECT_FILES` and `ZIP_REQUIRED_MEMBERS` in lockstep.
+- **Fine-grained PAT over classic.** Scoped to one repo (`ultimate-job-assistant-public`), one permission (Contents: Read and write). Smaller blast radius if the token leaks. Classic PAT with `repo` scope was the original plan; switched mid-Phase-12.
+- **Privacy flip kept Netlify alive via OAuth.** Verified that flipping `ultimate-job-assistant-public` private didn't break Netlify because OAuth credentials persist through visibility changes (only API token / SSH-key access fails).
+- **Phase 13 (custom domain) deferred.** Originally part of the v0.1.1 plan; decided to keep the netlify.app URL until Milan buys a domain, then wire it up in a follow-up. Tag `v0.1.1` after Phase 13 ships.
+
+### What Got Pushed Where (this session)
+
+Commits on `main` of canonical (`ultimate-job-assistant`):
+- `1faea1b` — Add netlify.toml + sync allowlist entry
+- `87a79b9` — netlify.toml: pin base = "." to override stale UI setting
+- `ac3c429` — Curate the zip into a working user starter kit (build_zip + ZIP_INJECT_FILES + ZIP_REQUIRED_MEMBERS)
+- `0848a13` — Curate website + add First Session Behavior to zip-bundle CLAUDE.md
+- `902112f` — Website: rebrand to 'Ultimate Job Assist', unify nav, prune dead pages
+- `a66b16c` — ONBOARDING.md: add Step 7 — Auto-sync canonical to deploy-source
+
+Each canonical push triggered an auto-sync run that produced a corresponding commit on the deploy-source repo (`ultimate-job-assistant-public`), authored by `uja-auto-sync`. HEAD as of session end: canonical `a66b16c`, deploy-source `dee6e7f`.
+
+### Outstanding Cleanup
+
+1. The classic PAT used briefly during Phase 12 setup needs revocation — its value briefly appeared in chat history during the device-flow auth.
+2. The fine-grained `PUBLIC_REPO_TOKEN` is the only active credential going forward.
+
+### What's Next
+
+A fresh session picks up at v0.2.0 — the self-hosted local web app where users run UJA in a browser against their own Anthropic API key. Open architectural questions: frontend stack, backend stack, skill execution surface, distribution model, branch strategy. Don't push v0.2.0 work to `main` while in flight — the auto-sync workflow will publish it. Use a feature branch.

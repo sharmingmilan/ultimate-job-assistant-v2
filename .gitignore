@@ -70,3 +70,10 @@ website/downloads/ultimate-job-assistant.zip
 
 # FUSE workaround: shed-renamed files when OS unlink is blocked.
 *.shed-*
+
+# Credential tempfiles. The token-rotation flow (sessions where Claude needs
+# to rotate the canonical's git remote PAT) writes the new token to
+# .token-new.tmp briefly, reads it, then deletes it. This rule makes sure
+# it can never accidentally be committed during the window where it exists.
+.token-new.tmp
+.token-*.tmp
