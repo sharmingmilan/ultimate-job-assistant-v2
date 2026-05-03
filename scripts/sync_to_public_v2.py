@@ -53,20 +53,27 @@ ALLOWLIST = [
     ("references/templates", "references/templates"),
     ("references/zip-bundle", "references/zip-bundle"),
     ("references/git-hooks", "references/git-hooks"),
+    # Phase 23: canonical Cowork MCP-config template emitted by start-uja-mcp.sh.
+    ("references/cowork-mcp-config-snippet.json", "references/cowork-mcp-config-snippet.json"),
 
-    # NEW for v2: the local web host backend
+    # NEW for v2: the local web host backend (host/uja_mcp/ from Phase 23 is
+    # picked up via the broad host/ entry below).
     ("host", "host"),
     ("start-uja.sh", "start-uja.sh"),
     ("start-uja.bat", "start-uja.bat"),
+    # Phase 23 launchers: emit a ready-to-paste Cowork MCP-config snippet.
+    ("start-uja-mcp.sh", "start-uja-mcp.sh"),
+    ("start-uja-mcp.bat", "start-uja-mcp.bat"),
 
     # Build/CI scripts
     ("scripts/scan_pii.py", "scripts/scan_pii.py"),
     ("scripts/sync_to_public_v2.py", "scripts/sync_to_public_v2.py"),
     ("scripts/install-hooks.sh", "scripts/install-hooks.sh"),
 
-    # ADR (the architectural record IS public for v0.2.0 — it's how we explain
+    # ADRs (the architectural record IS public for v0.2.0 — it's how we explain
     # the design to the inner circle. Verify with PII scan.)
     ("docs/ADR-001-v0.2.0-architecture.md", "docs/ADR-001-v0.2.0-architecture.md"),
+    ("docs/ADR-002-architecture-rethink.md", "docs/ADR-002-architecture-rethink.md"),
 
     # Website source. NOTE: during the bring-up phase on the v1 canonical's
     # dev/v0.2.0 branch the v2 site lives at website/v2/. After v2 canonical
@@ -79,6 +86,14 @@ ALLOWLIST = [
     # Netlify deploy config — published from the v2 site dir when on v2 canonical
     ("website/v2/netlify.toml", "netlify.toml"),
 ]
+
+# Session briefs (Dispatch-pattern brief-on-disk per CLAUDE.md "Dispatch session
+# pattern" section). Auto-include all docs/session-*-brief.md so future briefs
+# don't need a manual allowlist update on every new session.
+ALLOWLIST.extend(
+    (str(p.relative_to(ROOT)), str(p.relative_to(ROOT)))
+    for p in sorted(ROOT.glob("docs/session-*-brief.md"))
+)
 
 # Files we DELIBERATELY exclude even if they're inside an allowlisted directory.
 EXCLUDE_DST = {
