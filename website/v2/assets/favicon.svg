@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Ultimate Job Assistant">
+  <defs>
+    <linearGradient id="g" x1="0" y1="64" x2="64" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#38bdf8"/>
+      <stop offset="1" stop-color="#f472b6"/>
+    </linearGradient>
+  </defs>
+  <circle cx="14" cy="50" r="5" fill="url(#g)"/>
+  <circle cx="26" cy="38" r="6.5" fill="url(#g)"/>
+  <circle cx="40" cy="24" r="8" fill="url(#g)"/>
+  <circle cx="54" cy="10" r="9.5" fill="url(#g)"/>
+</svg>
