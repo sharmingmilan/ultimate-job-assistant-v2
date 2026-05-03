@@ -77,3 +77,12 @@ website/downloads/ultimate-job-assistant.zip
 # it can never accidentally be committed during the window where it exists.
 .token-new.tmp
 .token-*.tmp
+
+
+# Frontend (Phase 17): vite build output and dependency dirs.
+host/frontend/dist/
+host/frontend/.vite/
+
+# Local Python venvs (host dev).
+host/.venv/
+host/venv/

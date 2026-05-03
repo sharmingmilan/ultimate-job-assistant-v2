@@ -20,7 +20,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from uja_host import __version__, config as host_config
-from uja_host.api import auth, chat, config as config_api, conversations
+from uja_host.api import auth, chat, config as config_api, conversations, files as files_api
 
 
 def create_app() -> FastAPI:
@@ -49,6 +49,7 @@ def create_app() -> FastAPI:
     app.include_router(auth.router)
     app.include_router(conversations.router)
     app.include_router(chat.router)
+    app.include_router(files_api.router)
 
     @app.get("/api/health", tags=["meta"])
     def health():
@@ -58,6 +59,20 @@ def create_app() -> FastAPI:
             "version": __version__,
             "project_root_configured": cfg.project_root is not None,
         }
+
+
+    # ----- Frontend static files (Phase 17) -----
+    # In production, FastAPI serves the Vite-built SPA from host/frontend/dist/.
+    # In dev, Vite runs on :5173 with /api proxied here, so this mount is absent.
+    from pathlib import Path as _Path
+    from fastapi.staticfiles import StaticFiles as _StaticFiles
+    _here = _Path(__file__).resolve().parent
+    _dist = (_here.parent / "frontend" / "dist").resolve()
+    if _dist.is_dir():
+        # html=True makes StaticFiles serve index.html for missing routes
+        # (SPA history mode). API routes still match first because FastAPI
+        # checks them before falling through to mounted static files.
+        app.mount("/", _StaticFiles(directory=str(_dist), html=True), name="frontend")
 
     return app
 

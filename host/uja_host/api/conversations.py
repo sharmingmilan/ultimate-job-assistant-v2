@@ -9,6 +9,7 @@ from fastapi import APIRouter, HTTPException
 from uja_host import config as host_config
 from uja_host.db import (
     open_db, list_conversations, get_conversation, list_messages,
+    delete_conversation,
 )
 
 router = APIRouter(prefix="/api/conversations", tags=["conversations"])
@@ -49,3 +50,14 @@ def get_messages(conv_id: str) -> dict[str, Any]:
             raise HTTPException(status_code=404, detail="conversation not found")
         msgs = list_messages(conn, conv_id)
     return {"conversation_id": conv_id, "messages": msgs, "count": len(msgs)}
+
+
+@router.delete("/{conv_id}")
+def delete_one(conv_id: str) -> dict[str, Any]:
+    """Hard-delete a conversation. Cascades to messages, tool history,
+    pending changes, and pending questions. Returns 404 if it didn't exist."""
+    root = _require_root()
+    with open_db(root) as conn:
+        if not delete_conversation(conn, conv_id):
+            raise HTTPException(status_code=404, detail="conversation not found")
+    return {"deleted": True, "conversation_id": conv_id}

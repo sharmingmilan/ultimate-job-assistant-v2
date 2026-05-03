@@ -158,6 +158,15 @@ def get_conversation(conn: sqlite3.Connection, conv_id: str) -> Optional[dict]:
     return dict(row) if row else None
 
 
+def delete_conversation(conn: sqlite3.Connection, conv_id: str) -> bool:
+    """Hard-delete a conversation. Cascades to messages, tool_invocations,
+    pending_changes, and pending_questions via ON DELETE CASCADE.
+
+    Returns True if a row was deleted, False if conv_id did not exist."""
+    cur = conn.execute("DELETE FROM conversations WHERE id = ?", (conv_id,))
+    return cur.rowcount > 0
+
+
 def append_message(
     conn: sqlite3.Connection,
     conversation_id: str,
