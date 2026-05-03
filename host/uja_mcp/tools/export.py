@@ -27,6 +27,7 @@ import hashlib
 import json
 import re
 import zipfile
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Iterable, Optional
 
@@ -441,6 +442,142 @@ def _render_readme(
 
 
 _EXPORTS_REL = "website/v2/exports"
+_INDEX_REL = "website/v2/exports/index.json"
+_INDEX_SCHEMA_VERSION = 1
+
+
+# ---------------------------------------------------------------------------
+# Site-level index.json maintenance (Block 4)
+# ---------------------------------------------------------------------------
+
+
+def _now_iso_z() -> str:
+    """UTC ISO-8601 timestamp with `Z` suffix.
+
+    Matches the example timestamp in ADR-002 D4 (`2026-05-03T12:34:56Z`).
+    Lives in `index.json` only — never inside the deterministic zip.
+    """
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def _read_existing_index(root: Path) -> dict:
+    """Load the current `website/v2/exports/index.json` or stub a fresh one.
+
+    Returns a dict shaped `{"schema_version": 1, "exports": [...]}`.
+    Raises ToolError if the on-disk file is unparseable JSON.
+    """
+    index_path = _resolve_relative(root, _INDEX_REL)
+    if not index_path.exists():
+        return {"schema_version": _INDEX_SCHEMA_VERSION, "exports": []}
+    try:
+        parsed = json.loads(index_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as e:
+        raise ToolError(
+            f"website/v2/exports/index.json is malformed: {e}. "
+            f"Either restore from git or delete the file and re-export."
+        ) from None
+    if not isinstance(parsed, dict):
+        raise ToolError(
+            "website/v2/exports/index.json must be a JSON object"
+        )
+    return parsed
+
+
+def _write_index(root: Path, index: dict) -> None:
+    """Persist index.json with stable JSON formatting.
+
+    Determinism: same dict content -> same bytes (sort_keys=True,
+    indent=2, trailing newline). The `generated_at` timestamps inside
+    rows still vary across runs by design — that field is the only
+    legitimate non-determinism source in this layer (R1 lets us
+    sacrifice index.json determinism to keep the zip determinism
+    contract clean).
+    """
+    index_path = _resolve_relative(root, _INDEX_REL)
+    index_path.parent.mkdir(parents=True, exist_ok=True)
+    payload = (
+        json.dumps(index, sort_keys=True, indent=2, ensure_ascii=False) + "\n"
+    )
+    index_path.write_text(payload, encoding="utf-8")
+
+
+def _sort_index_exports(rows: list[dict]) -> list[dict]:
+    """Sort exports rows by `application_month` desc, then `company` asc.
+
+    Python's `sorted` is stable, so a two-pass sort with the secondary
+    key applied first lands the desired ordering with the simplest
+    code path.
+    """
+    by_company = sorted(rows, key=lambda r: r.get("company", ""))
+    return sorted(
+        by_company,
+        key=lambda r: r.get("application_month", ""),
+        reverse=True,
+    )
+
+
+def _update_exports_index(
+    root: Path,
+    *,
+    company_role: str,
+    company: str,
+    role_slug: str,
+    application_month: str,
+    status: str,
+    size_bytes: int,
+) -> dict:
+    """Append-or-update the row for `<company_role>.zip` in `index.json`.
+
+    Identity is `filename`. If a row with the same filename exists, it
+    is replaced in place (same list slot semantically — the row is
+    rebuilt from the current values). If absent, the row is appended.
+    Either way, the rows list is sorted before writing so the file's
+    diff is stable across re-runs.
+
+    Returns the new (or updated) row.
+    """
+    index = _read_existing_index(root)
+
+    schema = index.get("schema_version")
+    if schema != _INDEX_SCHEMA_VERSION:
+        raise ToolError(
+            f"website/v2/exports/index.json schema_version mismatch: "
+            f"expected {_INDEX_SCHEMA_VERSION}, got {schema!r}"
+        )
+
+    exports = index.get("exports", [])
+    if not isinstance(exports, list):
+        raise ToolError(
+            "website/v2/exports/index.json `exports` field is not a list"
+        )
+
+    filename = f"{company_role}.zip"
+    new_row: dict = {
+        "filename": filename,
+        "company": company,
+        "role": role_slug,
+        "application_month": application_month,
+        "status": status,
+        "size_bytes": size_bytes,
+        "generated_at": _now_iso_z(),
+        "manifest_path": f"{filename}#manifest.json",
+    }
+
+    updated = False
+    rebuilt: list[dict] = []
+    for row in exports:
+        if isinstance(row, dict) and row.get("filename") == filename:
+            rebuilt.append(new_row)
+            updated = True
+        else:
+            rebuilt.append(row)
+    if not updated:
+        rebuilt.append(new_row)
+
+    index["exports"] = _sort_index_exports(rebuilt)
+    index["schema_version"] = _INDEX_SCHEMA_VERSION
+    _write_index(root, index)
+    return new_row
 
 
 def export_application(
@@ -531,12 +668,21 @@ def export_application(
     size_bytes = zip_path.stat().st_size
     sha256 = hashlib.sha256(zip_path.read_bytes()).hexdigest()
 
-    # Block 4 wires the website/v2/exports/index.json maintenance call
-    # into this return shape via an `index_entry` field.
+    index_entry = _update_exports_index(
+        root,
+        company_role=company_role,
+        company=company,
+        role_slug=role_slug,
+        application_month=application_month,
+        status=status,
+        size_bytes=size_bytes,
+    )
+
     return {
         "company_role": company_role,
         "zip_path": zip_rel,
         "size_bytes": size_bytes,
         "sha256": sha256,
         "manifest": manifest,
+        "index_entry": index_entry,
     }

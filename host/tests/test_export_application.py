@@ -470,3 +470,132 @@ def test_export_rejects_malformed_id(project_root: Path):
     with pytest.raises(ToolError):
         export.export_application("Netflix Data Analyst 2026/04")
 
+
+# ---------------------------------------------------------------------------
+# Block 4 — website/v2/exports/index.json maintenance
+# ---------------------------------------------------------------------------
+
+
+def _seed_min_viable_for(root: Path, app_id: str) -> None:
+    """Drop minimum-viable fixtures for an arbitrary application id."""
+    (root / "decoded-jds").mkdir(parents=True, exist_ok=True)
+    (root / "decoded-jds" / f"{app_id}.md").write_text(
+        f"# Decoded JD for {app_id}\n", encoding="utf-8"
+    )
+    (root / "resumes").mkdir(parents=True, exist_ok=True)
+    (root / "resumes" / f"{app_id}.docx").write_bytes(
+        b"PK\x03\x04fixture-" + app_id.encode("ascii")
+    )
+
+
+def _read_index(root: Path) -> dict:
+    return json.loads(
+        (root / "website/v2/exports/index.json").read_text(encoding="utf-8")
+    )
+
+
+def test_index_json_created_on_first_export(project_root: Path):
+    _seed_min_viable(project_root)
+    assert not (project_root / "website/v2/exports/index.json").exists()
+
+    result = export.export_application(_TEST_ID, status="submitted")
+
+    index = _read_index(project_root)
+    assert index["schema_version"] == 1
+    assert isinstance(index["exports"], list)
+    assert len(index["exports"]) == 1
+
+    row = index["exports"][0]
+    assert row["filename"] == f"{_TEST_ID}.zip"
+    assert row["company"] == "netflix"
+    assert row["role"] == "data-analyst"
+    assert row["application_month"] == "2026-04"
+    assert row["status"] == "submitted"
+    assert row["size_bytes"] == result["size_bytes"]
+    assert row["manifest_path"] == f"{_TEST_ID}.zip#manifest.json"
+    # generated_at is a real timestamp shape (UTC ISO with Z suffix).
+    assert row["generated_at"].endswith("Z")
+    assert "T" in row["generated_at"]
+    # The MCP tool's return field matches the persisted row.
+    assert result["index_entry"] == row
+
+
+def test_index_json_updated_in_place_on_re_export(project_root: Path):
+    _seed_min_viable(project_root)
+    export.export_application(_TEST_ID, status="open")
+
+    # Re-export with a different status → row should be updated, not duplicated.
+    export.export_application(_TEST_ID, status="interviewing")
+
+    index = _read_index(project_root)
+    assert len(index["exports"]) == 1, (
+        "re-exporting the same id must not append a duplicate row"
+    )
+    row = index["exports"][0]
+    assert row["status"] == "interviewing"
+    assert row["filename"] == f"{_TEST_ID}.zip"
+
+
+def test_index_json_sort_order_descending_month_then_company_asc(project_root: Path):
+    """Sort: application_month DESC, then company ASC (stable across writes)."""
+    ids = [
+        "google-data-analyst-2026-04",
+        "amazon-bi-analyst-2026-04",
+        "netflix-data-analyst-2025-12",
+        "disney-lead-data-analyst-2026-06",
+    ]
+    # Export in random order.
+    random_order = [ids[2], ids[0], ids[3], ids[1]]
+    for app_id in random_order:
+        _seed_min_viable_for(project_root, app_id)
+        export.export_application(app_id)
+
+    index = _read_index(project_root)
+    seen = [(r["application_month"], r["company"], r["filename"]) for r in index["exports"]]
+    expected = [
+        ("2026-06", "disney",  "disney-lead-data-analyst-2026-06.zip"),
+        ("2026-04", "amazon",  "amazon-bi-analyst-2026-04.zip"),
+        ("2026-04", "google",  "google-data-analyst-2026-04.zip"),
+        ("2025-12", "netflix", "netflix-data-analyst-2025-12.zip"),
+    ]
+    assert seen == expected
+
+
+def test_index_json_zip_bytes_remain_deterministic_after_index_write(
+    project_root: Path,
+):
+    """Index update must not affect zip bytes (R1 contract holds end-to-end)."""
+    _seed_min_viable(project_root)
+    r1 = export.export_application(_TEST_ID, status="submitted")
+    sha1 = r1["sha256"]
+    # Re-run with same status → identical zip bytes despite index timestamp churn.
+    r2 = export.export_application(_TEST_ID, status="submitted")
+    sha2 = r2["sha256"]
+    assert sha1 == sha2
+
+
+def test_index_json_rejects_malformed_existing_file(project_root: Path):
+    """A pre-existing malformed index.json is surfaced loudly, not overwritten."""
+    _seed_min_viable(project_root)
+    (project_root / "website/v2/exports").mkdir(parents=True, exist_ok=True)
+    (project_root / "website/v2/exports/index.json").write_text(
+        "{not valid json",
+        encoding="utf-8",
+    )
+    with pytest.raises(ToolError) as exc:
+        export.export_application(_TEST_ID)
+    assert "index.json" in str(exc.value)
+
+
+def test_index_json_rejects_unknown_schema_version(project_root: Path):
+    _seed_min_viable(project_root)
+    (project_root / "website/v2/exports").mkdir(parents=True, exist_ok=True)
+    (project_root / "website/v2/exports/index.json").write_text(
+        json.dumps({"schema_version": 99, "exports": []}),
+        encoding="utf-8",
+    )
+    with pytest.raises(ToolError) as exc:
+        export.export_application(_TEST_ID)
+    assert "schema_version" in str(exc.value)
+
+
