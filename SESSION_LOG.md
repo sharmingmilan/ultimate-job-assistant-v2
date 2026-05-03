@@ -1,5 +1,5 @@
 # SESSION_LOG.md -- Job Assist
-# Last updated: 2026-05-03 (added UJA Session 8 entry)
+# Last updated: 2026-05-03 (added UJA Session 10 entry)
 
 ---
 
@@ -776,5 +776,61 @@ None new. Session 8's open footguns (backend-restart-required, rate limits) beco
 ### CLAUDE.md additions this session
 
 The "Current Status & What's Next" block is refreshed to reflect ADR-002 + the v0.2.0 tag + the v0.2.x phase plan. The "Working Principles" block from Session 8 is preserved unchanged.
+
+---
+
+## Session: 2026-05-03 (UJA Session 10) — Phase 22.5 deprecation marking + first Dispatch run
+
+### What Happened
+
+First-ever Dispatch session for this project. Dual goal: (a) ship Phase 22.5 per ADR-002 D3, marking the chat-style host modules and frontend as deprecated reference and demoting the OS-keychain + auth modules; (b) prove the Dispatch-session pattern that Session 9 codified, before Session 11 (Phase 23 — the larger MCP server scaffold) commits to a longer Dispatch run.
+
+Both goals landed. PR #1 opened from `phase22.5/deprecation-marking`, reviewed in the Cowork session, merged to `main` with `--no-ff` (merge SHA `6849f2a`); feature branch deleted post-merge. No version bump — Phase 22.5 is annotation only.
+
+### Shipped — code
+
+One feature branch, two atomic commits, one merge:
+
+- `a4db69d` — five deprecation stickers landed in one commit:
+  - `host/frontend/README.md` (new, 43 lines) flags the Phase 17/17.5 Vite + React + Tailwind + shadcn tree as deprecated reference. Calls out the HITL UX patterns (`PendingChangeSet`, `PendingQuestion`, `streamTurn` / `resumeStream`, `toolResultByUseId`) as the load-bearing reason for preservation — v0.4.0's workflow tracker will need to re-express the same HITL contract in a different visual frame.
+  - `host/uja_host/main.py` — module docstring marks the FastAPI + uvicorn entrypoint deprecated; points at `host/uja_mcp/server.py` (added in v0.2.1).
+  - `host/uja_host/api/chat.py` — module docstring marks the agent loop deprecated; the loop now lives in Cowork (Pivot C); MCP server exposes the tools.
+  - `host/uja_host/api/conversations.py` — module docstring marks the conversation history surface deprecated; persistence semantics shift to the MCP server in v0.2.x.
+  - `host/uja_host/keystore.py` — docstring demoted: kept as a credential store for possible future headless-export use; not part of the default MCP tool surface.
+  - `host/uja_host/api/auth.py` — same demotion framing.
+
+- `f68ecfb` — auth.py docstring softened. The brief had a defect: it asserted that the legacy FastAPI auth surface "surfaces a 410 Gone if hit through the legacy FastAPI surface," but the routes still serve unchanged today and Phase 22.5 is annotation-only. The Dispatch session caught the misrepresentation and proposed the soften commit, which the Cowork session approved on review. The new docstring describes the planned v0.2.x intent ("a future v0.2.x change is expected to make them return 410 Gone, but that gate is not yet implemented") rather than asserting present-tense behavior the code doesn't have.
+
+### Test result
+
+`pytest`: 36 passed, 3 skipped (unchanged from Session 8). Phase 22.5 made no behavior changes; tests confirm.
+
+### Brief success criteria → outcomes (from `docs/session-10-brief.md`)
+
+1. `host/frontend/README.md` exists, ≤60 lines, plain markdown, follows Block A spec → 43 lines, on-spec.
+2. Three deprecated-module docstrings present per Block B; module behavior unchanged → confirmed.
+3. Two demotion docstrings present per Block C → confirmed (with the auth.py soften adjustment above).
+4. `pytest` passes 36 tests with no regressions → 36 passed, 3 skipped.
+5. `git log --oneline -1` shows a clear ADR-002-D3-referencing commit → `a4db69d` "Phase 22.5: deprecation marking per ADR-002 D3"; the soften commit `f68ecfb` rides under the same phase header.
+6. PR open and ready for Cowork review → PR #1, merged at `6849f2a`.
+
+### Process notes worth preserving
+
+- **First Dispatch session, first defect-catch.** The pattern proved itself by surfacing a brief defect (the 410 Gone language) rather than papering over it. The Dispatch session flagged the misrepresentation, proposed the soften commit, and the Cowork session approved it on review — exactly what the brief itself was supposed to allow ("If something genuinely blocks you ... surface that and ask before improvising"). Pattern survives Session 10 intact; Session 11 should reuse the same shape.
+- **Atomic discipline held.** Two commits on the feature branch (deprecation block + soften), one `--no-ff` merge, one branch deletion. Reverting Phase 22.5 = one `git revert -m 1 6849f2a`.
+- **Brief-on-disk + thin-prompt-from-script worked end-to-end.** `bash scripts/dispatch-session.sh 10` emitted the `claude://` URL; the Dispatch session read the brief from `docs/session-10-brief.md` and executed; no orchestration overhead from Cowork side until PR review.
+
+### Deferred to next session
+
+1. **Phase 23 — MCP server scaffold (target v0.2.1, Session 11).** Brief already on disk at `docs/session-11-brief.md`. Stand up `host/uja_mcp/server.py` (JSON-RPC over stdio per the `mcp-builder` skill's Python guidance). Register file + skill + HITL + `read_workspace_metadata` tools. Pin `mcp` in `host/requirements.txt`. Re-point Phase 15/16/17.5 tests at MCP tool functions. New `host/tests/test_mcp_server.py` for protocol-level tests. New `start-uja-mcp.sh` / `start-uja-mcp.bat` launcher + `references/cowork-mcp-config-snippet.json`. Tag `v0.2.1` end of session.
+2. **v0.4.0 workflow UI Canva MCP design spike** — still parallelizable with Phase 23 per Session 9's note.
+
+### Known issues + footguns surfaced this session
+
+None new. Phase 22.5 didn't touch behavior; the existing footguns from Sessions 7–8 (backend-restart-required, rate limits) live on inside the now-deprecated tree but aren't part of the v0.2.x runtime path.
+
+### CLAUDE.md additions this session
+
+The "Current Status & What's Next" block is refreshed to reflect Phase 22.5 shipped + Phase 23 as the new top item in "Next up." No new working-principles or pattern additions — Session 9's Dispatch-pattern doc covered this session by construction.
 
 ---

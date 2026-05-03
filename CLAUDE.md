@@ -1,5 +1,5 @@
 # CLAUDE.md -- Ultimate Job Assistant
-# Last updated: 2026-05-03 (Session 9 — ADR-002 lands + v0.2.0 tagged as maintenance release)
+# Last updated: 2026-05-03 (Session 10 — Phase 22.5 deprecation marking ships; first Dispatch session)
 
 ---
 
@@ -236,7 +236,7 @@ When applying to a new role at a company that already has a `research/[company].
 
 ## Current Status & What's Next
 
-**Last session:** Session 9 of Ultimate Job Assistant (May 3, 2026) — ADR-002 (v0.2.0+ architecture rethink) landed; v0.2.0 tagged against `main` as a maintenance release per D2.
+**Last session:** Session 10 of Ultimate Job Assistant (May 3, 2026) — Phase 22.5 deprecation marking shipped per ADR-002 D3 (PR #1, merged at `6849f2a`, no version bump). First Dispatch-session run; pattern validated end-to-end including a defect-catch on the brief's auth.py docstring language.
 
 **Completed in Job Assist (parent project):**
 - Waymo lifecycle Steps 8-10 (portfolio, networking, wrap-up). Full end-to-end test complete.
@@ -272,19 +272,25 @@ See `docs/ADR-002-architecture-rethink.md`. Four decisions:
 
 Supersedes ADR-001 §D1, D2, D3, D6, D8, D10. Preserves §D4, D5, D7, D9.
 
+**Shipped in UJA Phase 22.5 (Session 10, 2026-05-03, no version bump):**
+- Per ADR-002 D3. Five deprecation stickers in one atomic commit (`a4db69d`) + one soften commit (`f68ecfb`), merged at `6849f2a`:
+  - `host/frontend/README.md` (new, 43 lines) — flags the Phase 17/17.5 React tree as deprecated reference; preserves it for the HITL UX patterns v0.4.0 will re-express.
+  - `host/uja_host/main.py`, `api/chat.py`, `api/conversations.py` — deprecated docstrings; point at `host/uja_mcp/server.py` (Phase 23).
+  - `host/uja_host/keystore.py`, `api/auth.py` — demoted docstrings; kept for possible future headless-export use.
+- No behavior change. Tests: 36 passed, 3 skipped (unchanged).
+- First Dispatch session for the project. Pattern worked; brief-on-disk + thin-prompt-from-script roundtripped cleanly.
+
 **Next up (in priority order):**
 
-Phases 22.5 and 23 are split across Sessions 10 and 11 to stage the Dispatch-session pattern (Session 10 = small cheap test; Session 11 = the larger shipping-target work). Briefs for both live on disk at `docs/session-10-brief.md` and `docs/session-11-brief.md`. Launch a Dispatch session for either via `bash scripts/dispatch-session.sh <N>` (emits a `claude://` deep link with the orchestrator-style prompt prefilled).
+Phase 23 ships next under the same Dispatch pattern. Brief lives on disk at `docs/session-11-brief.md`. Launch via `bash scripts/dispatch-session.sh 11` (emits a `claude://` deep link with the orchestrator-style prompt prefilled).
 
-1. **Phase 22.5 — Deprecation marking (Session 10, ~30-45 min).** Per ADR-002 D3. Add `host/frontend/README.md` flagging it as deprecated reference. Docstring headers on `host/uja_host/main.py`, `api/chat.py`, `api/conversations.py`. Demote `keystore.py` + `api/auth.py`. Cheap test of the Dispatch-session pattern before Phase 23 commits to a longer session. No version bump. See `docs/session-10-brief.md`.
+1. **Phase 23 — MCP server scaffold (Session 11, target v0.2.1, ~3-4 hr).** Stand up `host/uja_mcp/server.py` (JSON-RPC over stdio per the `mcp-builder` skill's Python guidance). Register file + skill + HITL + `read_workspace_metadata` tools. Pin `mcp` in `host/requirements.txt`. Re-point the Phase 15/16/17.5 tests at MCP tool functions. New `host/tests/test_mcp_server.py`. New `start-uja-mcp.sh` / `start-uja-mcp.bat` launcher + `references/cowork-mcp-config-snippet.json`. Tag `v0.2.1` end of session. See `docs/session-11-brief.md`.
 
-2. **Phase 23 — MCP server scaffold (Session 11, target v0.2.1, ~3-4 hr).** Stand up `host/uja_mcp/server.py` (JSON-RPC over stdio per the `mcp-builder` skill's Python guidance). Register file + skill + HITL + `read_workspace_metadata` tools. Pin `mcp` in `host/requirements.txt`. Re-point the Phase 15/16/17.5 tests at MCP tool functions. New `host/tests/test_mcp_server.py`. New `start-uja-mcp.sh` / `start-uja-mcp.bat` launcher + `references/cowork-mcp-config-snippet.json`. Tag `v0.2.1` end of session. See `docs/session-11-brief.md`.
+2. **Phase 24 — Export pipeline (target v0.2.2).** Implement `export_application(company_role)` MCP tool per ADR-002 D4. Deterministic zip bytes (sorted ordering, fixed compression, zeroed timestamps). Tests for manifest schema + determinism + sandbox-bounded writes.
 
-3. **Phase 24 — Export pipeline (target v0.2.2).** Implement `export_application(company_role)` MCP tool per ADR-002 D4. Deterministic zip bytes (sorted ordering, fixed compression, zeroed timestamps). Tests for manifest schema + determinism + sandbox-bounded writes.
+3. **Phase 25 — v2 site rebuild (target v0.2.3).** Per ADR-002 D4. Static `index.html` + JS that fetches `exports/index.json` and `templates/index.json` and renders cards. Three sections: Application packages / Config templates / About. Canva MCP visual exploration first. `scripts/sync_to_public_v2.py` allowlist updated. Re-raise custom-domain question.
 
-4. **Phase 25 — v2 site rebuild (target v0.2.3).** Per ADR-002 D4. Static `index.html` + JS that fetches `exports/index.json` and `templates/index.json` and renders cards. Three sections: Application packages / Config templates / About. Canva MCP visual exploration first. `scripts/sync_to_public_v2.py` allowlist updated. Re-raise custom-domain question.
-
-5. **v0.4.0 workflow UI Canva MCP design spike (parallel to Phase 23).** Sims-style game UI references, sketch the structured workflow tracker, prototype one application's stage view. The tracker is a Cowork artifact (per ADR-002 D1) that calls back into the v0.2.x MCP server through `window.cowork.callMcpTool`.
+4. **v0.4.0 workflow UI Canva MCP design spike (parallel to Phase 23).** Sims-style game UI references, sketch the structured workflow tracker, prototype one application's stage view. The tracker is a Cowork artifact (per ADR-002 D1) that calls back into the v0.2.x MCP server through `window.cowork.callMcpTool`.
 
 **v0.3.0 — PARKED.** Cowork is itself the desktop app; wrapping a non-existent web app in Tauri is moot. Plausible reframings (polished MCP installer, headless export mode, or skip) deferred to ADR-003 after v0.2.x lands. Do not start any Tauri work.
 
