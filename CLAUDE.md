@@ -1,5 +1,5 @@
 # CLAUDE.md -- Ultimate Job Assistant
-# Last updated: 2026-05-03 (Session 8 — Phase 17.5 ships + chat race fix + strategic pivots locked)
+# Last updated: 2026-05-03 (Session 9 — ADR-002 lands + v0.2.0 tagged as maintenance release)
 
 ---
 
@@ -236,7 +236,7 @@ When applying to a new role at a company that already has a `research/[company].
 
 ## Current Status & What's Next
 
-**Last session:** Session 8 of Ultimate Job Assistant (May 3, 2026) — Phase 17.5 (close-the-HITL-loop) shipped, chat conversation-event race condition fixed, three strategic pivots locked that reshape v0.2.0+ scope.
+**Last session:** Session 9 of Ultimate Job Assistant (May 3, 2026) — ADR-002 (v0.2.0+ architecture rethink) landed; v0.2.0 tagged against `main` as a maintenance release per D2.
 
 **Completed in Job Assist (parent project):**
 - Waymo lifecycle Steps 8-10 (portfolio, networking, wrap-up). Full end-to-end test complete.
@@ -244,84 +244,49 @@ When applying to a new role at a company that already has a `research/[company].
 - Folder structure consolidation, output-type restructure, all SKILL.md output paths updated
 
 **Shipped in UJA v0.1.0 (2026-05-02, tagged):**
-- Phases 0–7 complete. Both repos on github.com/sharmingmilan: `ultimate-job-assistant` (canonical, private) and `ultimate-job-assistant-public` (deploy-source, also private as of Session 3).
+- Phases 0–7. Both repos on github.com/sharmingmilan: `ultimate-job-assistant` (canonical, private) and `ultimate-job-assistant-public` (deploy-source, also private as of Session 3).
 - Live site at https://ultimatejobassist.netlify.app — Netlify free tier, reads the deploy-source repo via OAuth.
 - `noindex` + `robots.txt: Disallow /` keep the site search-invisible.
-- Landing page is download-first: single "Download the latest" CTA + HEAD-fetch JS for size/date.
 
-**Shipped in UJA v0.1.1 (Session 3, 2026-05-02 — UNTAGGED, awaiting Phase 13):**
-- Phase 8: zip generation in `scripts/sync_to_public.py` — `build_zip()` curates `website/downloads/ultimate-job-assistant.zip` on every sync (drops maintainer-only paths, injects `references/zip-bundle/` user templates, verifies `ZIP_REQUIRED_MEMBERS`).
-- Phase 9: initial sync after zip-build — both repos pushed.
-- Phase 10: hosting migrated GitHub Pages → Netlify.
-- Phase 11: deploy-source repo flipped to private (Netlify OAuth retains access).
-- Phase 12: auto-sync GitHub Action `auto-sync-to-public.yml` shipped end-to-end. Triggers on every push to canonical `main`. Uses fine-grained PAT (`PUBLIC_REPO_TOKEN`, Contents: Read+write, scoped only to deploy-source). Round-trip latency push → live zip ≈ 30 s. ONBOARDING.md Step 7 documents the setup for forkers.
+**Shipped in UJA v0.1.1 (Session 3 — UNTAGGED, awaiting Phase 13):**
+- Phase 8 zip generation, Phase 9 initial sync, Phase 10 hosting → Netlify, Phase 11 deploy-source private, Phase 12 auto-sync GitHub Action.
+- Phase 13 (custom domain) deferred — gates the v0.1.1 tag.
 
-**Deferred (gates the v0.1.1 tag):**
-- Phase 13: custom domain. Awaiting Milan to purchase (`ujassist.app` or `ultimatejobassistant.com`, ~$12/yr). When it lands, walk through Netlify "Add custom domain" + DNS records, then tag `v0.1.1`.
+**Shipped in UJA v0.2.0 (Sessions 4-9, tagged 2026-05-03 against `main` commit `cb66496`):**
+- Phase 14: ADR-001 — architecture decisions (Skills-as-Tools, FastAPI, React/Vite/Tailwind/shadcn, sandbox, SQLite, OS keychain, distribution model).
+- Phase 15 (Session 5): backend scaffold — `host/uja_host/` (sandbox, config, db, keystore, tools/, api/, main.py).
+- Phase 16 (Session 6): skill registry — real `run_skill` / `propose_changes` / `ask_user`; SQLite schema v2; 20 unit tests.
+- Phase 17 (Session 7): React frontend — Chat / Materials / Settings tabs + Onboarding + brand sky→pink gradient.
+- Phase 17.5 (Session 8): HITL endpoints + frontend wiring — `POST /api/changes/{id}/approve|reject` + `POST /api/questions/{id}/answer` + chat resume mode + state-machine UI. Plus chat conversation-event race fix. 36 passing tests.
+- **Phases 18-21 RETIRED** per ADR-002 D2 — chat-style architecture deprecated; v0.2.x picks up the new direction.
+- **Phase 22 (Session 9)**: tag `v0.2.0` cut. Release message flags chat-style UX as deprecated and points at ADR-002.
 
-**In flight (UJA v0.2.0 — Session 6, on v2 canonical's `main`):**
-Self-hosted local web app where the user runs UJA in a browser against their own Anthropic API key. Architecture decisions locked in Session 4 (see `docs/ADR-001-v0.2.0-architecture.md` and SPEC.md §14):
-- **Skill execution:** Skills-as-Tools. SKILL.md files stay as the source of truth. Host registers a fixed tool catalog with the Anthropic API; the agent loop stays inside Claude. Cowork mode and web-app mode become two surfaces over the same skills.
-- **Backend:** Python + FastAPI (reuses existing `scripts/` unchanged).
-- **Frontend:** React + Vite + Tailwind + shadcn/ui (using the `anthropic-skills:web-artifacts-builder` patterns).
-- **Distribution:** curated-zip extension with `start-uja.sh` + `start-uja.bat`. Prereq: Python 3.11+.
-- **Persistence:** SQLite at the project root, schema-versioned, append-only.
-- **Sandbox:** backend reads/writes only the project-root folder picked at first launch. API key encrypted at rest via OS keychain (`keyring`). Server binds 127.0.0.1 only.
-- **Branch protection:** GitHub branch protection / rulesets are Pro-gated on free private repos. Replaced by a local pre-push hook (`references/git-hooks/pre-push`) that refuses direct pushes to `main`. Run `bash scripts/install-hooks.sh` after cloning canonical to install it. Hook detects v1 vs v2 canonical so the warning text matches the canonical you're pushing to.
+**Architecture decision: ADR-002 (Session 9, 2026-05-03) — Pure Cowork + thin MCP**
 
-**Shipped in UJA Session 5 (2026-05-02 evening, on `dev/v0.2.0`):**
-- Phase 15 backend scaffold landed: `host/uja_host/` (sandbox, config, db, keystore, tools/, api/, main.py), `start-uja.sh`, `start-uja.bat`, pytest acceptance test, live_smoke.sh. 1,814 lines. Commit `1259f59`.
-- v2 repo separation prep landed: `V2_SETUP.md` (188-line handoff doc), `scripts/sync_to_public_v2.py`, `website/v2/index.html` + `robots.txt` + `netlify.toml`.
-- v2 repos created and live: canonical `sharmingmilan/ultimate-job-assistant-v2`, deploy-source `sharmingmilan/ultimate-job-assistant-v2-public`, both private, site at https://ultimatejobassist-v2.netlify.app.
+See `docs/ADR-002-architecture-rethink.md`. Four decisions:
 
-**Shipped in UJA Session 6 (2026-05-02 same-day continuation, on v2 canonical's `main`):**
-- Phase 16 — skill registry. Replaced `host/uja_host/tools/skill_stubs.py` with three real implementations in `skill_tools.py`: `run_skill` (catalog + load mode following Skills-as-Tools per ADR D1), `propose_changes` (persisted pending change-sets, sandbox-bounded, no-op on disk until approved), `ask_user` (persisted pending questions). New `skill_registry.py` discovery module walks `skills/*/SKILL.md` and parses YAML frontmatter. SQLite schema v2 migration adds `pending_changes` + `pending_questions` tables with repository helpers. Tool catalog stays at 8 entries; `run_skill.name` moved from required to optional so catalog mode works. `api/chat.py` SYSTEM_PROMPT rewritten to teach the model the new primitives.
-- Phase 16 — tests. 20 unit tests in `host/tests/test_phase16_skill_registry.py` cover discovery, the three tools, sandbox boundaries, and dispatcher error surfacing. 3 live integration smoke skeletons in `tests/integration/test_phase16_smoke.py` gated on `UJA_RUN_LIVE_TESTS=1`. Existing Phase 15 acceptance test still passes (21 passed, 3 skipped).
-- Cleanup — pre-push hook now detects v1 vs v2 canonical for accurate warning text. V2_SETUP.md Step 2 has a footgun callout for the GitHub fine-grained PAT "All repositories" radio defaulting on edit.
-- Commits on v2 canonical `main`: `91d51c2` (hook), `5670c15` (V2_SETUP), `e84f1db` (skill_tools), `a2c8502` (tests), `2c0fd74` (`--no-ff` merge of `phase16/skill-registry`).
+- **D1** — Pure Cowork + thin MCP server replaces agent-loop-in-host. Local FastAPI process becomes a JSON-RPC-over-stdio MCP server (no HTTP frontend, no per-user Anthropic API key, no port). Cowork drives the agent loop.
+- **D2** — Tag `v0.2.0` against current `main` as a maintenance release. v0.2.x picks up the new direction.
+- **D3** — Repository layout: sandbox / db / config / file_tools / skill_tools / skill_registry / HITL endpoints / 36-test suite all SURVIVE and re-shape into MCP tool functions. `keystore` + `api/auth.py` are DEMOTED. `chat.py` + `conversations.py` + `host/frontend/` are DEPRECATED-AS-REFERENCE. New `host/uja_mcp/` package added in v0.2.1.
+- **D4** — v2 site reframes per Pivot B: static delivery hub for per-application zips + config templates. Deterministic zip layout (`manifest.json` + `README.md` + per-output-type subfolders). Cowork emits via `export_application` MCP tool; existing auto-sync mirrors to deploy-source; Netlify rebuilds.
 
-**Shipped in UJA Session 7 (2026-05-02 same-day continuation, on v2 canonical's `main`):**
-- Phase 17 — React + Vite + Tailwind + shadcn/ui frontend in `host/frontend/`. Vite 8 + React 19 + TS 6, scaffolded with the `anthropic-skills:web-artifacts-builder` pattern, then trimmed to only the eight shadcn primitives the app actually uses (button, card, input, label, alert, scroll-area, textarea, separator). Brand sky→pink gradient from the v2 logo (`3cc7d46`) wired as `bg-brand-gradient` + `text-brand-sky/pink`. System font stack (no Inter — avoids the AI-slop tell).
-- Three primary tabs all built to the ADR §D10 polish bar (empty / loading / error states on every surface; `cmd+1`/`cmd+2`/`cmd+3` jumps tabs; `cmd+enter` sends; `esc` cancels in-flight chat; WCAG AA focus rings; aria-* on every interactive):
-  - Chat: conversation sidebar against `/api/conversations`, composer that streams `/api/chat` as SSE, renders text + tool_use + tool_result blocks. `propose_changes` and `ask_user` tool_use blocks render dedicated diff / question cards (approve/reject + answer wiring deferred to Phase 17.5; the change-set + question primitives already persist server-side from Phase 16).
-  - Materials: lazy file tree against the new `/api/files/tree`. Right-pane previewer routes by extension — md (marked + DOMPurify), docx (mammoth via deferred import), pdf (native iframe; PDF.js upgrade is a 17.5 polish task), text-ish, image. Per ADR §D4 all rendering is client-side.
-  - Settings: project root (PUT /api/config/project-root), API key (write-only, never reads back from server, surfaces memory-fallback warning), theme picker, conversation list with delete (DELETE /api/conversations/{id}), about card (host version, schema version, root path).
-- Two-step Onboarding flow that takes over the main pane when `/api/health` reports `project_root_configured: false`. Maps to existing config + auth endpoints; bad keys rejected via `test_connection: true` before they hit the keychain.
-- Backend additions (Phase 17 piece 1 of 3, commit `eb064f4`): new `host/uja_host/api/files.py` (GET /tree, /text, /raw — sandbox-bounded, 1 MB text cap, 25 MB raw cap), `delete_conversation()` helper + DELETE endpoint (cascades through pending_changes / pending_questions via existing FKs), `main.py` mounts `host/frontend/dist/` at `/` via StaticFiles in production.
-- Acceptance gate cleared:
-  - `npm run build` green: ~118 KB gzipped initial bundle (CSS + react + radix + app + preview-md). mammoth (~119 KB gz) correctly deferred — only loads when a `.docx` file is opened.
-  - `tsc -b` green (with `ignoreDeprecations: 6.0` for TS 6's deprecated `baseUrl` warning — needed for shadcn @/ aliasing).
-  - `pytest`: 21 passed / 3 skipped (unchanged from Session 6).
-  - TestClient smoke: `GET /` serves the SPA shell, `/api/health` returns 200, `/api/files/tree` 409s without project root and lists tree with one configured. Sandbox enforcement still rejects `..` traversal.
-- Atomic commits on three feature branches (`phase17/files-api`, `phase17/frontend-scaffold`, `phase17/frontend-tabs`), `--no-ff` merged to v2 canonical `main` per the Session 6 pattern. Final `main` HEAD: `c821f2d`.
+Supersedes ADR-001 §D1, D2, D3, D6, D8, D10. Preserves §D4, D5, D7, D9.
 
-**v2 repo + site separation (decided 2026-05-02 / Session 5):**
-- v0.1.x stays at `sharmingmilan/ultimate-job-assistant` (canonical) + `sharmingmilan/ultimate-job-assistant-public` (deploy-source) → `https://ultimatejobassist.netlify.app`. Untouched.
-- v0.2.0 lives at `sharmingmilan/ultimate-job-assistant-v2` (canonical, private) + `sharmingmilan/ultimate-job-assistant-v2-public` (deploy-source, private) → `https://ultimatejobassist-v2.netlify.app`.
-- Long-term shape (one site or two) is parked. Decide post-Phase 17 when the React frontend exists.
+**Next up (in priority order):**
 
-**Shipped in UJA Session 8 (2026-05-03):**
+1. **Phase 23 — MCP server scaffold (v0.2.1 target).** Stand up `host/uja_mcp/server.py` (JSON-RPC over stdio per the `mcp-builder` skill's Python guidance). Register file + skill + HITL + `read_workspace_metadata` tools. Pin `mcp` in `host/requirements.txt`. Wire one live Cowork session against it. Re-point the Phase 15/16/17.5 tests at MCP tool functions. New `start-uja-mcp.sh` / `start-uja-mcp.bat` launcher + `references/cowork-mcp-config-snippet.json`.
 
-- **Chat conversation-event race fix** (commit `95b1ef5`, merge `d4ae9c0`): load-history `useEffect` was wiping in-flight asstRow on every `conversation` SSE event, silently dropping all subsequent text/tool_use/tool_result. Fix tracks the streaming conversation via a ref, useEffect skips fetch when the in-flight stream owns the active conversation. 8 lines added to `ChatTab.tsx`.
+2. **Mark deprecated tree.** Add `host/frontend/README.md` flagging it as deprecated reference. Docstring headers on `host/uja_host/main.py`, `api/chat.py`, `api/conversations.py` marking deprecation per ADR-002 D3. Demote `keystore.py` + `api/auth.py`.
 
-- **Phase 17.5 — HITL endpoints + frontend wiring + tests** (3 commits + merge `8a68e85`): `POST /api/changes/{id}/approve|reject` (sandbox-bounded disk writes + idempotency), `POST /api/questions/{id}/answer` (records + synthesizes user message into conversation), `chat.py` resume-mode (empty body when conversation_id set), frontend wires real Approve/Reject/Send-answer with state machine (pending → submitting → applied/rejected/answered/error) and auto-resume after each action. 15 unit tests, full suite 36/36 green.
+3. **Phase 24 — Export pipeline (v0.2.2 target).** Implement `export_application(company_role)` MCP tool per ADR-002 D4. Deterministic zip bytes (sorted ordering, fixed compression, zeroed timestamps). Tests for manifest schema + determinism + sandbox-bounded writes.
 
-- **Two reusable patterns**: `.session-secrets/` for safely-delivered credentials (write to file, never paste in chat); test-workspace pattern (`cp -R ~/code/uja-v2 ~/code/uja-test-workspace`) for sandboxed agent writes.
+4. **Phase 25 — v2 site rebuild (v0.2.3 target).** Per ADR-002 D4. Static `index.html` + JS that fetches `exports/index.json` and `templates/index.json` and renders cards. Three sections: Application packages / Config templates / About. Canva MCP visual exploration first. `scripts/sync_to_public_v2.py` allowlist updated. Re-raise custom-domain question.
 
-**Strategic pivots locked this session — Block B/C/D and v0.2.0 ship plan paused (see SESSION_LOG.md Session 8 for detail):**
+5. **v0.4.0 workflow UI Canva MCP design spike (parallel to Phase 23).** Sims-style game UI references, sketch the structured workflow tracker, prototype one application's stage view. The tracker is a Cowork artifact (per ADR-002 D1) that calls back into the v0.2.x MCP server through `window.cowork.callMcpTool`.
 
-- **Pivot A** — Chat-style UI is the wrong metaphor for job-application workflows. v0.4.0 will be a Sims-style structured workflow tracker (per-application stages, discrete decisions, visible state, branching, undo). Canva MCP for design exploration. Chat becomes a sidecar.
-- **Pivot B** — v2 Netlify site reframes from "marketing landing for the local web app" to "delivery hub for **exportable** application packages + config templates." One zip per company-role containing decoded JD, targeted resume, cover letter, score, speaking points. Designed to be downloaded, sent to recruiters, archived, or shared. Static, search-invisible, URL-only access.
-- **Pivot C** — Anthropic-API-key + local-web-app architecture being reconsidered. Workflow likely stays in Cowork; local infrastructure exists for tooling (file ops, sandbox, persistence) not for running the agent loop. Reusable: backend, sandbox, file API, HITL endpoints, OS keychain. Deprecating: chat tab as primary surface, agent-loop-in-host pattern.
+**v0.3.0 — PARKED.** Cowork is itself the desktop app; wrapping a non-existent web app in Tauri is moot. Plausible reframings (polished MCP installer, headless export mode, or skip) deferred to ADR-003 after v0.2.x lands. Do not start any Tauri work.
 
-**Next up (in priority order, all deferred from this session):**
-
-1. **ADR-002 — v0.2.0+ architecture rethink** based on Pivots A/B/C. Decide what ships under the v0.2.0 tag (probably just the bug fixes + HITL endpoints as a maintenance release), what becomes v0.2.x / v0.3.0 / v0.4.0. Update SPEC §14 phase plan.
-2. **v2 site rebuild per Pivot B** — **exportable** application package + config delivery hub. Static. No marketing. Canva MCP for visual style. ~1-2 day rebuild from scratch.
-3. **v0.4.0 workflow UI design exploration** — Sims-style game UI references via Canva MCP, sketch the structured workflow tracker, prototype one application's stage view, gather feedback.
-4. **v0.3.0 Tauri double-click app** stays planned for after v0.2.0 ships (whatever v0.2.0 ends up meaning post-rethink). Per-OS distribution: .dmg / .msi / .AppImage. Bundles Python interpreter so users install nothing.
-
-**What's preserved from earlier sessions and survives all pivots:** the FastAPI backend, sandbox helper, file API, persistence layer, OS-keychain key store, propose_changes/ask_user primitives, the HITL approve/reject/answer endpoints from this session, the test suite (36 passing tests). These are infrastructure the next architecture sits on top of.
+**What's preserved from earlier sessions and survives ADR-002:** the FastAPI backend skeleton, sandbox helper, file API, persistence layer (SQLite schema v2), OS-keychain key store (demoted but kept), `propose_changes`/`ask_user` primitives, the HITL approve/reject/answer endpoints, the Skills-as-Tools registry, the test suite (36 passing tests), the test fixtures pattern (TestClient + monkeypatched config + tmp_path-rooted SQLite). These are infrastructure the next architecture sits on top of.
 
 ---
 

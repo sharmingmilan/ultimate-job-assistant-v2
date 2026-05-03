@@ -721,3 +721,60 @@ Add an explicit "Working Principles" section codifying:
 Landed in this commit's CLAUDE.md update.
 
 ---
+
+## Session: 2026-05-03 (UJA Session 9) — ADR-002 lands + v0.2.0 ships as maintenance release
+
+### What Happened
+
+Headline deliverable: `docs/ADR-002-architecture-rethink.md` (416 lines). Resolves the v0.2.0 PAUSED block from Session 8. Four decisions, one per Question in the Session 9 brief. Then SPEC §14 + ROADMAP updates flowing from those decisions, then `v0.2.0` tagged against `main` per D2.
+
+### Decisions made (each with Milan's gut-preference confirmation up front)
+
+Confirmed by AskUserQuestion at session open — all four matched the recommended option:
+
+- **D1 — Pure Cowork + thin MCP** (option c) — local FastAPI process becomes a JSON-RPC-over-stdio MCP server. No HTTP frontend, no per-user Anthropic API key, no port. Cowork drives the agent loop. v0.4.0 workflow tracker becomes a Cowork artifact that calls back into the MCP server through `window.cowork.callMcpTool`.
+- **D2 — Tag v0.2.0 as maintenance release** (option a) — captures Phase 15-17.5 as a reachable artifact; release notes flag the chat-style UX as deprecated; v0.2.x picks up the new architecture.
+- **D3 — Chat-tab kept as deprecated reference** (Q3 confirmation) — `host/frontend/` stays on main; new `host/frontend/README.md` will mark it deprecated and explain its preserved purpose (HITL UX patterns demo for v0.4.0). No active maintenance.
+- **D4 — Cowork emits zips via `export_application` MCP tool** (Q4 option a) — when v0.4.0 workflow tracker hits an export stage, Cowork calls the MCP tool; the server walks per-output-type folders, validates minimum-viable set, writes deterministic zip to `website/v2/exports/`, updates `index.json`. Existing `auto-sync-to-public.yml` mirrors to deploy-source; Netlify rebuilds.
+
+### Shipped — code
+
+**1. ADR-002 + SPEC §14 + ROADMAP updates** (`adr/v0.2.0-rethink`, merge `cb66496`). Two atomic commits:
+
+- `41edc52` — `docs/ADR-002-architecture-rethink.md` (416 lines). Mirrors ADR-001 structure (Status / Context / Quality bar / Decisions / Alternatives / Consequences / Open questions). Each of D1-D4 includes alternatives considered, trade-offs, consequences, and implementation implications. v0.3.0 (Tauri) parked pending ADR-003. Supersedes ADR-001 §D1, D2, D3, D6, D8, D10. Preserves §D4, D5, D7, D9.
+
+- `426ebb8` — SPEC §14 PAUSED block replaced with the new v0.2.x phase plan (Phases 23-25: MCP server scaffold / export pipeline / v2 site rebuild). Phases 18-21 marked RETIRED. v0.3.0 marked PARKED. ROADMAP gains five Session 9 decision-log rows + Track 7 Q4 marked resolved + Track 8 "Open questions" replaced with "Resolved by ADR-002 D4."
+
+**2. v0.2.0 tag** — annotated tag against the merge commit `cb66496`. Pushed to canonical. Release message captures what's in the tag + what's deprecated + a link to ADR-002.
+
+### Process notes worth preserving
+
+- **Pre-flight question batching worked.** AskUserQuestion presented all four ADR questions with my recommended option pre-loaded as the first choice; Milan confirmed all four in one exchange. Saved roughly four round-trips' worth of latency, and meant the ADR drafting started from a position of decision rather than enumeration.
+
+- **Test note from between Session 8 and 9 ("just didn't like chat bot style") strongly reinforced Pivot A + C.** This was the FILL IN block from the Session 9 brief; it landed as one line of context but was load-bearing — the Pure Cowork + thin MCP recommendation in D1 sits squarely on top of that observation.
+
+- **PAT A (`.session8-secrets/pat-a.txt`) reused unrotated for this session.** One clone (from the Session 8 file), one main push (after the merge), one tag push. Token stripped from origin URL after clone via `git remote set-url origin "https://github.com/..."` before any non-token operations, so the remote URL stored on disk in `.git/config` doesn't carry credentials. Session 8's "never paste in chat" pattern preserved end-to-end.
+
+- **Atomic commit discipline kept clean.** Two commits on the rethink branch (ADR + the docs reflect-back of ADR), one merge commit to main, one tag. Reverting any one piece is a one-command operation.
+
+### Reusable infrastructure unchanged this session
+
+The 36-test suite, sandbox helper, file API, persistence layer, OS-keychain wrapper, propose_changes/ask_user primitives, HITL endpoints, Skills-as-Tools registry — all carry forward into v0.2.x as ADR-002 D3 categorizes. The MCP server (Phase 23, target v0.2.1) re-shapes the FastAPI route handlers into MCP tool functions; the underlying logic doesn't change.
+
+### Deferred to next session
+
+1. **Phase 23 — MCP server scaffold (v0.2.1).** Stand up `host/uja_mcp/server.py` (JSON-RPC over stdio, per the `mcp-builder` skill's Python guidance). Register file + skill + HITL tools. Wire one live Cowork session against it. Re-point Phase 15/16/17.5 tests at MCP tool functions. Pin `mcp` in `host/requirements.txt`. New `start-uja-mcp.sh` / `start-uja-mcp.bat` launcher. New `references/cowork-mcp-config-snippet.json` template.
+
+2. **Mark deprecated tree** — add `host/frontend/README.md` flagging the directory as deprecated reference; add docstring headers to `host/uja_host/main.py`, `api/chat.py`, `api/conversations.py` marking deprecation per ADR-002 D3. Demote `keystore.py` + `api/auth.py` per the same Decision.
+
+3. **v0.4.0 workflow UI Canva MCP design spike** — pull Sims-style game UI references, sketch the structured workflow tracker, prototype one application's stage view. Not blocking Phase 23 but should happen in parallel.
+
+### Known issues + footguns surfaced this session
+
+None new. Session 8's open footguns (backend-restart-required, rate limits) become moot once the MCP server replaces the agent-loop-in-host. The deprecated tree retains them but isn't part of the runtime.
+
+### CLAUDE.md additions this session
+
+The "Current Status & What's Next" block is refreshed to reflect ADR-002 + the v0.2.0 tag + the v0.2.x phase plan. The "Working Principles" block from Session 8 is preserved unchanged.
+
+---
