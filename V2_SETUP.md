@@ -70,6 +70,8 @@ Same model as v1: one PAT for the v2 canonical's git remote (so you can push), o
 
 **Done when:** you have two PAT strings stashed somewhere safe (1Password, etc.).
 
+> ⚠️ **Footgun if you ever EDIT one of these PATs later.** When you click into an existing fine-grained PAT in the GitHub web UI to extend its expiration or add a permission, the **Repository access** radio defaults back to "All repositories" on the edit screen — even though the token was originally created with "Only select repositories." Saving without re-checking that radio silently widens the token's scope to your entire account. Always re-select **Only select repositories → `ultimate-job-assistant-v2`** (or `-v2-public` for PAT B) before clicking **Update**. Verify post-save that the token's scope still lists only the intended repo. Lesson learned the harder way during v1 setup; documenting it here so we don't repeat it.
+
 ---
 
 ## Step 3 — Push v0.2.0's current state to v2 canonical (Claude, ~2 min)
