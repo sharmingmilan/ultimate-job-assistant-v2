@@ -1,5 +1,5 @@
 # CLAUDE.md -- Ultimate Job Assistant
-# Last updated: 2026-05-04 (Session 14 — Phase 24.5 shipped; doc freshness pass; v0.2.1)
+# Last updated: 2026-05-04 (Session 14 — ADR-003 synthesis + freshness pass + Session 14 wrap; v0.2.1)
 
 ---
 
@@ -236,7 +236,7 @@ When applying to a new role at a company that already has a `research/[company].
 
 ## Current Status & What's Next
 
-**Last session:** Session 13 of Ultimate Job Assistant (May 3, 2026) — Phase 24.5 landscape doc shipped (PR #9 merged at `62dc805` in Session 14 Block 1; recovery from a botched first merge attempt — see Session 14 SESSION_LOG entry for the reflog-recovery pattern). Three atomic commits on `phase24_5/research`. Output is `docs/phase24_5-app-space-research.md` (7,678 words, 15 reference apps, 8 framed-as-questions for ADR-003 synthesis). No version bump — Phase 24.5 mirrors the Phase 22.5 precedent.
+**Last session:** Session 14 of Ultimate Job Assistant (May 4, 2026) — ADR-003 visual-identity synthesis. Three PRs landed in Session 14: PR #9 (Phase 24.5 landscape doc) merged at `62dc805` after a reflog-recovery sequence; PR #10 (CLAUDE.md freshness pass + active-repo note + Cowork session workflow caveat + .gitignore hygiene) merged at `c068251`; PR #11 (ADR-003 itself, branch `adr-003/visual-identity` at `8e15ac2`) **opened and left unmerged** — Milan merges as the kickoff of Session 15 / Phase 25. Eight visual identity decisions locked (D1-D8) via interactive synthesis from the Phase 24.5 landscape evidence; daily-check-in surface is the load-bearing aspiration that cascades across most decisions.
 
 **Completed in Job Assist (parent project):**
 - Waymo lifecycle Steps 8-10 (portfolio, networking, wrap-up). Full end-to-end test complete.
@@ -298,17 +298,19 @@ Supersedes ADR-001 §D1, D2, D3, D6, D8, D10. Preserves §D4, D5, D7, D9.
 
 **Next up (in priority order):**
 
-Phase 24 ships next under the same Dispatch pattern. Brief TBD on disk at `docs/session-12-brief.md`; launch via `bash scripts/dispatch-session.sh 12`.
+Session 15 picks up via the paste-ready prompt at `docs/session-15-cowork-prompt.md` (committed in Session 14, PR #11). The prompt orients a fresh Cowork session on "review and merge ADR-003 → re-edit session-14-brief.md → start Phase 25." Dispatch pattern abandoned per Session 13 — all sessions are interactive Cowork.
 
-1. **Phase 24 — Export pipeline (Session 12, target v0.2.2).** Implement `export_application(company_role)` MCP tool per ADR-002 D4. Walks per-output-type folders, validates minimum-viable set, writes deterministic zip to `website/v2/exports/`, updates `index.json`. Deterministic bytes (sorted ordering, fixed compression, zeroed timestamps). Tests for manifest schema, determinism, sandbox-bounded writes. The `build_server()` factoring from Block 3 of Phase 23 means Phase 24 tests can drive `tools/call` for `export_application` against the same registration pattern without process state.
+1. **Session 15 kickoff — merge PR #11 (ADR-003) and re-edit `docs/session-14-brief.md`.** PR #11 is open against `main` from branch `adr-003/visual-identity`. The deferred Phase 25 brief at `docs/session-14-brief.md` (on branch `docs/session-14-brief-draft` at `914d9e4`) predates ADR-003 and references "Canva MCP visual exploration first" as Phase 25 Block 1 — superseded. Block 1 should become "ADR-003 implementation pass: light-variant palette, theme toggle, About page, copy review." Open as a separate PR off main; merge before Phase 25 implementation starts.
 
-2. **Live smoke-test the v0.2.1 build.** Run `host/tests/live_smoke_phase23.md` against a real Cowork session — register the MCP server via the snippet from `start-uja-mcp.sh`, walk the six checks. The genuine acceptance gate; the test suite proves the tool-function contract, only a live Cowork session proves the JSON-RPC stdio framing.
+2. **Phase 24 — Export pipeline (PR #7, branch `phase24/export-pipeline` at `5879f3f`, OPEN against `main`).** Five commits, 87 tests passing per Session 12 brief. **Phase 25 stacks on this branch, not on main.** Phase 24 + Phase 25 ship as combined `v0.2.3` (skipping `v0.2.2`). Decision per the Session 13 → 14 handoff doc.
 
-3. **Phase 25 — v2 site rebuild (target v0.2.3).** Per ADR-002 D4. Static `index.html` + JS that fetches `exports/index.json` and `templates/index.json` and renders cards. Three sections: Application packages / Config templates / About. Canva MCP visual exploration first. `scripts/sync_to_public_v2.py` allowlist updated. Re-raise custom-domain question.
+3. **Phase 25 — v2 site rebuild (target `v0.2.3`).** Per ADR-002 §D4 + ADR-003 D1-D8. Static `index.html` + JS that fetches `exports/index.json` and `templates/index.json` and renders cards. Three sections: Application packages / Config templates / About. Inherits ADR-003 locked design (no Canva MCP exploration needed). Branch from `phase24/export-pipeline` (Phase 24 + Phase 25 ship combined as `v0.2.3`).
 
-4. **v0.4.0 workflow UI Canva MCP design spike (parallel to Phase 24).** Sims-style game UI references, sketch the structured workflow tracker, prototype one application's stage view. The tracker is a Cowork artifact (per ADR-002 D1) that calls back into the v0.2.x MCP server through `window.cowork.callMcpTool`.
+4. **Live smoke-test the v0.2.1 build.** Run `host/tests/live_smoke_phase23.md` against a real Cowork session — register the MCP server via the snippet from `start-uja-mcp.sh`, walk the six checks. The genuine acceptance gate; the test suite proves the tool-function contract, only a live Cowork session proves the JSON-RPC stdio framing. Can run in parallel with Phase 25.
 
-**v0.3.0 — PARKED.** Cowork is itself the desktop app; wrapping a non-existent web app in Tauri is moot. Plausible reframings (polished MCP installer, headless export mode, or skip) deferred to ADR-003 after v0.2.x lands. Do not start any Tauri work.
+5. **v0.4.0 workflow UI design spike (deferred).** Sims-style structured workflow tracker as a Cowork artifact per ADR-002 §D1. Parked for a future ADR after v0.2.3 lands per the Session 13 → 14 handoff doc.
+
+**v0.3.0 — PARKED.** Cowork is itself the desktop app; wrapping a non-existent web app in Tauri is moot. Plausible reframings (polished MCP installer, headless export mode, or skip) deferred to a future ADR after v0.2.x lands. Do not start any Tauri work.
 
 **What's preserved from earlier sessions and survives ADR-002:** the FastAPI backend skeleton (deprecated, kept as reference), sandbox helper, file API, persistence layer (SQLite schema v2), OS-keychain key store (demoted but kept), `propose_changes`/`ask_user` primitives, the HITL approve/reject/answer logic (re-implemented in `uja_mcp/tools/hitl.py` per D3, FastAPI copy intentionally untouched), the Skills-as-Tools registry, and the test suite (50 passing tests as of v0.2.1, up from 36 pre-Phase-23). The MCP layer in `host/uja_mcp/` is a thin facade over this surviving infrastructure.
 
