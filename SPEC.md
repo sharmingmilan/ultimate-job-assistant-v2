@@ -515,9 +515,9 @@ The PAUSED block from Session 8 is resolved. See `docs/ADR-002-architecture-reth
 | 24 | Export pipeline (target v0.2.2) | `export_application(company_role)` MCP tool: walks per-output-type folders, validates minimum-viable set, writes deterministic zip to `website/v2/exports/`, updates `website/v2/exports/index.json`. Zip layout per ADR-002 D4 (manifest.json + README.md + decoded-jd/ + resume/ + scores/ + speaking-points/ + cover-letter/ + portfolio/ + networking/). Deterministic bytes (sorted ordering, fixed compression, zeroed timestamps). Tests for manifest schema, determinism, sandbox-bounded writes. | committed |
 | 25 | v2 site rebuild (target v0.2.3) | Per ADR-002 D4. Static `index.html` + JS that fetches `exports/index.json` and `templates/index.json` and renders cards. Three sections: Application packages / Config templates / About. Canva MCP visual exploration first, then build. `scripts/sync_to_public_v2.py` updated to allowlist `website/v2/exports/`. Custom domain re-raised. | committed |
 
-### v0.3.0 — moved to ROADMAP Track 9 (parked pending ADR-003)
+### v0.3.0 — moved to ROADMAP Track 9 (parked pending a future ADR after v0.2.3 lands)
 
-The original Tauri-wrapped local-host plan no longer makes sense post-ADR-002 D1 (Cowork is itself the desktop app). The full parked-state context — including plausible reframings and the "do not start Tauri work" guidance — lives in `ROADMAP.md` Track 9. SPEC §14 carries only committed phases; v0.3.0 returns here when ADR-003 lands.
+The original Tauri-wrapped local-host plan no longer makes sense post-ADR-002 D1 (Cowork is itself the desktop app). ADR-003 (Session 14) addressed v2 site visual identity, not v0.3.0 reframing — that question is parked for a later ADR after v0.2.3 ships. The full parked-state context — including plausible reframings and the "do not start Tauri work" guidance — lives in `ROADMAP.md` Track 9. SPEC §14 carries only committed phases; v0.3.0 returns here when the future ADR lands.
 
 ### v0.4.0 — Workflow UI as Cowork artifact (per ADR-002 D1; see ROADMAP Track 7)
 

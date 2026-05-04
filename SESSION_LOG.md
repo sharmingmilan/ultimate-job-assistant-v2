@@ -915,3 +915,113 @@ PR #3 merged with `--no-ff` (`merge_method=merge`, the proven `git credential fi
 The "Current Status & What's Next" block is refreshed to reflect Phase 23 shipped + `v0.2.1` tagged + Phase 24 as the new top item in "Next up." No new working-principles or pattern additions — Session 9's Dispatch-pattern doc and Session 8's working-principles section continue to cover this session by construction.
 
 ---
+
+## Session: 2026-05-03 (UJA Session 12) — Phase 24 export pipeline (PR #7 OPEN; not merged)
+
+### What Happened
+
+Third Dispatch session for the project. Brief on disk at `docs/session-12-brief.md`; launched via `bash scripts/dispatch-session.sh 12`. Block 1 dropped the Phase 24 brief (PR #6, merged at `b5f110f`); Blocks 2-5 implemented the `export_application` MCP tool on branch `phase24/export-pipeline`.
+
+Status at end of session: **PR #7 open, NOT merged.** Five atomic commits on `phase24/export-pipeline` ending at `5879f3f`. The PR was deliberately left open per the Session 12 → Session 13 handoff plan: Phase 25 (v2 site rebuild) stacks on top of `phase24/export-pipeline`, and Phase 24 + Phase 25 ship as a combined `v0.2.3` release rather than two independent merges + tags. This is a deviation from the v0.2.0, v0.2.1 pattern (one phase, one tag) — captured here so future readers know the v0.2.2 number was deliberately skipped.
+
+### Shipped — code (on `phase24/export-pipeline` branch only; not on `main`)
+
+- `host/uja_mcp/tools/export.py` — the `export_application` tool. Walks per-output-type folders under the project root, validates a minimum-viable set, builds a deterministic zip into `website/v2/exports/`, updates `website/v2/exports/index.json` (append-only on success).
+- Deterministic zip contract: sorted file ordering, fixed compression level, zeroed timestamps in ZIP local file headers. Re-running `export_application` against the same on-disk state produces byte-identical output.
+- In-zip layout: `manifest.json` (machine-readable index) + `README.md` (human-readable index) + per-output-type subfolders (`decoded-jd/`, `resume/`, `scores/`, `speaking-points/`, `cover-letter/`, `portfolio/`, `networking/`).
+- `index.json` row schema v1 per ADR-002 §D4: `{filename, company, role, application_month, status, size_bytes, generated_at, manifest_path}` wrapped as `{"schema_version": 1, "exports": [...]}`. Lowercase canonical for `company` and `role` (display-name prettification is a Phase 25 client-side concern per Phase 25 brief R1).
+- Sort order applied by `_sort_index_exports`: `application_month` desc then `company` asc. Phase 25 renderer preserves this.
+
+### Test result
+
+`pytest`: **87 passed** on `phase24/export-pipeline` (was 50 / 3 skipped at the end of Phase 23). The +37 split into export-tool unit tests, manifest schema tests, determinism tests, and sandbox-bounded-write tests. Test files: `host/tests/test_export_application.py` and adjacent.
+
+### Process notes worth preserving
+
+- **Sessions 11, 12 — Dispatch pattern test.** Phase 23 (Session 11) was three to four hours of dev work. Phase 24 (Session 12) was a similar shape. The pattern held. Brief-on-disk + thin-prompt-from-script roundtripped cleanly. PR review + merge stayed with the originating Cowork session per the discipline established in Session 9.
+
+- **Stacking decision: Phase 24 + Phase 25 → combined v0.2.3.** Decided in the Session 12 → Session 13 handoff conversation. Rationale: Phase 25 needs the export tool's `index.json` to render; bisection on a broken main is easier when the export schema and the renderer ship together; v0.2.2 as a "tool-only" intermediate tag would have surfaced an unused export tool to anyone who pulled at that tag. Trade-off: PR #7 carries a longer review surface than typical, but the surface is one logical change ("the export pipeline + the site that consumes it").
+
+- **PAT leak in this session's transcript.** Per CLAUDE.md credential pattern, a classic PAT was pasted into chat at one point during PR creation troubleshooting and rotated post-session. Fine-grained PAT (the v2 PAT used through Session 14) was already established by then and was not affected. Risk grows as sessions accumulate.
+
+---
+
+## Session: 2026-05-03 (UJA Session 13) — Phase 24.5 landscape doc (PR #9, merged in Session 14)
+
+### What Happened
+
+Fourth Dispatch session for the project. Brief on disk at `docs/session-13-brief.md`; launched via `bash scripts/dispatch-session.sh 13`. Pure docs work — no code, no MCP changes, no v2 site touches. Followed the Phase 22.5 precedent (insert phase, no version bump).
+
+Three atomic commits on `phase24_5/research` ending at `a37db36`. PR #9 opened against `main` end of session, deliberately left unmerged for the next session's review pass. Output is `docs/phase24_5-app-space-research.md` — a 7,678-word competitive landscape across 15 reference apps with eight framed-as-questions for ADR-003 to answer.
+
+### Shipped — docs (on `phase24_5/research` branch; merged into `main` at `62dc805` in Session 14)
+
+- `docs/phase24_5-app-space-research.md` — the landscape doc. Four buckets covered with consistent depth-per-app: application trackers (Huntr / Teal / Simplify), AI resume tools (Rezi / Enhancv / Jobscan), personal job dashboards (two Notion templates + Airtable), and indie maker hubs (Levels.io / Stephango / Robb Knight). Plus three cross-domain outliers (Are.na / Pinboard / Hello.cv) per the Phase 24.5 brief R7 ask.
+- Cross-app analysis section: layout-shape frequency tables, color-convention counts, status-nomenclature variance, density tiers, copy-voice cluster analysis (six voice clusters surfaced; v2 maps closest to "plain-without-clubby" — a new cluster the doc names), privacy-messaging conventions, and a comparison of v2's ADR-002 §D4 guardrails against the landscape. v2 sits visually closer to the indie-hubs cluster than to the SaaS-trackers cluster despite being problem-space-adjacent to the latter.
+- Eight framed-as-questions for ADR-003 (`## Recommendations for ADR-003 synthesis`): Q1 kanban-vs-flat-tag, Q2 dark-vs-light, Q3 status-pill saturation, Q4 single-vs-multi-view, Q5 privacy-as-hero-vs-footer, Q6 voice cluster, Q7 AI-foregrounding, Q8 onboarding shape. Each presents both sides with landscape evidence; none pre-decide.
+- Provenance artifacts: `docs/phase24_5-screenshots/` with 15 `<app-slug>-source.md` files documenting where each visual reference came from (image binaries weren't bridged to the sandbox; doc references URLs + provenance metadata rather than embedded images), plus `docs/phase24_5-research-scratchpad.md` documenting Block 1's app-selection process.
+
+### Process notes worth preserving
+
+- **Dispatch pattern abandoned at end of session.** Decided in conversation with Milan during the wrap. Rationale: Cowork interactive sessions give Milan visibility into ambiguity-resolution moments that the Dispatch pattern hides; the dispatch-session-brief discipline still has value as a planning artifact, but the session itself runs in Cowork going forward. All future sessions are interactive Cowork.
+
+- **R6 fetch limitation surfaced.** G2, Capterra, and ProductHunt return Cloudflare bot challenges on server-side fetches; Glassdoor and similar review aggregators are similarly hardened. The R6 user-review subsections on Huntr / Teal / Rezi paraphrase frequently-cited themes rather than quoting reviews directly, with URL attribution to the source aggregators. The orchestrator can verify quotes interactively in browser if needed.
+
+- **Cowork-artifact tracker UI parking.** Surfaced in the Session 13 → 14 handoff doc: the workflow tracker UI (originally in scope for v0.4.0 per ADR-002 §D1) is parked for post-v0.2.3 ADR territory. Phase 25 (v0.2.3) is the static site only; the tracker is a future-ADR concern.
+
+---
+
+## Session: 2026-05-04 (UJA Session 14) — ADR-003 visual identity synthesis + Cowork-pattern shake-out
+
+### What Happened
+
+First fully-interactive Cowork session post-Dispatch-pattern abandonment (per the Session 13 wrap decision). Five blocks, three PRs, one ADR drafted and shipped as PR (left unmerged), one paste-ready prompt for Session 15.
+
+Block 1 merged the open Phase 24.5 PR (#9). Block 2 fixed CLAUDE.md staleness (active-repo note + Cowork session workflow caveat) and added `.gitignore` hygiene for `.session-secrets/`, `.claude/`, `.mcp.json`. Block 3 walked the eight framed-as-questions from the Phase 24.5 landscape doc interactively with Milan, locking eight visual-identity decisions for the v2 site. Block 4 drafted `docs/ADR-003-visual-identity.md` (397 lines) plus the paste-ready Session 15 Cowork prompt at `docs/session-15-cowork-prompt.md` and opened them as PR #11. Block 5 (this entry) wraps the session.
+
+### Shipped
+
+- **PR #9 merged** at `62dc805` (Block 1). Phase 24.5 landscape doc lands on `main`.
+- **PR #10 merged** at `c068251` (Block 2). CLAUDE.md freshness pass: header date, "Last session" line bump (Session 11 → Session 13), Cowork session workflow caveat under the credential-handling section, active-repo line under "GitHub Separation," `.gitignore` hygiene for `.session-secrets/`, `.claude/`, `.mcp.json`.
+- **PR #11 opened, NOT merged** at `8e15ac2` on branch `adr-003/visual-identity` (Block 4). Two new files: `docs/ADR-003-visual-identity.md` (397 lines) and `docs/session-15-cowork-prompt.md` (104 lines). Milan merges as the kickoff of Session 15.
+- **CLAUDE.md current-status block** refreshed in Session 14 wrap commit (this Block 5) to reflect ADR-003 in flight + revised "Next up" priority order.
+- **SESSION_LOG.md** backfilled with Session 12 (Phase 24 export pipeline, PR #7 open) and Session 13 (Phase 24.5 landscape doc) entries that did not land at the time, plus this Session 14 entry.
+
+### Locked decisions (ADR-003 D1-D8)
+
+| # | Decision |
+|---|---|
+| D1 | Status layout: flat list with optional status filter chips (rejects kanban) |
+| D2 | Theme: slate-950 dark default + light variant via `prefers-color-scheme` + explicit toggle |
+| D3 | Status pill style: mid-saturation (translucent backgrounds + bright text) |
+| D4 | View shape: single flat card list, designed for daily check-in scanning |
+| D5 | Privacy copy: implicit on homepage; About page explains briefly |
+| D6 | Voice cluster: plain-without-clubby |
+| D7 | AI branding: none (confirms ADR-002 §D4) |
+| D8 | Homepage hierarchy: cards immediately above the fold; thin top-bar only |
+
+The load-bearing aspiration is **daily check-in surface** (D4). It cascades across most other decisions — homepage stays uncluttered, voice stays scannable, theme respects the user's eyes, filter chips solve "what needs my attention this week."
+
+### Process notes worth preserving
+
+- **Reflog recovery for PR #9 merge (Block 1).** First merge attempt was interrupted by a `git pull` auth prompt; cleanup pushed `--delete` on the branch before verifying the merge state, which auto-closed PR #9 on GitHub. Recovery sequence: re-create local branch from reflog (`git branch phase24_5/research a37db36`), push back to origin, reopen PR via PATCH (`{"state":"open"}`), merge via PUT. Lesson encoded in CLAUDE.md as "always check API status before cleanup" and informed the addition of the "if a stale `.git/index.lock` blocks a commit" note.
+
+- **Cowork session workflow caveat clarified.** Earlier sessions described the constraint as "uid mismatch with chmod-600 files." Session 14 testing showed the actual constraint is FS-layer write rejection on `.git/` regardless of file ownership — the bash sandbox uid owns the directory but writes are still rejected. Read-only git ops (`git status`, `git diff`, `git log`) work fine; commits, pushes, and branch operations need to run from Milan's terminal. Updated the credential-handling section in CLAUDE.md (PR #10) to reflect this accurately.
+
+- **Repo flipped to public mid-session.** The repo visibility changed from private to public during Block 2. The credential-handling pattern was simplified accordingly — PAT still controls write access, so the pattern stays in place, but stderr-redaction is documented as defense-in-depth rather than PII protection.
+
+- **HITL synthesis pattern for ADR drafting.** Block 3 batched the eight framed-as-questions into two `AskUserQuestion` calls of four each, with Claude's recommendation marked "(Recommended)" per the system instructions. Milan pushed back on Q1 (chose hybrid over flat), Q2 (asked for a toggle, opening a third option), Q4 (asked to walk through three options before deciding), Q8 (asked what a "hero section" is — a reminder that internal-developer vocabulary is opaque outside the building). Each push-back caught a real bias in Claude's first recommendations. The pattern: surface decisions, let Milan correct, re-affirm the locked set before moving on.
+
+- **Session-15 prompt as committed artifact.** First time the project ships a paste-ready Cowork session prompt as a committed file (`docs/session-15-cowork-prompt.md`). Future sessions can adopt the pattern: end-of-session commits a session-N+1 prompt that orients the next session on PRs to merge + immediate next steps. Replaces ad-hoc handoff prompts written into chat.
+
+### Deferred to Session 15
+
+- **Re-edit `docs/session-14-brief.md`** to reflect locked ADR-003 decisions. The brief lives on branch `docs/session-14-brief-draft` at `914d9e4` and currently references "Canva MCP visual exploration first" as Phase 25 Block 1 — superseded by ADR-003. Should become "ADR-003 implementation pass: light-variant palette, theme toggle, About page, copy review." Moved to Session 15 because the brief lives on a separate branch from this session's wrap; combining would have widened the wrap PR's scope unnecessarily. The session-15 prompt explicitly handles this case.
+
+- **Live smoke-test of v0.2.1 build** against a real Cowork session via `host/tests/live_smoke_phase23.md`. Continues to be backlog from Session 11; no progress in Sessions 12-14.
+
+### CLAUDE.md additions this session
+
+PR #10 added the "Cowork session workflow" caveat under the credential-handling pattern, the active-repo note under "GitHub Separation," and `.gitignore` lines for `.session-secrets/`, `.claude/`, `.mcp.json`. This Block 5 commit refreshes the "Current Status & What's Next" block to reflect ADR-003 in flight + revised "Next up" priority order (Session 15 kickoff first, Phase 24 PR #7 second, Phase 25 third, smoke test fourth). The five-priority list explicitly notes the Phase 24 + Phase 25 → combined `v0.2.3` decision.
+
+---
