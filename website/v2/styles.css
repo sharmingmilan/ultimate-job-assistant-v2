@@ -24,8 +24,7 @@
 
   /* Text */
   --text: #e2e8f0;        /* slate-200 */
-  --text-muted: #94a3b8;  /* slate-400 */
-  --text-faint: #64748b;  /* slate-500 — footer only; see palette doc */
+  --text-muted: #94a3b8;  /* slate-400 - footer + secondary + tertiary */
 
   /* Links */
   --link: #7dd3fc;        /* sky-300 */
@@ -54,8 +53,7 @@
 
   /* Text */
   --text: #1e293b;        /* slate-800 */
-  --text-muted: #64748b;  /* slate-500 */
-  --text-faint: #94a3b8;  /* slate-400 — see palette doc note: borderline AA */
+  --text-muted: #64748b;  /* slate-500 - footer + secondary + tertiary */
 
   /* Links — flip to darker sky for contrast on the light bg */
   --link: #0284c7;        /* sky-600 */

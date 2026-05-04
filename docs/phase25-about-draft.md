@@ -49,13 +49,10 @@ Run each visible string through the D6 voice checklist:
 
 ---
 
-## Open question for Block 2
+## Resolved at HITL gate (Session 15)
 
-Should the About page also link to:
+**Decision:** add a `Source code` link in the page footer pointing at the canonical repo (https://github.com/sharmingmilan/ultimate-job-assistant-v2). Forkers find the repo; daily-check-in user ignores it.
 
-1. The canonical project repo (https://github.com/sharmingmilan/ultimate-job-assistant-v2) — surfaces the technical home for forkers.
-2. The v1 site (https://ultimatejobassist.netlify.app) — surfaces the predecessor for v0.1.x users.
+**No link to v1 site.** The v0.1.x audience and v0.2.3 audience overlap minimally; the link would add chrome to the calm footer for marginal benefit.
 
-Both are in scope for ADR-003 D5 ("links to the canonical (private) repo's README for forkers who already have access" — but the repo is now public). Recommendation: add (1) as a "Source code" link in the footer; skip (2) for now (v1 audience and v2 audience overlap minimally and the link adds noise to a calm page).
-
-Surface to Milan at the HITL gate.
+The link goes in the footer, not in the About body text. The About paragraph stays unchanged from the draft above.

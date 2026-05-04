@@ -114,6 +114,7 @@ Used when `fetch('./exports/index.json')` returns non-200 or parses fail. Consol
 |---|---|---|
 | Brand line | `Ultimate Job Assist · v0.2.3 · Inner-circle build` | Uses middot separator (·) per v1 pattern. |
 | Privacy line | `No tracking. No analytics. No SaaS.` | Verbatim from v1 site. |
+| Source code link | `Source code` | Link target: https://github.com/sharmingmilan/ultimate-job-assistant-v2. Per HITL gate (Session 15). Aligned right of the privacy line, separated by a middot. |
 
 ---
 

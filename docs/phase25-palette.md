@@ -18,8 +18,7 @@
 | `--border` | `#1e293b` (slate-800) | `#e2e8f0` (slate-200) | Section dividers, top-bar bottom border | Same value used by v1 site. |
 | `--border-subtle` | `#0f172a` (slate-900) | `#f1f5f9` (slate-100) | Card outer border | A hair against `--bg-card`. |
 | `--text` | `#e2e8f0` (slate-200) | `#1e293b` (slate-800) | Body text | Both meet WCAG AA on `--bg`. |
-| `--text-muted` | `#94a3b8` (slate-400) | `#64748b` (slate-500) | Secondary text (filename, size) | Both meet WCAG AA on `--bg`. |
-| `--text-faint` | `#64748b` (slate-500) | `#94a3b8` (slate-400) | Footer + tertiary | Meets WCAG AA on `--bg`. |
+| `--text-muted` | `#94a3b8` (slate-400) | `#64748b` (slate-500) | Secondary text (footer, filename, size, tertiary) | Both meet WCAG AA on `--bg`. |
 | `--link` | `#7dd3fc` (sky-300) | `#0284c7` (sky-600) | Hyperlinks (About, footer) | Light variant flips to a darker sky for contrast. |
 | `--link-hover` | `#bae6fd` (sky-200) | `#0369a1` (sky-700) | Hyperlink hover | One step lighter (dark) / darker (light). |
 | `--accent-from` | `#38bdf8` (sky-400) | `#38bdf8` (sky-400) | Gradient start (logo, badge) | Same in both themes — gradient renders well on either bg. |
@@ -56,7 +55,6 @@ Method: relative-luminance per WCAG 2.x. Targets: 4.5:1 for body text (normal si
 |---|---|---|---|
 | `--text` (#e2e8f0) on `--bg` (#020617) | 16.4:1 | 4.5 | yes |
 | `--text-muted` (#94a3b8) on `--bg` | 6.6:1 | 4.5 | yes |
-| `--text-faint` (#64748b) on `--bg` | 4.5:1 | 4.5 | borderline pass — used only for footer (large or non-critical text) |
 | `--link` (#7dd3fc) on `--bg` | 11.6:1 | 4.5 | yes |
 | `open` text (#38bdf8) on effective pill bg (slate-950 + 15% sky-400 ≈ #0a2139) | 7.6:1 | 4.5 | yes |
 | `submitted` text (#60a5fa) on effective pill bg ≈ #16243e | 7.5:1 | 4.5 | yes |
@@ -71,7 +69,6 @@ Method: relative-luminance per WCAG 2.x. Targets: 4.5:1 for body text (normal si
 |---|---|---|---|
 | `--text` (#1e293b) on `--bg` (#f8fafc) | 13.5:1 | 4.5 | yes |
 | `--text-muted` (#64748b) on `--bg` | 4.7:1 | 4.5 | yes |
-| `--text-faint` (#94a3b8) on `--bg` | 3.0:1 | 4.5 | borderline FAIL — use only for footer; if it must carry critical info, swap for `--text-muted`. |
 | `--link` (#0284c7) on `--bg` | 4.7:1 | 4.5 | yes |
 | `open` text (#0369a1) on effective pill bg (slate-50 + 15% sky-400 ≈ #dbf1fb) | 5.0:1 | 4.5 | yes |
 | `submitted` text (#1d4ed8) on effective pill bg ≈ #dde6fa | 6.4:1 | 4.5 | yes |
@@ -80,23 +77,13 @@ Method: relative-luminance per WCAG 2.x. Targets: 4.5:1 for body text (normal si
 | `closed` text (#475569) on effective pill bg ≈ #e6ebf1 | 6.0:1 | 4.5 | yes |
 | `rejected` text (#be123c) on effective pill bg ≈ #fbdde2 | 6.5:1 | 4.5 | yes |
 
-### Borderline notes
+### Notes
 
-- `--text-faint` in dark mode is exactly at the 4.5 threshold and in light mode is below it. Block 2 must NOT use `--text-faint` for any non-footer content. The footer carries `No tracking. No analytics. No SaaS.` in dark mode at ~12px which qualifies as borderline; flip to `--text-muted` if usability testing reveals readability issues.
-- All status pill contrasts pass cleanly. The translucent-bg + theme-flipped-text pattern is robust.
-
----
-
-## Open question for Block 2
-
-The light variant for `--text-faint` does not pass AA. Two options:
-
-1. Bump light `--text-faint` from `#94a3b8` to `#64748b` (slate-500) — same hue family as dark mode's `--text-muted`. Contrast becomes 4.7:1.
-2. Drop `--text-faint` entirely; collapse usage into `--text-muted` for both themes. Simpler palette at the cost of one fewer typographic step.
-
-Recommendation: option 2 — fewer variables, no edge-case branching. The value step between `--text` and `--text-muted` is enough for a calm-dense site; a third tier doesn't earn its keep. Surface to Milan at the HITL gate.
+- All surface and pill contrasts pass AA cleanly in both themes. The translucent-bg + theme-flipped-text pattern for status pills is robust.
 
 ---
+
+## Resolved at HITL gate (Session 15)
 
 ## Out of scope for the palette doc
 

@@ -206,19 +206,32 @@ The pill is display-only — clicking a card opens the download, not the pill. T
 - Padding: 0.75rem (12px) vertical, 1.5rem (24px) horizontal.
 - Border-bottom: 1px solid `var(--border)`.
 
-### Sticky behavior
+### Sticky behavior - resolved at HITL gate (Session 15)
 
-ADR-003 D8 leaves this as a Phase 25 implementation question. Recommendation: NOT sticky. Reasoning:
+**Decision:** sticky. Top-bar pinned to viewport top while scrolling. Theme toggle + About link reachable from any scroll position.
 
-- The user's daily-check-in loop is "open the site, scan the cards, click download, done." Scrolling past the top-bar happens rarely (only when card list is long).
-- A sticky top-bar costs ~48-64px of vertical real estate during scroll, which conflicts with D4's "calm-density" aesthetic.
-- The theme toggle is set-and-forget; the user does not need it persistent.
+CSS for Block 2:
 
-Surface to Milan at the HITL gate; flip to `position: sticky` if Milan disagrees.
+```css
+.top-bar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  /* Optional: subtle backdrop-blur for legibility if cards scroll behind */
+  /* backdrop-filter: blur(6px); */
+  /* If using backdrop-blur, drop the solid bg to a translucent version */
+  /* background: color-mix(in srgb, var(--bg) 85%, transparent); */
+}
+```
 
----
+Default: solid `--bg` background, no blur. Block 2 may add the optional `backdrop-filter` if the solid bg looks heavy in practice.
 
-## 5. Card
+The `z-index: 10` keeps the top-bar above any scrolled card content. No other site element competes for the layer.
+
+Reasoning recorded for posterity: future-proofs against application-list growth (past ~30 packages, scrolling becomes the dominant interaction); theme toggle reachable without scroll-back-up; one CSS change at the cost of ~48-64px of vertical real estate during scroll. Trade accepted.
+
 
 ### Markup
 
