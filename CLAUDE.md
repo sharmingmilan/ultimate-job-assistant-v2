@@ -1,5 +1,5 @@
 # CLAUDE.md -- Ultimate Job Assistant
-# Last updated: 2026-05-03 (Session 11 — Phase 23 MCP server scaffold ships; v0.2.1 tagged)
+# Last updated: 2026-05-04 (Session 14 — Phase 24.5 shipped; doc freshness pass; v0.2.1)
 
 ---
 
@@ -236,7 +236,7 @@ When applying to a new role at a company that already has a `research/[company].
 
 ## Current Status & What's Next
 
-**Last session:** Session 11 of Ultimate Job Assistant (May 3, 2026) — Phase 23 MCP server scaffold shipped per ADR-002 D1 (PR #3, merged at `e634252`, annotated tag `v0.2.1` on the merge commit, tag SHA `307e56a`). Six atomic commits across one feature branch. Tests went from 36 / 3 skipped to **50 passed, 3 skipped**. Second Dispatch session for the project; pattern continues to hold at the larger scope.
+**Last session:** Session 13 of Ultimate Job Assistant (May 3, 2026) — Phase 24.5 landscape doc shipped (PR #9 merged at `62dc805` in Session 14 Block 1; recovery from a botched first merge attempt — see Session 14 SESSION_LOG entry for the reflog-recovery pattern). Three atomic commits on `phase24_5/research`. Output is `docs/phase24_5-app-space-research.md` (7,678 words, 15 reference apps, 8 framed-as-questions for ADR-003 synthesis). No version bump — Phase 24.5 mirrors the Phase 22.5 precedent.
 
 **Completed in Job Assist (parent project):**
 - Waymo lifecycle Steps 8-10 (portfolio, networking, wrap-up). Full end-to-end test complete.
@@ -287,6 +287,14 @@ Supersedes ADR-001 §D1, D2, D3, D6, D8, D10. Preserves §D4, D5, D7, D9.
 - The deprecated tree (`api/chat.py`, `api/conversations.py`, `host/frontend/`) is unchanged from Session 10 per ADR-002 D3.
 - Three judgment calls flagged in the Session 11 SESSION_LOG entry: (1) two deprecated chat-route tests dropped during the re-target; (2) `api/changes.py` + `api/questions.py` business logic re-implemented in `uja_mcp/tools/hitl.py` rather than refactored into shared pure functions (D3 says don't refactor the deprecated tree); (3) MCP server warns instead of fail-fast on missing project root, surfacing `ToolError` per call so the agent can drive setup interactively.
 - Second Dispatch session for the project. Pattern continued to hold at ~3-4 hr / six-commit scope.
+
+**Shipped in UJA Phase 24.5 (Session 13, 2026-05-03, no version bump — landscape research doc only):**
+- Per the Phase 22.5 precedent (insert phase, no version bump). Three atomic commits on `phase24_5/research`: Block 1 (lock app list, `2607283`), Block 2 prep (provenance + skipped, `6fb10b8`), Blocks 2-4 (per-app deep dives + cross-app synthesis + recommendations, `a37db36`).
+- Output: `docs/phase24_5-app-space-research.md` — 7,678-word competitive landscape covering 15 reference apps (12 in-bucket + 3 cross-domain outliers) across application trackers, AI resume tools, personal-job-dashboard templates, indie-maker hubs, and outliers (Are.na / Pinboard / Hello.cv). Each app gets a consistent rubric (visual takeaway, layout, palette, status conventions, density, standout, anti-pattern) plus user-review subsections on Huntr / Teal / Rezi.
+- Cross-app analysis: layout-shape frequency tables, color-convention counts, status-nomenclature variance, density tiers, copy-voice cluster analysis (6 voice clusters surfaced; v2 maps closest to "plain-without-clubby"), privacy-messaging conventions, and a comparison of v2's ADR-002 §D4 guardrails against the landscape (positions v2 visually closer to indie-hubs cluster than to SaaS trackers).
+- Eight framed-as-questions for ADR-003 (`## Recommendations for ADR-003 synthesis`): Q1 kanban-vs-flat-tag, Q2 dark-vs-light, Q3 status-pill saturation, Q4 single-vs-multi-view, Q5 privacy-as-hero-vs-footer, Q6 voice cluster, Q7 AI-foregrounding, Q8 onboarding shape. Each presents both sides with landscape evidence; none pre-decide.
+- Provenance artifacts: `docs/phase24_5-screenshots/` with 15 `<app-slug>-source.md` files capturing where each visual reference came from (binaries weren't bridged to the sandbox; doc references URLs + provenance metadata rather than embedded images), plus `docs/phase24_5-research-scratchpad.md` documenting Block 1's app-selection process.
+- PR #9 merged in Session 14 Block 1 at `62dc805` after a recovery sequence — first merge attempt was interrupted by a `git pull` auth prompt; cleanup pushed `--delete` before verifying merge state, which auto-closed the PR. Recovery: re-pushed branch from reflog (`a37db36`), re-opened PR via PATCH, merged via PUT. Pattern documented in Session 14 entry as the "always check API status before cleanup" lesson.
 
 **Next up (in priority order):**
 
@@ -392,6 +400,21 @@ For local-app onboarding screens (UJA's API key field, etc.):
 cat "<path>/key.txt" | tr -d '\n' | pbcopy
 ```
 
+#### Cowork session workflow (Session 14, 2026-05-04 — load-bearing)
+
+Git operations in a Cowork session split across two surfaces:
+
+- **Claude side** prepares the commands (one bash block per branch: commit + push + PR + merge + cleanup) and runs read-only git ops (`git status`, `git diff`, `git log`) in sandbox bash.
+- **You** run the prepared block in your local terminal.
+
+Why the split: the Cowork sandbox cannot write to `.git/` (FS-layer restriction — the sandbox uid owns the directory but writes are still rejected; reads and `git log` / `git diff` / `git status` work fine). Your terminal has full access. We commit / push / PR / merge from your terminal exactly as in any normal repo, just with the block prepared by Claude.
+
+Repository visibility (public vs private) does not change the pattern — the PAT still controls write access regardless, so it stays in your terminal and is stderr-redacted with `sed` when echoed.
+
+Sessions 11 (Phase 23, Dispatch) and 14 (Phase 24.5 merge + this freshness pass, Cowork) demonstrate the two halves. The Dispatch session runs git itself; the Cowork session hands off a prepared block.
+
+**If a `.git/index.lock` stale file blocks a commit**, run `rm .git/index.lock` from your terminal first — the sandbox can't clean these up.
+
 ---
 
 ## Doc Freshness Protocol
@@ -430,6 +453,8 @@ Use grep/glob to scan programmatically. Document issues and fix before proposing
 ---
 
 ## GitHub Separation
+
+Active repo: `sharmingmilan/ultimate-job-assistant-v2` (private, branched from `ultimate-job-assistant` in Session 4 / v0.2.0).
 
 ```
 # What gets pushed (plug-and-play for others)
