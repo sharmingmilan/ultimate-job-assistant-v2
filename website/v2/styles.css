@@ -1,0 +1,109 @@
+/*
+ * Ultimate Job Assist v2 — Phase 25 site styles
+ *
+ * Block 1 scaffold: CSS variables only.
+ * Block 2 will add component classes (cards, chips, pills, top-bar, theme toggle, etc.)
+ * on top of these variables.
+ *
+ * Theming: variables flip per `data-theme` attribute on <html>.
+ * Bootstrap script in index.html sets the attribute before first paint
+ * to avoid a flash of wrong theme on load.
+ *
+ * Source of truth for these values: docs/phase25-palette.md (with
+ * WCAG AA contrast ratios verified for each pair).
+ */
+
+:root,
+[data-theme="dark"] {
+  /* Surface */
+  --bg: #020617;          /* slate-950 */
+  --bg-card: #0f172a;     /* slate-900 */
+  --bg-card-hover: #1e293b; /* slate-800 */
+  --border: #1e293b;      /* slate-800 */
+  --border-subtle: #0f172a; /* slate-900 */
+
+  /* Text */
+  --text: #e2e8f0;        /* slate-200 */
+  --text-muted: #94a3b8;  /* slate-400 - footer + secondary + tertiary */
+
+  /* Links */
+  --link: #7dd3fc;        /* sky-300 */
+  --link-hover: #bae6fd;  /* sky-200 */
+
+  /* Brand accent gradient (same in both themes) */
+  --accent-from: #38bdf8; /* sky-400 */
+  --accent-to: #f472b6;   /* pink-400 */
+
+  /* Status pill text */
+  --pill-text-open: #38bdf8;         /* sky-400 */
+  --pill-text-submitted: #60a5fa;    /* blue-400 */
+  --pill-text-interviewing: #fbbf24; /* amber-400 */
+  --pill-text-offer: #34d399;        /* emerald-400 */
+  --pill-text-closed: #94a3b8;       /* slate-400 */
+  --pill-text-rejected: #fb7185;     /* rose-400 */
+}
+
+[data-theme="light"] {
+  /* Surface */
+  --bg: #f8fafc;          /* slate-50 */
+  --bg-card: #ffffff;
+  --bg-card-hover: #f1f5f9; /* slate-100 */
+  --border: #e2e8f0;      /* slate-200 */
+  --border-subtle: #f1f5f9; /* slate-100 */
+
+  /* Text */
+  --text: #1e293b;        /* slate-800 */
+  --text-muted: #64748b;  /* slate-500 - footer + secondary + tertiary */
+
+  /* Links — flip to darker sky for contrast on the light bg */
+  --link: #0284c7;        /* sky-600 */
+  --link-hover: #0369a1;  /* sky-700 */
+
+  /* Brand accent gradient (same as dark) */
+  --accent-from: #38bdf8; /* sky-400 */
+  --accent-to: #f472b6;   /* pink-400 */
+
+  /* Status pill text — flip to darker variants for AA on light bg */
+  --pill-text-open: #0369a1;         /* sky-700 */
+  --pill-text-submitted: #1d4ed8;    /* blue-700 */
+  --pill-text-interviewing: #b45309; /* amber-700 */
+  --pill-text-offer: #047857;        /* emerald-700 */
+  --pill-text-closed: #475569;       /* slate-600 */
+  --pill-text-rejected: #be123c;     /* rose-700 */
+}
+
+/* Status pill backgrounds — same in both themes (translucent at 15% alpha) */
+:root {
+  --pill-bg-open: rgb(56 189 248 / 0.15);         /* sky-400 @ 15% */
+  --pill-bg-submitted: rgb(96 165 250 / 0.15);    /* blue-400 @ 15% */
+  --pill-bg-interviewing: rgb(251 191 36 / 0.15); /* amber-400 @ 15% */
+  --pill-bg-offer: rgb(52 211 153 / 0.15);        /* emerald-400 @ 15% */
+  --pill-bg-closed: rgb(148 163 184 / 0.15);      /* slate-400 @ 15% */
+  --pill-bg-rejected: rgb(251 113 133 / 0.15);    /* rose-400 @ 15% */
+}
+
+/*
+ * Brand gradient utility — used by the site name in the top-bar and
+ * the v0.2.3 badge. Same definition used in v1 site (website/index.html).
+ * Gradient stops come from --accent-from and --accent-to so the same
+ * class works in both themes.
+ */
+.gradient-text {
+  background: linear-gradient(120deg, var(--accent-from) 0%, var(--accent-to) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/*
+ * Block 2 adds:
+ *   - body / main layout
+ *   - .top-bar layout
+ *   - .filter-chip + .filter-chip[data-active]
+ *   - .status-pill (uses --pill-bg-* and --pill-text-* via attribute selector)
+ *   - .card layout
+ *   - .theme-toggle button
+ *   - .empty-state block
+ *
+ * Keep this file under 150 lines per the brief's Block 2 spec.
+ */
