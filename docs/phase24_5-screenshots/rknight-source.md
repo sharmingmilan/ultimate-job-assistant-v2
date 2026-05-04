@@ -1,0 +1,8 @@
+# rknight — capture provenance
+
+- Source URL: https://rknight.me/
+- Page title: Robb Knight (derived from URL; tab context not captured by browser agent)
+- Capture method: Homepage
+- Capture date (UTC): 2026-05-03
+- Captured view: posts/links/projects three-column
+- Retry notes: none
