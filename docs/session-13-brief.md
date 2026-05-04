@@ -81,6 +81,22 @@ These were ambiguities surfaced during Phase 24.5 planning. Resolved up-front so
 
 **How to apply:** Block 2's per-app rubric does NOT include a copy voice line — agents should focus visual time on layout, palette, density, status conventions, standout patterns. Block 3's cross-app section gets a dedicated `### Copy voice across the landscape` subsection. Quote ≤15 words per phrase, in quotes, with URL attribution. Comply with the copyright requirements in `CLAUDE.md` — never reproduce more than that per source. If a per-app section in Block 2 includes a striking copy phrase the agent can't resist quoting, that's fine in moderation, but the systematic copy analysis lives only in the cross-app subsection.
 
+### R6 — User reviews drive failure-mode capture for ≥3 apps
+
+**Decision:** for at least 3 of the 12–15 selected apps (spanning at least 2 of the 4 categories), spend 10–15 min per app reading 5+ user reviews from G2, Capterra, ProductHunt, or app-store reviews. Capture the top 2 complaints + top 2 praises per app in a `### User reviews` subsection of that app's per-app entry.
+
+**Why:** visual-only research surfaces what the apps DO. Review-reading surfaces what they GET WRONG. The synthesis session needs both — knowing Huntr's pipeline columns are pretty doesn't matter if users describe them as "cluttered" or "intimidating." Failure modes drive what v2 should AVOID. The orchestrator added this requirement explicitly during brief review.
+
+**How to apply:** add ~15 min × 3 apps ≈ 45 minutes to the Block 2 budget. The `### User reviews` subsection appears only on the 3+ chosen apps — don't force it on every app, the doc would balloon. Quote ≤15 words per review snippet, in quotes, with reviewer-handle attribution if available + URL of the review page. Pick apps where review-readability is highest (G2 / Capterra > app store reviews > Reddit threads); pick across categories so the failure-mode signal isn't bucket-skewed.
+
+### R7 — Cross-domain outliers (personal-toolkit shapes outside job-search)
+
+**Decision:** add a dedicated `## Outliers — cross-domain personal-toolkit shapes` section after the four category sections in Block 2. Cover 2–3 sites OUTSIDE the job-search space that share v2's "personal local-first toolkit" positioning shape. Candidates: Read.cv, Linktree, Beli, Are.na, Pinboard, indie portfolio template starters that double as tool delivery hubs. Pick 2–3 that surface useful patterns.
+
+**Why:** the four-bucket landscape covers job-search-tooling. v2's actual positioning is "personal toolkit that delivers files." That shape exists OUTSIDE job-search (link-in-bio sites, personal directories, indie portfolios) — and those shapes might inform v2's design more than another job tracker. The synthesis session benefits from the stretch. The orchestrator added this requirement explicitly during brief review.
+
+**How to apply:** R2 rubric applies (URL, visual takeaway, layout pattern, palette, status conventions, density, standout pattern, anti-pattern, screenshot reference per R4). User-review reading per R6 NOT required for outliers. Adds ~30 min to the dispatch.
+
 ---
 
 ## Deliverable — Block-by-Block
@@ -91,11 +107,13 @@ These were ambiguities surfaced during Phase 24.5 planning. Resolved up-front so
 - For each candidate, do a quick triage pass: open the URL, take 30 seconds to assess fit, decide if it makes the final 3 per category. Goal of this block: lock the final 12–15 app list.
 - Atomic commit on branch `phase24_5/research-brief` (base = `main`): the scratchpad + a `## App selection` section in the landscape doc with the locked list.
 
-### Block 2 — Per-app deep dives (75–100 min)
+### Block 2 — Per-app deep dives + user reviews + outliers (115–175 min)
 
 - For each of the 12–15 selected apps, write a per-app section in `docs/phase24_5-app-space-research.md` covering the R2 rubric: URL, visual takeaway, layout pattern, palette, status conventions, density, standout pattern, anti-pattern, screenshot reference (R4). **No copy voice line per-app per R5.**
 - Group by category (R3). Four `## Category:` headings, ~3 apps each.
-- Atomic commit per category (4 commits is fine; one big "Block 2" commit also acceptable per the working principles' "atomic = one logical change" definition).
+- For at least 3 of the apps (spanning 2+ categories) per R6: add a `### User reviews` subsection capturing top 2 complaints + top 2 praises from G2 / Capterra / ProductHunt. ≤15-word quotes, URL-attributed.
+- After the four category sections, add a `## Outliers — cross-domain personal-toolkit shapes` section per R7 with 2–3 entries (Read.cv, Linktree, Are.na, indie portfolio starters, etc.). R2 rubric applies; R6 user reviews NOT required for outliers.
+- Atomic commit per category (4–6 commits across categories + outliers; or one big "Block 2" commit, both acceptable per "atomic = one logical change").
 
 ### Block 3 — Cross-app synthesis (60–75 min)
 
@@ -106,6 +124,7 @@ These were ambiguities surfaced during Phase 24.5 planning. Resolved up-front so
   - Density conventions (cramped / breathing / inbetween) and what tends to drive each
   - Where the v2 guardrails (ADR-002 §D4) align with the landscape vs where they diverge
 - Inside this section, dedicate a `### Copy voice across the landscape` subsection (~250–400 words) per R5: 4–6 representative phrases total (≤15 words each, in quotes, URL-attributed), classified into voice clusters, with notes on which clusters dominate which categories. This is the ONLY place copy voice gets systematic treatment.
+- ALSO inside this section, dedicate a `### Privacy-first messaging conventions` subsection (~200–300 words): how do apps that emphasize "local-first" / "no tracking" / "no SaaS" / "your data stays yours" position themselves visually and verbally? Survey across the landscape — both the indie maker bucket and any privacy-leaning entries elsewhere. Capture 3–4 representative phrases (≤15 words, quotes, URL-attributed) and observations on visual conventions (footer placement / dedicated page / hero callout / etc.). v2's positioning sits in this space; the synthesis session pulls from this subsection directly.
 - This section is the bridge between per-app data and the recommendations. The agent's deeper visual analysis time (freed by R5's per-app drop) goes here — make the visual-pattern subsections richer than they would otherwise be.
 - Atomic commit.
 
@@ -159,6 +178,9 @@ Phase 24.5 ships when ALL of the following hold:
 7. The Phase 24 / 25 work is unchanged — Phase 24.5 adds files under `docs/` and `docs/phase24_5-screenshots/` only. No edits to `host/`, `website/`, `scripts/`, `references/`, or any other tree.
 8. PR is open against `main`. No merge yet — orchestrator merges interactively.
 9. `docs/phase24_5-research-scratchpad.md` is either committed (transparency about Block 1's selection process) or pruned cleanly (the final landscape doc stands on its own). Either is acceptable; document the choice in the PR description.
+10. ≥3 apps (spanning 2+ categories) have a `### User reviews` subsection with top 2 complaints + top 2 praises, ≤15-word quotes, URL-attributed (per R6).
+11. `## Outliers — cross-domain personal-toolkit shapes` section exists with 2–3 entries (per R7).
+12. Block 3 cross-app synthesis includes a `### Privacy-first messaging conventions` subsection (~200–300 words) with 3–4 representative phrases.
 
 ---
 
@@ -166,7 +188,7 @@ Phase 24.5 ships when ALL of the following hold:
 
 1. The PR URL.
 2. Block-by-block summary of what landed, with commit SHAs.
-3. The locked app list (12–15 apps across 4 categories).
+3. The locked app list (12–15 apps across 4 categories + 2–3 outliers).
 4. The top 5 cross-app patterns surfaced, one line each.
 5. The 5–10 questions framed for ADR-003 synthesis.
 6. Any apps you tried to research but had to drop (auth wall, paywall, content-restricted), with rationale.
