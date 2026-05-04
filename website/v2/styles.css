@@ -1,93 +1,79 @@
 /*
  * Ultimate Job Assist v2 — Phase 25 site styles
  *
- * Block 1 scaffold: CSS variables only.
- * Block 2 will add component classes (cards, chips, pills, top-bar, theme toggle, etc.)
- * on top of these variables.
+ * Source of truth for variable values: docs/phase25-palette.md (with
+ * WCAG AA contrast ratios verified for each pair).
  *
  * Theming: variables flip per `data-theme` attribute on <html>.
  * Bootstrap script in index.html sets the attribute before first paint
  * to avoid a flash of wrong theme on load.
- *
- * Source of truth for these values: docs/phase25-palette.md (with
- * WCAG AA contrast ratios verified for each pair).
  */
 
 :root,
 [data-theme="dark"] {
   /* Surface */
-  --bg: #020617;          /* slate-950 */
-  --bg-card: #0f172a;     /* slate-900 */
-  --bg-card-hover: #1e293b; /* slate-800 */
-  --border: #1e293b;      /* slate-800 */
-  --border-subtle: #0f172a; /* slate-900 */
+  --bg: #020617;
+  --bg-card: #0f172a;
+  --bg-card-hover: #1e293b;
+  --border: #1e293b;
+  --border-subtle: #0f172a;
 
   /* Text */
-  --text: #e2e8f0;        /* slate-200 */
-  --text-muted: #94a3b8;  /* slate-400 - footer + secondary + tertiary */
+  --text: #e2e8f0;
+  --text-muted: #94a3b8;
 
   /* Links */
-  --link: #7dd3fc;        /* sky-300 */
-  --link-hover: #bae6fd;  /* sky-200 */
+  --link: #7dd3fc;
+  --link-hover: #bae6fd;
 
   /* Brand accent gradient (same in both themes) */
-  --accent-from: #38bdf8; /* sky-400 */
-  --accent-to: #f472b6;   /* pink-400 */
+  --accent-from: #38bdf8;
+  --accent-to: #f472b6;
 
   /* Status pill text */
-  --pill-text-open: #38bdf8;         /* sky-400 */
-  --pill-text-submitted: #60a5fa;    /* blue-400 */
-  --pill-text-interviewing: #fbbf24; /* amber-400 */
-  --pill-text-offer: #34d399;        /* emerald-400 */
-  --pill-text-closed: #94a3b8;       /* slate-400 */
-  --pill-text-rejected: #fb7185;     /* rose-400 */
+  --pill-text-open: #38bdf8;
+  --pill-text-submitted: #60a5fa;
+  --pill-text-interviewing: #fbbf24;
+  --pill-text-offer: #34d399;
+  --pill-text-closed: #94a3b8;
+  --pill-text-rejected: #fb7185;
 }
 
 [data-theme="light"] {
-  /* Surface */
-  --bg: #f8fafc;          /* slate-50 */
+  --bg: #f8fafc;
   --bg-card: #ffffff;
-  --bg-card-hover: #f1f5f9; /* slate-100 */
-  --border: #e2e8f0;      /* slate-200 */
-  --border-subtle: #f1f5f9; /* slate-100 */
+  --bg-card-hover: #f1f5f9;
+  --border: #e2e8f0;
+  --border-subtle: #f1f5f9;
 
-  /* Text */
-  --text: #1e293b;        /* slate-800 */
-  --text-muted: #64748b;  /* slate-500 - footer + secondary + tertiary */
+  --text: #1e293b;
+  --text-muted: #64748b;
 
-  /* Links — flip to darker sky for contrast on the light bg */
-  --link: #0284c7;        /* sky-600 */
-  --link-hover: #0369a1;  /* sky-700 */
+  --link: #0284c7;
+  --link-hover: #0369a1;
 
-  /* Brand accent gradient (same as dark) */
-  --accent-from: #38bdf8; /* sky-400 */
-  --accent-to: #f472b6;   /* pink-400 */
+  --accent-from: #38bdf8;
+  --accent-to: #f472b6;
 
-  /* Status pill text — flip to darker variants for AA on light bg */
-  --pill-text-open: #0369a1;         /* sky-700 */
-  --pill-text-submitted: #1d4ed8;    /* blue-700 */
-  --pill-text-interviewing: #b45309; /* amber-700 */
-  --pill-text-offer: #047857;        /* emerald-700 */
-  --pill-text-closed: #475569;       /* slate-600 */
-  --pill-text-rejected: #be123c;     /* rose-700 */
+  --pill-text-open: #0369a1;
+  --pill-text-submitted: #1d4ed8;
+  --pill-text-interviewing: #b45309;
+  --pill-text-offer: #047857;
+  --pill-text-closed: #475569;
+  --pill-text-rejected: #be123c;
 }
 
 /* Status pill backgrounds — same in both themes (translucent at 15% alpha) */
 :root {
-  --pill-bg-open: rgb(56 189 248 / 0.15);         /* sky-400 @ 15% */
-  --pill-bg-submitted: rgb(96 165 250 / 0.15);    /* blue-400 @ 15% */
-  --pill-bg-interviewing: rgb(251 191 36 / 0.15); /* amber-400 @ 15% */
-  --pill-bg-offer: rgb(52 211 153 / 0.15);        /* emerald-400 @ 15% */
-  --pill-bg-closed: rgb(148 163 184 / 0.15);      /* slate-400 @ 15% */
-  --pill-bg-rejected: rgb(251 113 133 / 0.15);    /* rose-400 @ 15% */
+  --pill-bg-open: rgb(56 189 248 / 0.15);
+  --pill-bg-submitted: rgb(96 165 250 / 0.15);
+  --pill-bg-interviewing: rgb(251 191 36 / 0.15);
+  --pill-bg-offer: rgb(52 211 153 / 0.15);
+  --pill-bg-closed: rgb(148 163 184 / 0.15);
+  --pill-bg-rejected: rgb(251 113 133 / 0.15);
 }
 
-/*
- * Brand gradient utility — used by the site name in the top-bar and
- * the v0.2.3 badge. Same definition used in v1 site (website/index.html).
- * Gradient stops come from --accent-from and --accent-to so the same
- * class works in both themes.
- */
+/* Brand gradient utility */
 .gradient-text {
   background: linear-gradient(120deg, var(--accent-from) 0%, var(--accent-to) 100%);
   -webkit-background-clip: text;
@@ -95,15 +81,330 @@
   color: transparent;
 }
 
-/*
- * Block 2 adds:
- *   - body / main layout
- *   - .top-bar layout
- *   - .filter-chip + .filter-chip[data-active]
- *   - .status-pill (uses --pill-bg-* and --pill-text-* via attribute selector)
- *   - .card layout
- *   - .theme-toggle button
- *   - .empty-state block
- *
- * Keep this file under 150 lines per the brief's Block 2 spec.
- */
+/* ============================================================ */
+/* Base                                                         */
+/* ============================================================ */
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+a { color: var(--link); text-decoration: none; }
+a:hover { color: var(--link-hover); }
+
+/* ============================================================ */
+/* Top-bar (sticky per ADR-003 D8 + Session 15 HITL)            */
+/* ============================================================ */
+
+.top-bar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+
+.top-bar-inner {
+  max-width: 64rem;
+  margin: 0 auto;
+  padding: 0.75rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text);
+}
+
+.brand img { display: block; }
+
+.brand-name { font-weight: 700; letter-spacing: -0.01em; }
+
+.version-badge {
+  font-size: 0.7rem;
+  background: var(--bg-card);
+  color: var(--text-muted);
+  padding: 0.125rem 0.5rem;
+  border-radius: 0.25rem;
+  border: 1px solid var(--border);
+}
+
+.top-bar-nav {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.top-bar-link {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+.top-bar-link:hover { color: var(--link); }
+
+.theme-toggle {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  border-radius: 0.375rem;
+  padding: 0.375rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.theme-toggle:hover { color: var(--link); border-color: var(--link); }
+.theme-toggle:focus-visible {
+  outline: 2px solid var(--link);
+  outline-offset: 2px;
+}
+
+[data-theme="dark"] .theme-icon-moon { display: none; }
+[data-theme="light"] .theme-icon-sun { display: none; }
+
+/* ============================================================ */
+/* Main / sections                                              */
+/* ============================================================ */
+
+.main-content {
+  flex: 1;
+  max-width: 64rem;
+  width: 100%;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+}
+
+section {
+  margin-top: 2rem;
+}
+section:first-of-type { margin-top: 0; }
+
+.section-heading {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0 0 1rem 0;
+}
+
+/* ============================================================ */
+/* Filter chip row                                              */
+/* ============================================================ */
+
+.filter-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.filter-chip {
+  font-family: inherit;
+  font-size: 0.8rem;
+  background: var(--bg-card);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  padding: 0.375rem 0.75rem;
+  border-radius: 9999px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: background 0.1s, color 0.1s;
+}
+.filter-chip:hover { background: var(--bg-card-hover); color: var(--text); }
+.filter-chip:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; }
+
+.filter-chip[data-active][data-status="all"] {
+  background: var(--bg-card-hover);
+  color: var(--text);
+  border-color: var(--text-muted);
+}
+.filter-chip[data-active][data-status="open"]         { background: var(--pill-bg-open);         color: var(--pill-text-open);         border-color: transparent; }
+.filter-chip[data-active][data-status="submitted"]    { background: var(--pill-bg-submitted);    color: var(--pill-text-submitted);    border-color: transparent; }
+.filter-chip[data-active][data-status="interviewing"] { background: var(--pill-bg-interviewing); color: var(--pill-text-interviewing); border-color: transparent; }
+.filter-chip[data-active][data-status="offer"]        { background: var(--pill-bg-offer);        color: var(--pill-text-offer);        border-color: transparent; }
+.filter-chip[data-active][data-status="closed"]       { background: var(--pill-bg-closed);       color: var(--pill-text-closed);       border-color: transparent; }
+.filter-chip[data-active][data-status="rejected"]     { background: var(--pill-bg-rejected);     color: var(--pill-text-rejected);     border-color: transparent; }
+
+.filter-chip-count {
+  font-size: 0.7rem;
+  font-weight: 500;
+  opacity: 0.7;
+}
+
+/* ============================================================ */
+/* Card list                                                    */
+/* ============================================================ */
+
+.card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  padding: 0.875rem 1rem;
+  color: var(--text);
+}
+.card:hover { background: var(--bg-card-hover); color: var(--text); }
+.card:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; }
+
+.card-logo {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, var(--accent-from) 0%, var(--accent-to) 100%);
+  color: white;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.875rem;
+  flex-shrink: 0;
+}
+
+.card-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.card-header {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.card-company { font-weight: 600; color: var(--text); }
+.card-role    { color: var(--text-muted); font-size: 0.9rem; }
+
+.card-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  flex-wrap: wrap;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* ============================================================ */
+/* Status pill                                                  */
+/* ============================================================ */
+
+.status-pill {
+  display: inline-block;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+.status-pill[data-status="open"]         { background: var(--pill-bg-open);         color: var(--pill-text-open); }
+.status-pill[data-status="submitted"]    { background: var(--pill-bg-submitted);    color: var(--pill-text-submitted); }
+.status-pill[data-status="interviewing"] { background: var(--pill-bg-interviewing); color: var(--pill-text-interviewing); }
+.status-pill[data-status="offer"]        { background: var(--pill-bg-offer);        color: var(--pill-text-offer); }
+.status-pill[data-status="closed"]       { background: var(--pill-bg-closed);       color: var(--pill-text-closed); }
+.status-pill[data-status="rejected"]     { background: var(--pill-bg-rejected);     color: var(--pill-text-rejected); }
+
+/* ============================================================ */
+/* Empty / loading / error states                               */
+/* ============================================================ */
+
+.empty-state,
+.loading-state {
+  background: var(--bg-card);
+  border: 1px dashed var(--border);
+  border-radius: 0.5rem;
+  padding: 1.5rem 1rem;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.empty-state p { margin: 0.25rem 0; }
+.empty-state-hint { font-size: 0.8rem; opacity: 0.85; }
+
+.empty-state--error {
+  border-style: solid;
+  border-color: var(--pill-text-rejected);
+  background: var(--pill-bg-rejected);
+  color: var(--pill-text-rejected);
+}
+
+/* ============================================================ */
+/* About section                                                */
+/* ============================================================ */
+
+.about-section { padding-bottom: 1rem; }
+
+.about-body {
+  color: var(--text-muted);
+  line-height: 1.65;
+  max-width: 42rem;
+}
+
+.about-body p { margin: 0 0 0.75rem 0; }
+.about-body p:last-child { margin-bottom: 0; }
+
+/* ============================================================ */
+/* Footer                                                       */
+/* ============================================================ */
+
+.site-footer {
+  border-top: 1px solid var(--border);
+  margin-top: auto;
+}
+
+.site-footer-inner {
+  max-width: 64rem;
+  margin: 0 auto;
+  padding: 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.footer-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin: 0;
+}
+
+.footer-sep { opacity: 0.5; }
+
+.footer-link { color: var(--text-muted); }
+.footer-link:hover { color: var(--link); }
+
+.footer-brand { margin: 0; }

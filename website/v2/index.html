@@ -4,73 +4,127 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="robots" content="noindex,nofollow" />
-  <title>Ultimate Job Assist — v0.2.0 (preview)</title>
-  <meta name="description" content="v0.2.0 of Ultimate Job Assistant: a local web app you run on your own computer with your own Anthropic API key. In active development." />
-  <meta name="theme-color" content="#0f172a" />
+  <title>Ultimate Job Assist</title>
+  <meta name="description" content="A read-only delivery hub for personal job-application packages. No signup, no tracking." />
+  <meta name="theme-color" content="#020617" media="(prefers-color-scheme: dark)" />
+  <meta name="theme-color" content="#f8fafc" media="(prefers-color-scheme: light)" />
   <link rel="icon" href="assets/favicon.svg" />
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
 
-  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-  <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; }
-    .gradient-text { background: linear-gradient(120deg, #38bdf8 0%, #f472b6 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
-    .check { color: #22c55e; }
-    .pending { color: #94a3b8; }
-    .blocked { color: #f59e0b; }
-  </style>
-</head>
-<body class="bg-slate-950 text-slate-200 antialiased min-h-screen flex flex-col">
+  <!--
+    Theme bootstrap — runs synchronously before first paint to avoid a
+    flash of the wrong theme. Reads localStorage["uja-v2-theme"]; falls
+    back to prefers-color-scheme; defaults dark. Per ADR-003 D2.
+  -->
+  <script>
+    (function () {
+      var stored = localStorage.getItem('uja-v2-theme');
+      var theme = stored || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
 
-<header class="border-b border-slate-800">
-  <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-    <a href="./" class="flex items-center gap-2">
-      <img src="assets/logo.svg" alt="" width="28" height="28" class="block" />
-      <span class="font-bold tracking-tight">Ultimate Job Assist</span>
-      <span class="text-xs bg-slate-800 text-slate-400 px-2 py-0.5 rounded ml-1">v0.2.0 preview</span>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+
+<header class="top-bar">
+  <div class="top-bar-inner">
+    <a href="./" class="brand">
+      <img src="assets/logo.svg" alt="" width="28" height="28" />
+      <span class="brand-name gradient-text">Ultimate Job Assist</span>
+      <span class="version-badge">v0.2.3</span>
     </a>
-    <nav class="flex items-center gap-5 text-sm text-slate-400">
-      <a href="https://ultimatejobassist.netlify.app" class="hover:text-sky-300">v0.1.x site</a>
+    <nav class="top-bar-nav">
+      <a href="#about" class="top-bar-link">About</a>
+      <button class="theme-toggle" type="button" aria-label="Switch theme" data-theme-toggle>
+        <svg class="theme-icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="4"></circle>
+          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
+        </svg>
+        <svg class="theme-icon-moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+      </button>
     </nav>
   </div>
 </header>
 
-<main class="flex-1 flex items-center">
-  <section class="max-w-3xl mx-auto px-6 py-16">
-    <h1 class="text-4xl md:text-5xl font-bold leading-tight tracking-tight text-center">
-      <span class="gradient-text">v0.2.0</span> is in the oven.
-    </h1>
-    <p class="mt-6 text-lg text-slate-400 max-w-xl mx-auto text-center">
-      A local web app you run on your own computer. Bring your own Anthropic API key. Same skills as v0.1.x, with a real UI for browsing and previewing every artifact you generate.
-    </p>
+<main class="main-content">
 
-    <div class="mt-12 bg-slate-900 border border-slate-800 rounded-lg p-6 text-sm">
-      <h2 class="text-base font-semibold mb-4 text-slate-200">Build status</h2>
-      <ul class="space-y-2 text-slate-400">
-        <li><span class="check">&#10003;</span> Phase 14 — architecture decisions (ADR-001)</li>
-        <li><span class="check">&#10003;</span> Phase 15 — backend scaffold (FastAPI host, sandboxed tools, SQLite, OS keychain)</li>
-        <li><span class="pending">&#9711;</span> Phase 16 — skill registry (run_skill, propose_changes, ask_user)</li>
-        <li><span class="pending">&#9711;</span> Phase 17 — React + Vite + Tailwind + shadcn/ui frontend</li>
-        <li><span class="pending">&#9711;</span> Phase 18 — distribution polish (start-uja.sh, curated zip)</li>
-        <li><span class="pending">&#9711;</span> Phase 19 — comprehensive testing</li>
-        <li><span class="pending">&#9711;</span> Phase 20 — docs refresh</li>
-        <li><span class="pending">&#9711;</span> Phase 21 — merge gate</li>
-        <li><span class="pending">&#9711;</span> Phase 22 — tag v0.2.0</li>
-      </ul>
+  <!-- ============================================================ -->
+  <!-- Application packages section                                  -->
+  <!-- ============================================================ -->
+  <section id="packages" aria-labelledby="packages-heading">
+    <h2 id="packages-heading" class="section-heading">Application packages</h2>
+
+    <div class="filter-chip-row" role="toolbar" aria-label="Filter by status">
+      <button class="filter-chip" type="button" data-status="all" data-active>
+        All <span class="filter-chip-count" data-count-total>0</span>
+      </button>
+      <button class="filter-chip" type="button" data-status="open">
+        Open <span class="filter-chip-count" data-count-status="open">0</span>
+      </button>
+      <button class="filter-chip" type="button" data-status="submitted">
+        Submitted <span class="filter-chip-count" data-count-status="submitted">0</span>
+      </button>
+      <button class="filter-chip" type="button" data-status="interviewing">
+        Interviewing <span class="filter-chip-count" data-count-status="interviewing">0</span>
+      </button>
+      <button class="filter-chip" type="button" data-status="offer">
+        Offer <span class="filter-chip-count" data-count-status="offer">0</span>
+      </button>
+      <button class="filter-chip" type="button" data-status="closed">
+        Closed <span class="filter-chip-count" data-count-status="closed">0</span>
+      </button>
+      <button class="filter-chip" type="button" data-status="rejected">
+        Rejected <span class="filter-chip-count" data-count-status="rejected">0</span>
+      </button>
     </div>
 
-    <div class="mt-8 text-center text-slate-500 text-sm">
-      Need the v0.1.x toolkit today?
-      <a href="https://ultimatejobassist.netlify.app" class="text-sky-400 hover:text-sky-300 underline">It's at the v0.1.x site.</a>
+    <div class="card-list" data-card-list="packages" aria-live="polite">
+      <p class="loading-state">Loading packages...</p>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- Config templates section                                      -->
+  <!-- ============================================================ -->
+  <section id="templates" aria-labelledby="templates-heading">
+    <h2 id="templates-heading" class="section-heading">Config templates</h2>
+    <div class="card-list" data-card-list="templates" aria-live="polite">
+      <p class="loading-state">Loading templates...</p>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- About section                                                 -->
+  <!-- ============================================================ -->
+  <section id="about" aria-labelledby="about-heading" class="about-section">
+    <h2 id="about-heading" class="section-heading">About</h2>
+    <div class="about-body">
+      <p>This is a personal job-application toolkit. The site lists application packages — one per company role — that you can download as a zip and send to recruiters.</p>
+      <p>Each package contains the full set of materials for one application: the decoded job description, the targeted resume in Word and PDF, the match score reports, the speaking points for an interview, the cover letter if there is one, and any portfolio or networking files generated for the role.</p>
+      <p>No signup, no tracking, no analytics. Files live on your computer. The site is read-only; the actual work happens in your Ultimate Job Assistant project folder, where you generate the materials and run the export tool to produce the zips you see here.</p>
+      <p>Built and maintained by one person.</p>
     </div>
   </section>
 </main>
 
-<footer class="border-t border-slate-800">
-  <div class="max-w-5xl mx-auto px-6 py-6 text-xs text-slate-500 flex flex-wrap items-center justify-between gap-3">
-    <p>Ultimate Job Assist &middot; v0.2.0 preview &middot; Inner-circle build</p>
-    <p>No tracking. No analytics. No SaaS.</p>
+<footer class="site-footer">
+  <div class="site-footer-inner">
+    <p class="footer-brand">Ultimate Job Assist · v0.2.3 · Inner-circle build</p>
+    <p class="footer-meta">
+      <span>No tracking. No analytics. No SaaS.</span>
+      <span class="footer-sep">·</span>
+      <a href="https://github.com/sharmingmilan/ultimate-job-assistant-v2" class="footer-link" rel="noreferrer">Source code</a>
+    </p>
   </div>
 </footer>
+
+<script defer src="app.js"></script>
 
 </body>
 </html>
