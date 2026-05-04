@@ -86,3 +86,12 @@ host/frontend/.vite/
 # Local Python venvs (host dev).
 host/.venv/
 host/venv/
+
+# Cowork-side runtime artifacts (Session 13+).
+# `.mcp.json` carries the v2 PAT inline for Claude-Code MCP discovery; never commit.
+# `.session-secrets/` is the load-bearing credential drop-folder per CLAUDE.md
+# "Credential handling pattern". Files inside are 600-mode tokens / PATs / payloads.
+# `.claude/worktrees/` is Cowork's worktree scratch area (separate git checkouts).
+.mcp.json
+.session-secrets/
+.claude/
