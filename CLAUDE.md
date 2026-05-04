@@ -1,5 +1,5 @@
 # CLAUDE.md -- Ultimate Job Assistant
-# Last updated: 2026-05-04 (Session 14 — ADR-003 synthesis + freshness pass + Session 14 wrap; v0.2.1)
+# Last updated: 2026-05-04 (Session 15 — Phase 25 Blocks 1-2; PR #16 open; v0.2.1)
 
 ---
 
@@ -236,7 +236,7 @@ When applying to a new role at a company that already has a `research/[company].
 
 ## Current Status & What's Next
 
-**Last session:** Session 14 of Ultimate Job Assistant (May 4, 2026) — ADR-003 visual-identity synthesis. Three PRs landed in Session 14: PR #9 (Phase 24.5 landscape doc) merged at `62dc805` after a reflog-recovery sequence; PR #10 (CLAUDE.md freshness pass + active-repo note + Cowork session workflow caveat + .gitignore hygiene) merged at `c068251`; PR #11 (ADR-003 itself, branch `adr-003/visual-identity` at `8e15ac2`) **opened and left unmerged** — Milan merges as the kickoff of Session 15 / Phase 25. Eight visual identity decisions locked (D1-D8) via interactive synthesis from the Phase 24.5 landscape evidence; daily-check-in surface is the load-bearing aspiration that cascades across most decisions.
+**Last session:** Session 15 of Ultimate Job Assistant (May 4, 2026) — Phase 25 Block 1 (ADR-003 implementation pass) shipped, Block 2 (HTML / JS rewrite) shipped as PR #16 (open). Five PRs landed in Session 15: PR #13 (retroactive Session 14 wrap — saved 122 lines of uncommitted Session 14 wrap content + 2 untracked Session 13 ephemera) merged at `9cb3a9e0`; PR #14 (re-edit Phase 25 brief per ADR-003 — Block 1 framing replaced; ADR-003 added to orientation list with D1-D8 summary) merged at `e892b03f`; PR #15 (Phase 25 Block 1 — palette + styles.css + About draft + copy review + component sketches + HITL gate resolutions) merged at `392e558c` into `phase24/export-pipeline`; PR #16 (Phase 25 Block 2 — `index.html` rewrite + `app.js` renderer + chip state machine + theme toggle + 2 placeholder index.jsons) **OPEN** against `phase24/export-pipeline`. Three HITL gate decisions locked: drop `--text-faint` (collapse into `--text-muted`); add Source code link to footer; sticky top-bar on scroll. PR #11 (ADR-003) was already merged at start of session via PR #12's same-SHA auto-merge — Session 15 kickoff prompt was based on incomplete state; recovered by reading actual remote state via REST API.
 
 **Completed in Job Assist (parent project):**
 - Waymo lifecycle Steps 8-10 (portfolio, networking, wrap-up). Full end-to-end test complete.
@@ -296,19 +296,31 @@ Supersedes ADR-001 §D1, D2, D3, D6, D8, D10. Preserves §D4, D5, D7, D9.
 - Provenance artifacts: `docs/phase24_5-screenshots/` with 15 `<app-slug>-source.md` files capturing where each visual reference came from (binaries weren't bridged to the sandbox; doc references URLs + provenance metadata rather than embedded images), plus `docs/phase24_5-research-scratchpad.md` documenting Block 1's app-selection process.
 - PR #9 merged in Session 14 Block 1 at `62dc805` after a recovery sequence — first merge attempt was interrupted by a `git pull` auth prompt; cleanup pushed `--delete` before verifying merge state, which auto-closed the PR. Recovery: re-pushed branch from reflog (`a37db36`), re-opened PR via PATCH, merged via PUT. Pattern documented in Session 14 entry as the "always check API status before cleanup" lesson.
 
+**Shipped in UJA Session 15 (2026-05-04, no version bump — Phase 25 Block 1 + Block 2 in flight):**
+- PR #13 — retroactive Session 14 wrap. Saved 122 lines of Session 14 wrap content (CLAUDE.md status block + 110-line SESSION_LOG backfill for Sessions 12/13/14 + SPEC.md v0.3.0 wording fix) plus 2 untracked Session 13 ephemera (`docs/cowork-handoff-prompt.md` + `docs/notes-q6-test-app-lock.md`). Two atomic commits. Merged at `9cb3a9e0`.
+- PR #14 — re-edit `docs/session-14-brief.md` per ADR-003. Block 1 framing replaced ("Canva MCP visual exploration first" → "ADR-003 implementation pass: light-variant palette, theme toggle, About page, copy review"). Title, frame, surface, orientation list, Block 1, Block 2/3/4, working principles, end-of-session deliverables, questions-for-orchestrator all updated. R1-R6 carried forward verbatim. ADR-003 added to orientation read-list at point 4 with one-paragraph D1-D8 summary. 267-line single-commit rewrite. Merged at `e892b03f`.
+- PR #15 — Phase 25 Block 1 (ADR-003 implementation pass). Three commits: (1) `docs/phase25-palette.md` (every CSS variable for both themes with WCAG AA contrast verified for every text-on-bg pair) + `website/v2/styles.css` scaffold (CSS variables only, ~110 lines); (2) `docs/phase25-about-draft.md` (About copy in plain-without-clubby voice) + `docs/phase25-copy-review.md` (D6 voice checklist + visible string drafts for every site region) + `docs/phase25-component-sketches.md` (markup + JS for theme toggle, filter chip set, status pill, top-bar, card); (3) HITL gate resolutions (drop `--text-faint`, Source code footer link, sticky top-bar). Merged at `392e558c` INTO `phase24/export-pipeline` (stacked).
+- PR #16 — Phase 25 Block 2 (HTML / JS rewrite). **OPEN** against `phase24/export-pipeline` at `139beb20`. Three commits: (1) `website/v2/index.html` rewrite (130 lines: sticky top-bar + 7 filter chips + 3 sections + footer) + `website/v2/styles.css` extension (110 → 410 lines: component classes on top of Block 1 variables); (2) `website/v2/app.js` (399 lines: renderer + chip state machine + theme toggle + prettify helpers + empty/loading/error states + small `window.__ujaSite` test API for Block 3); (3) `website/v2/exports/index.json` + `website/v2/templates/index.json` placeholders (R6: empty-but-valid `{schema_version: 1, ...}` so first deploy doesn't 404). R1-R6 from brief verified inline. Total Phase 25 site asset budget ~27 KB vs. 400 KB target.
+- **Eight ADR-003 D1-D8 decisions confirmed live during implementation.** D2's light-variant + theme toggle, D3's mid-saturation pills, D4's single flat list, D5's About-page-with-Source-code-link footer, D6's plain-without-clubby copy, D8's sticky top-bar (per HITL resolution) all in `index.html` + `app.js` + `styles.css`.
+- **Block 3 (renderer test) + Block 4 (end-to-end smoke against Waymo Q6 fixture) + `v0.2.3` tag — DEFERRED** to Session 16. Block 4 is the genuine acceptance gate; PR #7 (Phase 24) + PR #16 (Phase 25 Block 2) merge to `main` as combined `v0.2.3` after Block 4 passes.
+
 **Next up (in priority order):**
 
-Session 15 picks up via the paste-ready prompt at `docs/session-15-cowork-prompt.md` (committed in Session 14, PR #11). The prompt orients a fresh Cowork session on "review and merge ADR-003 → re-edit session-14-brief.md → start Phase 25." Dispatch pattern abandoned per Session 13 — all sessions are interactive Cowork.
+Session 16 picks up where Session 15 left off — PR #16 (Phase 25 Block 2) is open against `phase24/export-pipeline`. Phase 25 Block 3 + Block 4 + the `v0.2.3` tag are the remaining work to ship the combined Phase 24 + Phase 25 release.
 
-1. **Session 15 kickoff — merge PR #11 (ADR-003) and re-edit `docs/session-14-brief.md`.** PR #11 is open against `main` from branch `adr-003/visual-identity`. The deferred Phase 25 brief at `docs/session-14-brief.md` (on branch `docs/session-14-brief-draft` at `914d9e4`) predates ADR-003 and references "Canva MCP visual exploration first" as Phase 25 Block 1 — superseded. Block 1 should become "ADR-003 implementation pass: light-variant palette, theme toggle, About page, copy review." Open as a separate PR off main; merge before Phase 25 implementation starts.
+1. **Visual smoke of Block 2.** Open `website/v2/index.html` directly (`file://` after pulling `phase25/block2-html-js` locally, or via Netlify preview after PR #16 merges). Walk the 6-step smoke: (a) page paints in correct theme on first load (no flash), (b) theme toggle swaps sun/moon icons + persists, (c) filter chips toggle (counts at 0 across the board), (d) both sections show empty-state copy, (e) About paragraphs read clean + Source code link reachable, (f) sticky top-bar stays visible while scrolling. Surface findings; iterate on `phase25/block2-html-js` if needed.
 
-2. **Phase 24 — Export pipeline (PR #7, branch `phase24/export-pipeline` at `5879f3f`, OPEN against `main`).** Five commits, 87 tests passing per Session 12 brief. **Phase 25 stacks on this branch, not on main.** Phase 24 + Phase 25 ship as combined `v0.2.3` (skipping `v0.2.2`). Decision per the Session 13 → 14 handoff doc.
+2. **Merge PR #16** (Phase 25 Block 2) into `phase24/export-pipeline` once visual smoke passes. The branch then carries Phase 24 + Block 1 + Block 2 — eleven commits stacked.
 
-3. **Phase 25 — v2 site rebuild (target `v0.2.3`).** Per ADR-002 §D4 + ADR-003 D1-D8. Static `index.html` + JS that fetches `exports/index.json` and `templates/index.json` and renders cards. Three sections: Application packages / Config templates / About. Inherits ADR-003 locked design (no Canva MCP exploration needed). Branch from `phase24/export-pipeline` (Phase 24 + Phase 25 ship combined as `v0.2.3`).
+3. **Phase 25 Block 3 — site-renderer test.** New `website/v2/tests/site-renderer.test.html` (single self-contained HTML page; `<details>` blocks + plain-text assertions; no testing framework). Covers: empty / single-row / multi-row across two months, filter chip single + multi-select, theme toggle DOM + localStorage, WCAG AA contrast spot check via `getComputedStyle` + relative-luminance helper. Atomic commit on a new branch off the merged `phase24/export-pipeline`.
 
-4. **Live smoke-test the v0.2.1 build.** Run `host/tests/live_smoke_phase23.md` against a real Cowork session — register the MCP server via the snippet from `start-uja-mcp.sh`, walk the six checks. The genuine acceptance gate; the test suite proves the tool-function contract, only a live Cowork session proves the JSON-RPC stdio framing. Can run in parallel with Phase 25.
+4. **Phase 25 Block 4 — end-to-end smoke against Waymo Q6 fixture.** Run `export_application(company_role="waymo-bi-analyst-2026-04", project_root="/Users/Milan/Documents/Documents - Milan's MacBook Pro (Personal)/Claude/Ultimate Job Assistant", status="interviewing")`. Verify the produced `index.json` row appears as a card on the rendered site. Re-run with `status="offer"`; verify card updates in place. Visual + screenshot, NOT bash assertions. Q6 lock context lives at `docs/notes-q6-test-app-lock.md`. The genuine acceptance gate for Phase 25.
 
-5. **v0.4.0 workflow UI design spike (deferred).** Sims-style structured workflow tracker as a Cowork artifact per ADR-002 §D1. Parked for a future ADR after v0.2.3 lands per the Session 13 → 14 handoff doc.
+5. **Merge PR #7 (Phase 24 + Block 1 + Block 2 + Block 3) into `main`; tag `v0.2.3`.** Combined release skipping `v0.2.2`. Annotated tag per Session 9-11 pattern. Auto-sync to deploy-source repo + Netlify rebuild handles the live site.
+
+6. **Live smoke-test the v0.2.1 MCP server build.** Run `host/tests/live_smoke_phase23.md` against a real Cowork session — register the MCP server via the snippet from `start-uja-mcp.sh`, walk the six checks. Continues to be backlog from Session 11; can run in parallel with Phase 25 work.
+
+7. **v0.4.0 workflow UI design spike (deferred).** Sims-style structured workflow tracker as a Cowork artifact per ADR-002 §D1. Parked for a future ADR after `v0.2.3` lands.
 
 **v0.3.0 — PARKED.** Cowork is itself the desktop app; wrapping a non-existent web app in Tauri is moot. Plausible reframings (polished MCP installer, headless export mode, or skip) deferred to a future ADR after v0.2.x lands. Do not start any Tauri work.
 
@@ -416,6 +428,20 @@ Repository visibility (public vs private) does not change the pattern — the PA
 Sessions 11 (Phase 23, Dispatch) and 14 (Phase 24.5 merge + this freshness pass, Cowork) demonstrate the two halves. The Dispatch session runs git itself; the Cowork session hands off a prepared block.
 
 **If a `.git/index.lock` stale file blocks a commit**, run `rm .git/index.lock` from your terminal first — the sandbox can't clean these up.
+
+#### Cowork session — fully-automated REST API path (Session 15 codification)
+
+When the GitHub MCP isn't connected and you'd otherwise hand off to the user's terminal, the GitHub REST API + a fine-grained PAT in `.session-secrets/` enables fully-automated git ops from a Cowork session. The Cowork sandbox CAN read `.session-secrets/` (contrary to a Session 13 note that turned out to be wrong); it cannot delete files there but can read + write. The PAT controls write access to the repo even though the sandbox can't write to local `.git/`.
+
+The pattern:
+
+1. PAT lives at `.session-secrets/github-pat.txt` (chmod 600, gitignored). Create blobs via `POST /repos/{owner}/{repo}/git/blobs`, trees via `POST /git/trees`, commits via `POST /git/commits`, refs via `POST /git/refs` (or `PATCH` to update). Open PRs via `POST /pulls`. Merge PRs via `PUT /pulls/{n}/merge`. Toggle PR draft state via the GraphQL `markPullRequestReadyForReview` mutation (REST doesn't expose draft toggle).
+
+2. **Treat 5xx responses as potentially-async.** Session 15 hit a 502 on `PUT /pulls/15/merge` that turned out to mean GitHub had STARTED the merge asynchronously; a retry returned 405 "Merge already in progress" and the merge eventually landed. After any 5xx on a write endpoint, wait ~5 seconds and re-fetch state (PR status, ref tip) before retrying. Don't blow away source branches until you've confirmed the merge actually didn't land.
+
+3. **Branch deletion is irreversible at the API layer but commits are reachable by SHA.** If you delete a branch and realize the merge didn't land, the commits are still in GitHub's object store and can be recovered: recreate the branch with `POST /git/refs` pointing at the SHA, then re-open or re-PR.
+
+Session 15 used this path for five PRs (#13, #14, #15, #16, plus PR #15's recovery from a 502/405 merge dance). No commits were lost; the dance added overhead but everything ended up in the right place. Pattern is the right primary path for Cowork sessions — the prepared-bash-block-for-Milan's-terminal pattern is now the fallback for cases where the REST API path stalls or for ops that genuinely require local tooling (e.g., live smoke against `file://` URLs).
 
 ---
 
